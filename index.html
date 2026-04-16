@@ -377,6 +377,9 @@
                         <button onclick="showToast('Kebutuhan ditambahkan!', 'fa-plus')" class="bg-emerald-600 text-white px-3 py-2 rounded-xl text-[10px] font-black"><i class="fa-solid fa-paper-plane"></i></button>
                     </div>
 
+                    <div id="list-kebutuhan-render"></div>
+                </div>
+
                     <div class="flex items-center justify-between p-3 bg-red-50 rounded-xl border border-red-100">
                         <div>
                             <span class="bg-red-500 text-white text-[7px] font-black uppercase px-2 py-0.5 rounded mb-1 inline-block">Mendesak</span>
@@ -689,19 +692,12 @@
             pengumuman: [],
             kebutuhan: [],
             // Kategori statis untuk dropdown UI
-            kelas: [
-                { id: "k1", nama: "Kelas A1", ruangan: "Ruang Utama", wali: "Ustadzah Aisyah" },
-                { id: "k2", nama: "Kelas A2", ruangan: "Serambi Kanan", wali: "Ustadz Budi" },
-                { id: "k3", nama: "Kelas B", ruangan: "Ruang 02", wali: "Ustadz Ali" },
-                { id: "k4", nama: "Kelas C", ruangan: "Ruang 03", wali: "Ustadzah Nisa" },
-                { id: "k5", nama: "Kelas D", ruangan: "Aula Atas", wali: "Ustadz Mansyur" },
-                { id: "k6", nama: "Kelas E", ruangan: "Gazebo", wali: "Ustadz Rahmat" }
-            ],
+            kelas: [],
             kategoriPengurus: ["Kesantrian", "Humas", "Keamanan", "Kurikulum", "Sarpras", "Bendahara"]
         };
 
         // Fungsi mengambil data dari Worker saat web pertama kali dibuka
-        async function loadData() {
+       async function loadData() {
             try {
                 const response = await fetch(`${WORKER_URL}/get-data`);
                 const data = await response.json();
@@ -711,12 +707,18 @@
                 if(data.pengurus) masterData.pengurus = data.pengurus;
                 if(data.pengumuman) masterData.pengumuman = data.pengumuman;
                 if(data.kebutuhan) masterData.kebutuhan = data.kebutuhan;
+                
+                // INI YANG KURANG:
+                if(data.kelas) masterData.kelas = data.kelas; 
+                
+                updateDashboardStats();
+                renderPublicAnnouncements();
             } catch (error) {
                 console.error('Gagal mengambil database:', error);
-                showToast("Sistem berjalan dalam Mode Offline", "fa-wifi", "text-red-500");
+                // showToast sudah dihapus atau tidak diperlukan untuk GitHub
+                updateDashboardStats(); 
             }
         }
-
         /* ==============================================
            CORE UI FUNCTIONS
            ============================================== */
