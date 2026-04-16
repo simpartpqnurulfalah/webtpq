@@ -880,19 +880,20 @@ function downloadExcelData() {
         /* ==============================================
            ADMIN FORM LOGIC
            ============================================== */
-        function changeAdminForm() {
+function changeAdminForm() {
             const val = document.getElementById('admin-kategori').value;
+            // Sembunyikan ke-5 form
             ['form-santri', 'form-pengurus', 'form-kelas', 'form-pengumuman', 'form-kebutuhan'].forEach(f => {
                 const el = document.getElementById(f);
                 if(el) el.classList.add('hidden');
             });
+            // Munculkan form yang sedang dipilih
             const target = document.getElementById('form-' + val);
             if(target) target.classList.remove('hidden');
         }
-
-        async function handleAdminSubmit(e) {
+async function handleAdminSubmit(e) {
             e.preventDefault();
-            const kategori = document.getElementById('admin-kategori').value;
+            const kat = document.getElementById('admin-kategori').value;
             const btn = e.target.querySelector('button[type="submit"]');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
@@ -900,18 +901,37 @@ function downloadExcelData() {
             let endpoint = '';
             let payload = {};
 
-            if (kategori === 'santri') {
+            if (kat === 'santri') {
                 endpoint = '/add-santri';
-                // Ambil data dari input form santri (berdasarkan struktur form HTML Mas)
                 payload = {
-                    nama: e.target.querySelectorAll('input[type="text"]')[0].value,
-                    ttl: e.target.querySelectorAll('input[type="text"]')[1].value,
-                    alamat: e.target.querySelector('textarea').value,
-                    ortu: e.target.querySelectorAll('input[type="text"]')[2].value,
-                    kelas: e.target.querySelectorAll('select')[1].value,
-                    status: e.target.querySelectorAll('select')[2].value
+                    nama: document.getElementById('in-nama').value,
+                    ttl: document.getElementById('in-tempat').value + ", " + document.getElementById('in-tanggal').value,
+                    alamat: document.getElementById('in-alamat').value,
+                    ortu: document.getElementById('in-ortu').value,
+                    kelas: document.getElementById('in-kelas').value,
+                    status: document.getElementById('in-status').value
                 };
-            } else { // Ini adalah kondisi untuk form Kebutuhan TPQ
+            } else if (kat === 'pengurus') {
+                endpoint = '/add-pengurus';
+                payload = {
+                    nama: document.getElementById('in-pengurus-nama').value,
+                    kategori: document.getElementById('in-pengurus-kat').value,
+                    alamat: document.getElementById('in-pengurus-hp').value
+                };
+            } else if (kat === 'kelas') {
+                endpoint = '/add-kelas';
+                payload = {
+                    nama: document.getElementById('in-kelas-nama').value,
+                    wali: document.getElementById('in-kelas-wali').value
+                };
+            } else if (kat === 'pengumuman') {
+                endpoint = '/add-info';
+                payload = {
+                    judul: document.getElementById('in-judul').value,
+                    isi: document.getElementById('in-isi').value,
+                    target: 'wali_santri'
+                };
+            } else if (kat === 'kebutuhan') {
                 endpoint = '/add-kebutuhan';
                 payload = {
                     nama: document.getElementById('input-keb-nama').value,
@@ -930,8 +950,8 @@ function downloadExcelData() {
                 if (response.ok) {
                     showToast("Data Berhasil Disimpan!", "fa-save");
                     e.target.reset();
-                    await loadData(); // Refresh data terbaru secara diam-diam
-                    switchTab('panel'); // Kembali ke dashboard
+                    await loadData(); // Refresh data dari worker
+                    switchTab('panel'); 
                 } else {
                     showToast("Gagal menyimpan data", "fa-circle-xmark", "text-red-500");
                 }
@@ -941,7 +961,6 @@ function downloadExcelData() {
                 btn.innerHTML = originalText;
             }
         }
-
         /* ==============================================
            NESTED MODAL ENGINE
            ============================================== */
@@ -1266,8 +1285,26 @@ function renderPublicAnnouncements() {
             }
             content.innerHTML = html;
         }
-// Jalankan pengambilan data saat halaman pertama dimuat
-        document.addEventListener('DOMContentLoaded', loadData);
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+        function initMatrix() {
+            if (!canvas) return;
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            const columns = Math.floor(canvas.width / 20);
+            const drops = Array(columns).fill(1);
+            setInterval(() => {
+                ctx.fillStyle = "rgba(5, 150, 105, 0.05)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "#34d399"; ctx.font = "15px monospace";
+                for (let i = 0; i < drops.length; i++) {
+                    const text = String.fromCharCode(Math.random() * 128);
+                    ctx.fillText(text, i * 20, drops[i] * 20);
+                    if (drops[i] * 20 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                    drops[i]++;
+                }
+            }, 50);
+        }
+        // Jalankan pengambilan data saat halaman pertama dimuat
+        document.addEventListener('DOMContentLoaded', () => { loadData(); initMatrix(); });
     </script>
 </body>
 </html>
