@@ -1,12 +1,15 @@
-importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
-
-const CACHE_NAME = 'tpq-nf-v1';
-const assets = ['./', './index.html', './manifest.json'];
-
-self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(assets)));
-});
-
-self.addEventListener('fetch', e => {
-  e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
+// 1. Inisialisasi OneSignal & Paksa Munculkan Pop-up Izin
+window.OneSignalDeferred = window.OneSignalDeferred || [];
+OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+        appId: "8975b58d-f7bd-4217-91a0-acb804361bb5",
+        serviceWorkerPath: "sw.js", // Beri tahu OneSignal nama file Mas
+        serviceWorkerParam: { scope: "/web/" }, // Beri tahu letak foldernya
+        notifyButton: {
+            enable: true, // Memunculkan ikon lonceng
+        }
+    });
+    
+    // Paksa pop-up izin muncul dari atas
+    OneSignal.Slidedown.promptPush();
 });
