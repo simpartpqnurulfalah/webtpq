@@ -687,6 +687,7 @@
             santri: [],
             pengurus: [],
             pengumuman: [],
+            kebutuhan: [],
             // Kategori statis untuk dropdown UI
             kelas: [
                 { id: "k1", nama: "Kelas A1", ruangan: "Ruang Utama", wali: "Ustadzah Aisyah" },
@@ -709,7 +710,7 @@
                 if(data.santri) masterData.santri = data.santri;
                 if(data.pengurus) masterData.pengurus = data.pengurus;
                 if(data.pengumuman) masterData.pengumuman = data.pengumuman;
-                
+                if(data.kebutuhan) masterData.kebutuhan = data.kebutuhan;
             } catch (error) {
                 console.error('Gagal mengambil database:', error);
                 showToast("Sistem berjalan dalam Mode Offline", "fa-wifi", "text-red-500");
@@ -910,14 +911,12 @@ function downloadExcelData() {
                     kelas: e.target.querySelectorAll('select')[1].value,
                     status: e.target.querySelectorAll('select')[2].value
                 };
-            } else if (kategori === 'pengumuman' || kategori === 'pengumuman-pengurus') {
-                endpoint = '/add-info';
-                // Ambil data dari input form pengumuman
-                const titleInputs = e.target.querySelectorAll('input[type="text"]');
+            } else { // Ini adalah kondisi untuk form Kebutuhan TPQ
+                endpoint = '/add-kebutuhan';
                 payload = {
-                    judul: titleInputs[titleInputs.length - 1].value,
-                    isi: e.target.querySelectorAll('textarea')[e.target.querySelectorAll('textarea').length - 1].value,
-                    target: 'wali_santri'
+                    nama: document.getElementById('input-keb-nama').value,
+                    skala: document.getElementById('input-keb-skala').value,
+                    keterangan: document.getElementById('input-keb-ket').value
                 };
             }
 
@@ -1188,7 +1187,51 @@ function downloadExcelData() {
             html += '</div>';
             document.getElementById('modal-master-content').innerHTML = html;
         }
+function renderPublicAnnouncements() {
+            // Menampilkan Pengumuman untuk Wali Santri
+            let pubInfo = null;
+            if (masterData.pengumuman) {
+                for (let i = 0; i < masterData.pengumuman.length; i++) {
+                    if (masterData.pengumuman[i].target === 'wali_santri') {
+                        pubInfo = masterData.pengumuman[i];
+                        break;
+                    }
+                }
+            }
 
+            if (pubInfo && document.getElementById('announcement-text')) {
+                document.getElementById('announcement-text').innerText = pubInfo.judul + " : " + pubInfo.isi;
+            }
+            
+            // Menampilkan Daftar Kebutuhan Khusus Pengurus/Admin
+            if (isAdminActive) {
+                const internalBox = document.getElementById('internal-content-open');
+                if (internalBox) {
+                    internalBox.innerHTML = '';
+                    
+                    // Pastikan tabel kebutuhan ada datanya
+                    if (masterData.kebutuhan) {
+                        masterData.kebutuhan.forEach(function(k) {
+                            // Tentukan warna berdasarkan skala prioritas
+                            let color = 'emerald';
+                            let textSkala = 'Saran';
+                            if (k.skala === 'mendesak') { color = 'red'; textSkala = 'Mendesak'; }
+                            else if (k.skala === 'penting') { color = 'yellow'; textSkala = 'Penting'; }
+
+                            internalBox.innerHTML += `
+                                <div class="p-3 bg-${color}-50 rounded-xl border border-${color}-100 flex justify-between items-center mb-2">
+                                    <div>
+                                        <span class="bg-${color}-500 text-white text-[7px] font-black uppercase px-2 py-0.5 rounded">${textSkala}</span>
+                                        <p class="text-[11px] font-bold text-gray-800">${k.nama}</p>
+                                        <p class="text-[8px] text-gray-500 font-bold mt-0.5">${k.keterangan}</p>
+                                    </div>
+                                    <button onclick="this.parentElement.innerHTML = '<p class=\\'text-[10px] font-bold text-emerald-600\\'>✅ Sedang Diproses</p>'" class="text-[9px] font-black text-${color}-600 bg-white px-3 py-1.5 rounded shadow-sm border border-${color}-200 hover:bg-${color}-600 hover:text-white transition">TANGANI</button>
+                                </div>`;
+                        });
+                    }
+                }
+            }
+        }
         function renderKelasSantri(kelasName, waliName) {
             currentModalState = { type: 'kelas_santri' };
             setupModalUI(kelasName, `Wali: ${waliName}`, true, false, false);
