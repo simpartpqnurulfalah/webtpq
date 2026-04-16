@@ -1,3 +1,5 @@
+importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
+
 const CACHE_NAME = 'tpq-nf-v1';
 const assets = ['./', './index.html', './manifest.json'];
 
