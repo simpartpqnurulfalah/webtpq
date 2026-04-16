@@ -1259,5 +1259,55 @@ async function hapusData(tabel, id) {
 
         document.addEventListener('DOMContentLoaded', () => { loadData(); initMatrix(); });
     </script>
+    <script type="text/javascript">
+    // 1. Mencegah seleksi teks (Highlight) via JavaScript
+    document.onselectstart = function() { return false; };
+    
+    // 2. Mencegah Shortcut Keyboard (Copy, Save, View Source)
+    document.addEventListener('keydown', function(e) {
+        // Blokir Ctrl+C (Copy)
+        if (e.ctrlKey && e.keyCode == 67) {
+            showToast("Maaf, fitur salin dilarang untuk keamanan data", "fa-lock", "text-red-500");
+            e.preventDefault();
+            return false;
+        }
+        // Blokir Ctrl+U (View Source)
+        if (e.ctrlKey && e.keyCode == 85) {
+            showToast("Akses kode sumber dilarang", "fa-code", "text-red-500");
+            e.preventDefault();
+            return false;
+        }
+        // Blokir Ctrl+S (Save Page)
+        if (e.ctrlKey && e.keyCode == 83) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // 3. Mencegah Drag & Drop gambar (agar logo/foto tidak mudah dicuri)
+    document.addEventListener('dragstart', function(e) {
+        if (e.target.nodeName === 'IMG') {
+            e.preventDefault();
+        }
+    }, false);
+
+    // 4. Tambahan CSS via JS agar proteksi lebih kuat di semua browser
+    const style = document.createElement('style');
+    style.innerHTML = `
+        * {
+            -webkit-user-select: none; /* Chrome, Safari, Opera */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* IE/Edge */
+            user-select: none;         /* Standard syntax */
+        }
+        input, textarea {
+            -webkit-user-select: text !important;
+            -moz-user-select: text !important;
+            -ms-user-select: text !important;
+            user-select: text !important;
+        }
+    `;
+    document.head.appendChild(style);
+</script>
 </body>
 </html>
