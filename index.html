@@ -1,5 +1,8 @@
 <html lang="id">
 <head>
+    <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#059669">
+<link rel="apple-touch-icon" href="https://i.ibb.co.com/JRx6VXCf/fix-logo-tpq-png.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TPQ Nurul Falah | Management System</title>
@@ -1308,6 +1311,13 @@ async function hapusData(tabel, id) {
         }
     `;
     document.head.appendChild(style);
+</script>
+    <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+      .then(() => console.log("Service Worker Registered"))
+      .catch(err => console.log("SW Register Failed", err));
+  }
 </script>
 </body>
 </html>
