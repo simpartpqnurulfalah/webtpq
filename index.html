@@ -368,15 +368,17 @@
 
                 <div id="internal-content-open" class="hidden space-y-3">
                     <div class="flex gap-2 mb-4 pb-4 border-b border-gray-100">
-                        <input type="text" placeholder="Tulis kebutuhan baru..." class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-[10px] font-bold outline-none focus:border-emerald-500">
-                        <select class="bg-gray-50 border border-gray-200 rounded-xl px-2 py-2 text-[10px] font-bold outline-none">
+                        <input type="text" id="in-keb-judul" placeholder="Tulis kebutuhan baru..." class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-[10px] font-bold outline-none focus:border-emerald-500">
+                        <select id="in-keb-skala" class="bg-gray-50 border border-gray-200 rounded-xl px-2 py-2 text-[10px] font-bold outline-none">
                             <option value="mendesak">🔴 Mendesak</option>
                             <option value="penting">🟡 Penting</option>
                             <option value="saran">🟢 Saran</option>
                         </select>
-                        <button onclick="showToast('Kebutuhan ditambahkan!', 'fa-plus')" class="bg-emerald-600 text-white px-3 py-2 rounded-xl text-[10px] font-black"><i class="fa-solid fa-paper-plane"></i></button>
+                        <button onclick="saveKebutuhanQuick()" class="bg-emerald-600 text-white px-3 py-2 rounded-xl text-[10px] font-black"><i class="fa-solid fa-paper-plane"></i></button>
                     </div>
 
+                    <div id="kebutuhan-list"></div>
+                </div>
                     <div id="list-kebutuhan-render"></div>
                 </div>
 
@@ -686,36 +688,36 @@
         let isAdminActive = false; 
 
         // Tempat menampung data asli dari database
+        // Tempat menampung data asli dari database
         let masterData = {
             santri: [],
-            pengurus: [],
+            pengurus: [], // <--- HARUS KOSONG SEPERTI INI
             pengumuman: [],
             kebutuhan: [],
-            // Kategori statis untuk dropdown UI
-            kelas: [],
+            kelas: [],    // <--- HARUS KOSONG SEPERTI INI
             kategoriPengurus: ["Kesantrian", "Humas", "Keamanan", "Kurikulum", "Sarpras", "Bendahara"]
         };
-
         // Fungsi mengambil data dari Worker saat web pertama kali dibuka
-       async function loadData() {
+      async function loadData() {
             try {
                 const response = await fetch(`${WORKER_URL}/get-data`);
                 const data = await response.json();
                 
-                // Masukkan data asli ke masterData
                 if(data.santri) masterData.santri = data.santri;
                 if(data.pengurus) masterData.pengurus = data.pengurus;
                 if(data.pengumuman) masterData.pengumuman = data.pengumuman;
                 if(data.kebutuhan) masterData.kebutuhan = data.kebutuhan;
-                
-                // INI YANG KURANG:
                 if(data.kelas) masterData.kelas = data.kelas; 
                 
+                // INI SANGAT PENTING: Memanggil fungsi yang baru kita buat
                 updateDashboardStats();
+                
                 renderPublicAnnouncements();
             } catch (error) {
                 console.error('Gagal mengambil database:', error);
-                // showToast sudah dihapus atau tidak diperlukan untuk GitHub
+                showToast("Sistem berjalan dalam Mode Offline", "fa-wifi", "text-red-500");
+                
+                // Panggil juga jika error, agar angka minimal berubah jadi 0
                 updateDashboardStats(); 
             }
         }
@@ -1207,6 +1209,32 @@ async function handleAdminSubmit(e) {
             });
             html += '</div>';
             document.getElementById('modal-master-content').innerHTML = html;
+        }
+        function updateDashboardStats() {
+            // Hitung total santri aktif
+            const totalSantri = masterData.santri ? masterData.santri.length : 0;
+            
+            // Hitung total ustadz (berdasarkan kategori)
+            let totalUstadz = 0;
+            if (masterData.pengurus) {
+                totalUstadz = masterData.pengurus.filter(p => p.kategori === "Kesantrian" || p.kategori === "Ustadz/Pengajar" || p.kategori === "Kurikulum").length;
+            }
+            
+            // Hitung total pengurus
+            const totalPengurus = masterData.pengurus ? masterData.pengurus.length : 0;
+
+            // Hitung total kelas
+            const totalKelas = masterData.kelas ? masterData.kelas.length : 0;
+
+            // Update text di Landing Page
+            if (document.getElementById('stat-santri')) document.getElementById('stat-santri').innerText = totalSantri + "+";
+            if (document.getElementById('stat-ustadz')) document.getElementById('stat-ustadz').innerText = totalUstadz;
+            
+            // Update text di Dashboard Admin
+            if (document.getElementById('count-santri')) document.getElementById('count-santri').innerText = totalSantri;
+            if (document.getElementById('count-pengurus')) document.getElementById('count-pengurus').innerText = totalPengurus;
+            if (document.getElementById('count-ustadz')) document.getElementById('count-ustadz').innerText = totalUstadz;
+            if (document.getElementById('count-kelas')) document.getElementById('count-kelas').innerText = totalKelas;
         }
 function renderPublicAnnouncements() {
             // Menampilkan Pengumuman untuk Wali Santri
