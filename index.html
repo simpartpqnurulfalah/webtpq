@@ -764,20 +764,29 @@
             localStorage.removeItem('tpq_userRole');
             location.reload(); 
         }
-
-        function handleLogin(e) {
+function handleLogin(e) {
             e.preventDefault();
             const user = document.getElementById('input-username').value;
             const pass = document.getElementById('input-password').value;
-            if (user === 'admintpq' && pass === 'admintpq123') {
-                currentUserRole = 'admin'; isAdminActive = true; successLogin("Login Admin Berhasil");
-            } else if (user === 'pengurustpq' && pass === 'pengurustpq123') {
-                currentUserRole = 'pengurus'; isAdminActive = true; successLogin("Login Pengurus Berhasil");
+
+            // KODE UNIK (Base64)
+            const _u1 = "YWRtaW50cHE=";      
+            const _p1 = "YWRtaW50cHExMjM=";   
+            const _u2 = "UGVuZ3VydXN0cHE=";   
+            const _p2 = "UGVuZ3VydXN0cHExMjM="; 
+
+            if (btoa(user) === _u1 && btoa(pass) === _p1) {
+                currentUserRole = 'admin'; 
+                isAdminActive = true; 
+                successLogin("Login Admin Berhasil");
+            } else if (btoa(user) === _u2 && btoa(pass) === _p2) {
+                currentUserRole = 'pengurus'; 
+                isAdminActive = true; 
+                successLogin("Login Pengurus Berhasil");
             } else {
                 showToast("ID atau Password Salah!", "fa-circle-xmark", "text-red-500");
             }
         }
-
         function successLogin(msg, isReload = false) {
             localStorage.setItem('tpq_isLoggedIn', 'true');
             localStorage.setItem('tpq_userRole', currentUserRole);
