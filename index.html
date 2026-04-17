@@ -599,21 +599,21 @@
 
     <script>
         // 1. Inisialisasi OneSignal & Paksa Munculkan Pop-up Izin
-// 1. Inisialisasi OneSignal & Paksa Munculkan Pop-up Izin
-window.OneSignalDeferred = window.OneSignalDeferred || [];
-OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-        appId: "8975b58d-f7bd-4217-91a0-acb804361bb5",
-        serviceWorkerPath: "/web/sw.js", // Beri tahu OneSignal letak file sw.js
-        serviceWorkerParam: { scope: "/web/" }, // Beri tahu letak foldernya
-        notifyButton: {
-            enable: true, // Memunculkan ikon lonceng
-        }
-    });
-    
-    // Paksa pop-up izin muncul dari atas
-    OneSignal.Slidedown.promptPush();
-});
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({
+                appId: "8975b58d-f7bd-4217-91a0-acb804361bb5",
+                serviceWorkerPath: "https://simpartpqnurulfalah.github.io/web/sw.js", // Path absolut
+                serviceWorkerParam: { scope: "https://simpartpqnurulfalah.github.io/web/" }, // Path absolut
+                notifyButton: {
+                    enable: true, // Memunculkan ikon lonceng
+                }
+            });
+            
+            // Paksa pop-up izin muncul dari atas
+            OneSignal.Slidedown.promptPush();
+        });
+
         const WORKER_URL = 'https://web-tpq.simpartpqnurulfalah.workers.dev';
         let currentUserRole = 'guest';
         let isAdminActive = false; 
@@ -901,7 +901,6 @@ OneSignalDeferred.push(async function(OneSignal) {
                 const response = await fetch(WORKER_URL + endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 if (response.ok) {
                     showToast("Data Berhasil Disimpan!", "fa-save");
-
                     e.target.reset();
                     await loadData(); 
                     switchTab('panel'); 
@@ -923,7 +922,6 @@ OneSignalDeferred.push(async function(OneSignal) {
                 }
             } catch (e) { showToast("Gagal tersambung server!", "fa-circle-xmark", "text-red-500"); }
         }
-
 
         async function hapusData(tabel, id) {
             if (!confirm('Apakah Anda yakin ingin menghapus data ini secara permanen?')) return;
@@ -1057,7 +1055,6 @@ OneSignalDeferred.push(async function(OneSignal) {
             let html = '<div class="space-y-3">';
             filtered.forEach(p => {
                 const displayAlamat = isAdminActive ? p.alamat : "***";
-                const displayHp = isAdminActive ? p.hp : "***";
                 html += `
                     <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col gap-3">
                         <div class="flex items-center gap-3 border-b border-gray-100 pb-3">
@@ -1130,7 +1127,7 @@ OneSignalDeferred.push(async function(OneSignal) {
         }
 
         window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
+            e.preventDefault(); 
             deferredPrompt = e;
             const btn = document.getElementById('menu-install-app');
             if (btn) btn.classList.remove('hidden');
@@ -1150,7 +1147,7 @@ OneSignalDeferred.push(async function(OneSignal) {
             showToast("Aplikasi terpasang!", "fa-check-circle");
         });
 
-       function checkLoginState() {
+        function checkLoginState() {
             const isLoggedIn = localStorage.getItem('tpq_isLoggedIn');
             const savedRole = localStorage.getItem('tpq_userRole');
 
@@ -1167,10 +1164,10 @@ OneSignalDeferred.push(async function(OneSignal) {
 
         document.addEventListener('DOMContentLoaded', () => { loadData(); initMatrix(); checkLoginState(); });
 
-       if ('serviceWorker' in navigator) {
-    // Sesuaikan path dan tambahkan scope agar selaras dengan OneSignal
-    navigator.serviceWorker.register('/web/sw.js', { scope: '/web/' }).then(() => console.log("SW OK"));
-}
+        if ('serviceWorker' in navigator) {
+            // Sesuaikan path absolut dan tambahkan scope agar selaras dengan OneSignal
+            navigator.serviceWorker.register('https://simpartpqnurulfalah.github.io/web/sw.js', { scope: 'https://simpartpqnurulfalah.github.io/web/' }).then(() => console.log("SW OK"));
+        }
 
         document.onselectstart = () => false;
         document.addEventListener('keydown', e => {
