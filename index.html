@@ -165,18 +165,15 @@
         .tab-btn.active-red { background: #ef4444; color: white; border-color: #ef4444; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-     <script>
-        // 1. Inisialisasi OneSignal (Jalur Relative, Tanpa URL Panjang)
-        window.OneSignalDeferred = window.OneSignalDeferred || [];
-        OneSignalDeferred.push(async function(OneSignal) {
-            await OneSignal.init({
-                appId: "28287630-3787-4dfd-aeb6-329330cceff2",
-                serviceWorkerPath: "/webtpq/sw.js", 
-                serviceWorkerParam: { scope: "/webtpq/" },
-                notifyButton: { enable: true }
-            });
+   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "28287630-3787-4dfd-aeb6-329330cceff2",
         });
-     </script>
+      });
+    </script>
 </head>
 <body class="" oncontextmenu="return false" onselectstart="return false" ondragstart="return false">
 
