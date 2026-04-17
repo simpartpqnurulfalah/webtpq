@@ -599,24 +599,19 @@
 
     <script>
         // 1. Inisialisasi OneSignal & Paksa Munculkan Pop-up Izin
+// 1. Inisialisasi OneSignal & Paksa Munculkan Pop-up Izin
 window.OneSignalDeferred = window.OneSignalDeferred || [];
 OneSignalDeferred.push(async function(OneSignal) {
     await OneSignal.init({
         appId: "8975b58d-f7bd-4217-91a0-acb804361bb5",
+        serviceWorkerPath: "/web/sw.js", // Beri tahu OneSignal letak file sw.js
+        serviceWorkerParam: { scope: "/web/" }, // Beri tahu letak foldernya
         notifyButton: {
-            enable: true, // Memunculkan ikon lonceng merah di pojok kanan bawah
-            text: {
-                "tip.state.unsubscribed": "Aktifkan notifikasi",
-                "tip.state.subscribed": "Notifikasi aktif",
-                "tip.state.blocked": "Notifikasi diblokir",
-                "message.action.subscribed": "Terima kasih sudah berlangganan!",
-                "message.action.resubscribed": "Notifikasi diaktifkan kembali",
-                "message.action.unsubscribed": "Notifikasi dimatikan"
-            }
+            enable: true, // Memunculkan ikon lonceng
         }
     });
     
-    // Perintah untuk memaksa pop-up izin muncul dari atas layar
+    // Paksa pop-up izin muncul dari atas
     OneSignal.Slidedown.promptPush();
 });
 
@@ -1203,9 +1198,10 @@ OneSignalDeferred.push(async function(OneSignal) {
 
         document.addEventListener('DOMContentLoaded', () => { loadData(); initMatrix(); checkLoginState(); });
 
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').then(() => console.log("SW OK"));
-        }
+       if ('serviceWorker' in navigator) {
+    // Sesuaikan path dan tambahkan scope agar selaras dengan OneSignal
+    navigator.serviceWorker.register('/web/sw.js', { scope: '/web/' }).then(() => console.log("SW OK"));
+}
 
         document.onselectstart = () => false;
         document.addEventListener('keydown', e => {
