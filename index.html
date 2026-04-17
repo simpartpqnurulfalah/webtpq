@@ -609,18 +609,7 @@
         </div>
     </div>
     <script>
-        // 1. Inisialisasi OneSignal (Jalur Relative, Tanpa URL Panjang)
-        window.OneSignalDeferred = window.OneSignalDeferred || [];
-        OneSignalDeferred.push(async function(OneSignal) {
-            await OneSignal.init({
-                appId: "28287630-3787-4dfd-aeb6-329330cceff2",
-                serviceWorkerPath: "/webtpq/sw.js", 
-                serviceWorkerParam: { scope: "/webtpq/" },
-                notifyButton: { enable: true }
-            });
-        });
-
-        // Trigger manual untuk pop-up
+    // Trigger manual untuk pop-up
         function triggerNotificationPrompt() {
             if (window.OneSignalDeferred) {
                 window.OneSignalDeferred.push(function(OneSignal) {
