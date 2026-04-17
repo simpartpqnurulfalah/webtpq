@@ -614,30 +614,6 @@ OneSignalDeferred.push(async function(OneSignal) {
     // Paksa pop-up izin muncul dari atas
     OneSignal.Slidedown.promptPush();
 });
-
-        // 2. Fungsi Pengirim Suara ke Semua HP Pengurus
-        async function pemicuNotifSuara(judul, pesan) {
-            try {
-                await fetch("https://onesignal.com/api/v1/notifications", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json; charset=utf-8",
-                        "Authorization": "Basic os_v2_app_rf23ldpxxvbbpenavs4ainq3wvuvz52jnmfel3mshjj56ivtfptcmiptsksxzqxkbbbtta3oz7drycaehykpfg3xgnktgzumiqcog4y" // Ganti dengan REST API Key asli
-                    },
-                    body: JSON.stringify({
-                        app_id: "8975b58d-f7bd-4217-91a0-acb804361bb5", // Ganti dengan App ID asli
-                        included_segments: ["AllUsers"],
-                        headings: {"en": "📢 KEBUTUHAN TPQ BARU!"},
-                        contents: {"en": judul + ": " + pesan},
-                        android_sound: "os_notification_default", // Memicu suara HP
-                        url: "https://simpartpqnurulfalah.github.io/web/"
-                    })
-                });
-            } catch (e) {
-                console.log("Notifikasi gagal dikirim");
-            }
-        }
-
         const WORKER_URL = 'https://web-tpq.simpartpqnurulfalah.workers.dev';
         let currentUserRole = 'guest';
         let isAdminActive = false; 
@@ -925,10 +901,6 @@ OneSignalDeferred.push(async function(OneSignal) {
                 const response = await fetch(WORKER_URL + endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 if (response.ok) {
                     showToast("Data Berhasil Disimpan!", "fa-save");
-                    // Memerintahkan OneSignal kirim notif ke seluruh pengurus jika kategori yang diinput adalah kebutuhan
-                    if (kat === 'kebutuhan') {
-                        pemicuNotifSuara(payload.nama, payload.keterangan);
-                    }
 
                     e.target.reset();
                     await loadData(); 
@@ -947,10 +919,7 @@ OneSignalDeferred.push(async function(OneSignal) {
                 if(res.ok) { 
                     showToast("Kebutuhan disimpan!"); 
                     document.getElementById('in-keb-judul').value = ''; 
-                    loadData(); 
-                    
-                    // Panggil fungsi notif
-                    pemicuNotifSuara(payload.nama, payload.keterangan || "Segera cek dashboard!");
+                    loadData();    
                 }
             } catch (e) { showToast("Gagal tersambung server!", "fa-circle-xmark", "text-red-500"); }
         }
