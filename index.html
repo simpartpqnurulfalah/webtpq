@@ -6,8 +6,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TPQ Nurul Falah | Management System</title>
-    
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
@@ -242,7 +240,6 @@
             </div>
         </main>
     </div>
-
     <div id="phase-login" class="hidden min-h-screen flex flex-col items-center justify-center p-6 animate-fadeIn">
         <div class="mb-8 flex flex-col items-center">
             <div class="w-20 h-20 border-[3px] border-white rounded-[25px] flex items-center justify-center p-3 mb-6 shadow-2xl bg-white/10">
@@ -480,15 +477,23 @@
                     </div>
 
                     <div id="form-pengumuman" class="space-y-4 pt-2 border-t border-gray-100 hidden">
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-500 uppercase mb-1 block">Judul Pengumuman</label>
-                            <input type="text" id="in-judul" class="input-box-light w-full p-3 text-sm font-bold text-gray-800" placeholder="Contoh: Info Libur Idul Fitri">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-500 uppercase mb-1 block">Isi Pengumuman</label>
-                            <textarea id="in-isi" class="input-box-light w-full p-3 text-sm font-bold text-gray-800 h-24" placeholder="Tuliskan pesan untuk wali santri di sini..."></textarea>
-                        </div>
-                    </div>
+    <div>
+        <label class="text-[10px] font-bold text-gray-500 uppercase mb-1 block">Judul Pengumuman</label>
+        <input type="text" id="in-judul" class="input-box-light w-full p-3 text-sm font-bold text-gray-800" placeholder="Contoh: Info Libur Idul Fitri">
+    </div>
+    <div>
+        <label class="text-[10px] font-bold text-gray-500 uppercase mb-1 block">Isi Pengumuman</label>
+        <textarea id="in-isi" class="input-box-light w-full p-3 text-sm font-bold text-gray-800 h-24" placeholder="Tuliskan pesan..."></textarea>
+    </div>
+    <div>
+        <label class="text-[10px] font-bold text-gray-500 uppercase mb-1 block">Kirim Notifikasi Ke:</label>
+        <select id="in-target-notif" class="input-box-light w-full p-3 text-sm font-bold text-emerald-700 outline-none">
+            <option value="all">📢 Semua (Wali & Pengurus)</option>
+            <option value="wali">👨‍👩‍👧‍👦 Wali Santri Saja</option>
+            <option value="pengurus">🕌 Pengurus Saja</option>
+        </select>
+    </div>
+</div>
 
                     <div id="form-kebutuhan" class="space-y-4 pt-2 border-t border-gray-100 hidden">
                         <div>
@@ -577,7 +582,6 @@
             </button>
         </div>
     </div>
-
     <div id="modal-master-overlay" class="fixed inset-0 bg-black/60 z-[300] hidden flex items-end sm:items-center justify-center sm:p-4 backdrop-blur-sm transition-opacity">
         <div class="w-full max-w-md bg-gray-50 rounded-t-[40px] sm:rounded-[40px] shadow-2xl relative flex flex-col max-h-[90vh] animate-fadeIn">
             <div class="bg-white px-6 py-5 rounded-t-[40px] sm:rounded-t-[40px] border-b border-gray-200 flex justify-between items-center sticky top-0 z-10">
@@ -788,9 +792,20 @@ function handleLogin(e) {
             }
         }
         function successLogin(msg, isReload = false) {
+            // 1. Simpan status login ke LocalStorage (Sudah Benar)
             localStorage.setItem('tpq_isLoggedIn', 'true');
             localStorage.setItem('tpq_userRole', currentUserRole);
+            
+            // 2. Tampilkan pesan sukses
             if (!isReload) showToast(msg, "fa-unlock");
+
+            // 3. KIRIM TAG KE ONESIGNAL (DIBUNGKUS DALAM DEFERRED)
+            // Ini wajib dibungkus seperti ini agar OneSignal tahu siapa yang login
+            window.OneSignalDeferred = window.OneSignalDeferred || [];
+            OneSignalDeferred.push(async function(OneSignal) {
+                await OneSignal.User.addTag("role", currentUserRole);
+                console.log("Tag OneSignal dikirim: " + currentUserRole);
+            });
 
             document.getElementById('admin-indicator').classList.remove('hidden');
             document.getElementById('guest-indicator').classList.add('hidden');
@@ -881,7 +896,12 @@ function handleLogin(e) {
                 payload = { nama: document.getElementById('in-kelas-nama').value, wali: document.getElementById('in-kelas-wali').value };
             } else if (kat === 'pengumuman') {
                 endpoint = '/add-info';
-                payload = { judul: document.getElementById('in-judul').value, isi: document.getElementById('in-isi').value, target: 'wali_santri' };
+                payload = { 
+    judul: document.getElementById('in-judul').value, 
+    isi: document.getElementById('in-isi').value, 
+    target: 'wali_santri',
+    target_notif: document.getElementById('in-target-notif').value // Masuk ke sini
+};
             } else if (kat === 'kebutuhan') {
                 endpoint = '/add-kebutuhan';
                 payload = { nama: document.getElementById('input-keb-nama').value, skala: document.getElementById('input-keb-skala').value, keterangan: document.getElementById('input-keb-ket').value };
