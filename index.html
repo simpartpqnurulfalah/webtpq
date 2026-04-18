@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <link rel="manifest" href="manifest.json">
@@ -15,9 +16,9 @@
 
     <style>
         :root {
-            --primary-color: #059669; /* Emerald 600 */
-            --primary-dark: #047857; /* Emerald 700 */
-            --accent-gold: #F59E0B; /* Amber 500 */
+            --primary-color: #059669;
+            --primary-dark: #047857;
+            --accent-gold: #F59E0B;
             --card-bg: rgba(255, 255, 255, 0.1);
         }
 
@@ -35,7 +36,6 @@
             color: #1f2937 !important;
         }
 
-        /* MATRIX BACKGROUND */
         #matrix-canvas {
             position: fixed;
             top: 0;
@@ -171,6 +171,15 @@
         await OneSignal.init({
           appId: "28287630-3787-4dfd-aeb6-329330cceff2",
         });
+        
+        // MENDETEKSI SAAT USER KLIK "IZINKAN" NOTIFIKASI
+        OneSignal.Notifications.addEventListener('permissionChange', function(permissionGranted) {
+            if (permissionGranted) {
+                setTimeout(() => {
+                    if (typeof triggerPwaPromptUI === 'function') triggerPwaPromptUI();
+                }, 1500);
+            }
+        });
       });
     </script>
 </head>
@@ -179,6 +188,24 @@
     <canvas id="matrix-canvas"></canvas>
     
     <div id="toast-container"></div>
+    
+    <div id="pwa-install-popup" class="fixed inset-0 bg-black/80 z-[9999] hidden flex items-center justify-center p-6 animate-fadeIn transition-opacity">
+        <div class="bg-white rounded-[30px] p-8 max-w-sm w-full text-center shadow-2xl transform transition-all">
+            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 shadow-inner border-4 border-white outline outline-4 outline-emerald-50">
+                <i class="fa-solid fa-download animate-bounce"></i>
+            </div>
+            <h3 class="text-xl font-black text-gray-800 mb-1 uppercase italic">Pasang Aplikasi</h3>
+            <p class="text-[11px] font-bold text-gray-500 mb-6 leading-relaxed">Agar lebih mudah mengecek nilai dan SPP, pasang aplikasi TPQ Nurul Falah di layar utama HP Anda sekarang.</p>
+            <div class="flex flex-col gap-3">
+                <button onclick="executePwaInstall()" class="w-full py-4 bg-emerald-600 text-white font-black uppercase rounded-2xl shadow-xl active:scale-95 transition">
+                    Ya, Pasang Sekarang
+                </button>
+                <button onclick="document.getElementById('pwa-install-popup').classList.add('hidden')" class="w-full py-3 bg-gray-50 text-gray-400 font-bold uppercase rounded-2xl active:scale-95 transition text-[10px] hover:bg-gray-100">
+                    Mungkin Nanti
+                </button>
+            </div>
+        </div>
+    </div>
 
     <div id="phase-landing" class="animate-fadeIn">
         <nav class="sticky top-4 z-50 mx-4">
@@ -327,11 +354,11 @@
                 <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-white shrink-0 z-10 backdrop-blur-sm">
                     <i class="fa-solid fa-bullhorn text-xl animate-swing"></i>
                 </div>
-                <div class="flex-1 z-10">
+                <div class="flex-1 z-10 w-full overflow-hidden">
                     <p class="text-[10px] font-black uppercase tracking-widest text-emerald-200 mb-1">Informasi Terkini</p>
-                    <p class="text-xs font-bold text-white leading-relaxed italic" id="announcement-text">
+                    <div class="text-xs font-bold text-white leading-relaxed italic break-words w-full" id="announcement-text">
                         Sedang memuat data pengumuman...
-                    </p>
+                    </div>
                 </div>
             </div>
 
@@ -340,7 +367,7 @@
                 <h3 class="text-sm font-black italic uppercase text-gray-700">Administrasi & Akademik</h3>
             </div>
             <div class="grid grid-cols-1 gap-4">
-                <div onclick="openModal('spp')" class="bg-white p-5 rounded-3xl border-l-4 border-emerald-500 flex items-center justify-between shadow-sm active:scale-95 transition cursor-pointer group">
+                <div id="spp-dashboard-btn" onclick="openModal('spp')" class="hidden bg-white p-5 rounded-3xl border-l-4 border-emerald-500 items-center justify-between shadow-sm active:scale-95 transition cursor-pointer group">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center">
                             <i class="fa-solid fa-money-bill-wave text-emerald-600 text-xl"></i>
@@ -414,18 +441,35 @@
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div onclick="openModal('ustadz')" class="bg-white p-5 rounded-3xl border-b-4 border-emerald-500 flex flex-col items-center justify-center gap-2 shadow-sm active:scale-95 transition cursor-pointer">
-                    <div class="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center">
+                    <div class="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center mb-1">
                         <i class="fa-solid fa-chalkboard-user text-emerald-600 text-xl"></i>
                     </div>
                     <p class="text-2xl font-black italic text-gray-800" id="count-ustadz">0</p>
-                    <p class="text-[9px] font-bold uppercase text-gray-500 text-center">Data Ustadz</p>
+                    <p class="text-[9px] font-bold uppercase text-gray-500">Data Ustadz</p>
                 </div>
+
+                <div onclick="openModal('pengurus')" class="bg-white p-5 rounded-3xl border-b-4 border-purple-500 flex flex-col items-center justify-center gap-2 shadow-sm active:scale-95 transition cursor-pointer">
+                    <div class="w-12 h-12 bg-purple-50 rounded-full flex items-center justify-center mb-1">
+                        <i class="fa-solid fa-sitemap text-purple-600 text-xl"></i>
+                    </div>
+                    <p class="text-2xl font-black italic text-gray-800" id="count-pengurus">0</p>
+                    <p class="text-[9px] font-bold uppercase text-gray-500">Kepengurusan</p>
+                </div>
+
                 <div onclick="openModal('santri')" class="bg-white p-5 rounded-3xl border-b-4 border-blue-500 flex flex-col items-center justify-center gap-2 shadow-sm active:scale-95 transition cursor-pointer">
-                    <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
+                    <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-1">
                         <i class="fa-solid fa-children text-blue-600 text-xl"></i>
                     </div>
                     <p class="text-2xl font-black italic text-gray-800" id="count-santri">0</p>
-                    <p class="text-[9px] font-bold uppercase text-gray-500 text-center">Data Santri</p>
+                    <p class="text-[9px] font-bold uppercase text-gray-500">Data Santri</p>
+                </div>
+
+                <div onclick="openModal('kelas')" class="bg-white p-5 rounded-3xl border-b-4 border-orange-500 flex flex-col items-center justify-center gap-2 shadow-sm active:scale-95 transition cursor-pointer">
+                    <div class="w-12 h-12 bg-orange-50 rounded-full flex items-center justify-center mb-1">
+                        <i class="fa-solid fa-door-open text-orange-600 text-xl"></i>
+                    </div>
+                    <p class="text-2xl font-black italic text-gray-800" id="count-kelas">0</p>
+                    <p class="text-[9px] font-bold uppercase text-gray-500">Data Kelas</p>
                 </div>
             </div>
             
@@ -480,42 +524,17 @@
                         </div>
                     </div>
 
-                    <div id="form-spp" class="space-y-4 pt-2 border-t border-gray-100 hidden">
-                        <select id="in-spp-nama" class="input-box-light w-full p-3 text-sm font-bold"></select>
-                        <div class="grid grid-cols-2 gap-3">
-                            <select id="in-spp-bulan" class="input-box-light w-full p-3 text-sm font-bold">
-                                <option>Januari</option><option>Februari</option><option>Maret</option><option>April</option><option>Mei</option><option>Juni</option><option>Juli</option><option>Agustus</option><option>September</option><option>Oktober</option><option>November</option><option>Desember</option>
-                            </select>
-                            <input type="number" id="in-spp-tahun" class="input-box-light w-full p-3 text-sm font-bold" value="2026">
-                        </div>
-                        <input type="number" id="in-spp-jumlah" class="input-box-light w-full p-3 text-sm font-bold" placeholder="Jumlah (Rp)">
-                    </div>
-
-                    <div id="form-jadwal" class="space-y-4 pt-2 border-t border-gray-100 hidden">
-                        <select id="in-jadwal-kelas-select" class="input-box-light w-full p-3 text-sm font-bold"></select>
-                        <select id="in-jadwal-tipe" class="input-box-light w-full p-3 text-sm font-bold">
-                            <option value="Pertengahan Semester">Pertengahan Semester</option>
-                            <option value="Satu Semester Full">Satu Semester Full</option>
-                        </select>
-                        <textarea id="in-jadwal-konten" class="input-box-light w-full p-3 text-sm font-bold h-32" placeholder="Contoh: Senin: Tajwid & Fiqh"></textarea>
-                    </div>
-
-                    <div id="form-nilai" class="space-y-4 pt-2 border-t border-gray-100 hidden">
-                        <select id="in-nilai-nama" class="input-box-light w-full p-3 text-sm font-bold"></select>
-                        <input type="text" id="in-nilai-mapel" class="input-box-light w-full p-3 text-sm font-bold text-gray-800" placeholder="Mata Pelajaran (Contoh: Fasholatan)">
-                        <input type="text" id="in-nilai-materi" class="input-box-light w-full p-3 text-sm font-bold text-gray-800" placeholder="Nama Bab/Materi (Contoh: Bab Thoharoh)">
-                        <select id="in-nilai-skor" class="input-box-light w-full p-3 text-sm font-bold">
-                            <option value="L+">L+ (Nilai Baik)</option>
-                            <option value="L-">L- (Nilai Kurang Baik)</option>
-                        </select>
-                    </div>
-
                     <div id="form-pengurus" class="space-y-4 pt-2 border-t border-gray-100 hidden">
                         <input type="text" id="in-pengurus-nama" class="input-box-light w-full p-3 text-sm font-bold" placeholder="Nama Pengurus">
                         <select id="in-pengurus-kat" class="input-box-light w-full p-3 text-sm font-bold">
                             <option>Ustadz/Pengajar</option><option>Bendahara</option><option>Kesantrian</option>
                         </select>
                         <input type="text" id="in-pengurus-hp" class="input-box-light w-full p-3 text-sm font-bold" placeholder="Kontak">
+                    </div>
+
+                    <div id="form-kelas" class="space-y-4 pt-2 border-t border-gray-100 hidden">
+                        <input type="text" id="in-kelas-nama" class="input-box-light w-full p-3 text-sm font-bold" placeholder="Contoh: Kelas A1">
+                        <input type="text" id="in-kelas-wali" class="input-box-light w-full p-3 text-sm font-bold" placeholder="Contoh: Ustadzah Fatimah (Ruang 1)">
                     </div>
 
                     <div id="form-pengumuman" class="space-y-4 pt-2 border-t border-gray-100 hidden">
@@ -538,12 +557,60 @@
                         <textarea id="input-keb-ket" class="input-box-light w-full p-3 text-sm font-bold h-20" placeholder="Keterangan Rincian"></textarea>
                     </div>
 
-                    <div id="form-kelas" class="space-y-4 pt-2 border-t border-gray-100 hidden">
-                        <input type="text" id="in-kelas-nama" class="input-box-light w-full p-3 text-sm font-bold" placeholder="Contoh: Kelas A1">
-                        <input type="text" id="in-kelas-wali" class="input-box-light w-full p-3 text-sm font-bold" placeholder="Contoh: Ustadzah Fatimah (Ruang 1)">
+                    <div id="form-spp" class="space-y-4 pt-2 border-t border-gray-100 hidden">
+                        <select id="in-spp-nama" class="input-box-light w-full p-3 text-sm font-bold"></select>
+                        <div class="grid grid-cols-2 gap-3">
+                            <select id="in-spp-bulan" class="input-box-light w-full p-3 text-sm font-bold">
+                                <option value="Triwulan 1">Triwulan 1 (Jan-Mar)</option>
+                                <option value="Triwulan 2">Triwulan 2 (Apr-Jun)</option>
+                                <option value="Triwulan 3">Triwulan 3 (Jul-Sep)</option>
+                                <option value="Triwulan 4">Triwulan 4 (Okt-Des)</option>
+                            </select>
+                            <input type="number" id="in-spp-tahun" class="input-box-light w-full p-3 text-sm font-bold" value="2026">
+                        </div>
+                        <input type="number" id="in-spp-jumlah" class="input-box-light w-full p-3 text-sm font-bold" placeholder="Jumlah (Rp)">
                     </div>
 
-                    <button type="submit" class="w-full py-4 bg-emerald-600 text-white font-black uppercase rounded-2xl shadow-lg active:scale-95 transition mt-4">
+                    <div id="form-jadwal" class="space-y-4 pt-2 border-t border-gray-100 hidden">
+                        <select id="in-jadwal-kelas-select" class="input-box-light w-full p-3 text-sm font-bold"></select>
+                        <select id="in-jadwal-tipe" class="input-box-light w-full p-3 text-sm font-bold">
+                            <option value="Pertengahan Semester">Pertengahan Semester</option>
+                            <option value="Satu Semester Full">Satu Semester Full</option>
+                        </select>
+                        <textarea id="in-jadwal-konten" class="input-box-light w-full p-3 text-sm font-bold h-32" placeholder="Contoh: Senin: Tajwid & Fiqh"></textarea>
+                    </div>
+
+                    <div id="form-nilai" class="space-y-4 pt-2 border-t border-gray-100 hidden">
+                        <select id="in-nilai-nama" class="input-box-light w-full p-3 text-sm font-bold" onchange="generateMapelPintar()"></select>
+                        <div class="relative">
+                            <input type="text" id="in-nilai-mapel" list="list-mapel-kelas" class="input-box-light w-full p-3 text-sm font-bold text-gray-800" placeholder="Pilih / Ketik Mata Pelajaran">
+                            <datalist id="list-mapel-kelas"></datalist>
+                            <p class="text-[8px] text-gray-400 mt-1 italic ml-2">*Klik kolom untuk melihat daftar pelajaran di kelas santri ini.</p>
+                        </div>
+                        <input type="text" id="in-nilai-materi" class="input-box-light w-full p-3 text-sm font-bold text-gray-800" placeholder="Nama Bab/Materi (Contoh: Bab Thoharoh)">
+                        <select id="in-nilai-skor" class="input-box-light w-full p-3 text-sm font-bold">
+                            <option value="L+">L+ (Nilai Baik)</option>
+                            <option value="L-">L- (Nilai Kurang Baik)</option>
+                        </select>
+                    </div>
+
+                    <div id="form-notif-spp" class="space-y-4 pt-2 border-t border-gray-100 hidden">
+                        <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                            <p class="text-xs font-bold text-blue-800 leading-relaxed mb-2">Tombol ini akan mengirimkan notifikasi PUSH ke seluruh HP Wali Santri untuk segera melunasi SPP.</p>
+                            <p class="text-[10px] font-black uppercase text-blue-600">Hanya gunakan saat masa penagihan tiba!</p>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-500 uppercase mb-1 block">Periode Tagihan</label>
+                            <select id="in-tagihan-triwulan" class="input-box-light w-full p-3 text-sm font-bold text-gray-800">
+                                <option value="Triwulan 1">Triwulan 1 (Jan-Mar)</option>
+                                <option value="Triwulan 2">Triwulan 2 (Apr-Jun)</option>
+                                <option value="Triwulan 3">Triwulan 3 (Jul-Sep)</option>
+                                <option value="Triwulan 4">Triwulan 4 (Okt-Des)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button id="btn-submit-admin" type="submit" class="w-full py-4 bg-emerald-600 text-white font-black uppercase rounded-2xl shadow-lg active:scale-95 transition mt-4">
                         Simpan / Publikasikan
                     </button>
                 </form>
@@ -636,20 +703,31 @@
             try {
                 const response = await fetch(`${WORKER_URL}/get-data`);
                 const data = await response.json();
-                Object.assign(masterData, data);
+                
+                masterData.santri = Array.isArray(data.santri) ? data.santri : [];
+                masterData.pengurus = Array.isArray(data.pengurus) ? data.pengurus : [];
+                masterData.pengumuman = Array.isArray(data.pengumuman) ? data.pengumuman : [];
+                masterData.kebutuhan = Array.isArray(data.kebutuhan) ? data.kebutuhan : [];
+                masterData.kelas = Array.isArray(data.kelas) ? data.kelas : [];
+                masterData.spp = Array.isArray(data.spp) ? data.spp : [];
+                masterData.jadwal = Array.isArray(data.jadwal) ? data.jadwal : [];
+                masterData.nilai = Array.isArray(data.nilai) ? data.nilai : [];
+
                 updateDashboardStats();
                 updateDropdownKelas();
                 updateDropdownSantri(); 
                 renderPublicAnnouncements();
-            } catch (e) { updateDashboardStats(); }
+            } catch (e) { 
+                console.error("Gagal memuat data:", e);
+                updateDashboardStats(); 
+            }
         }
 
         function updateDropdownSantri() {
-            const activeSantri = masterData.santri ? masterData.santri.filter(s => s.status === 'Aktif') : [];
+            const activeSantri = (masterData.santri || []).filter(s => s.status === 'Aktif');
             let options = '<option value="">-- Pilih Nama Santri --</option>';
             if (activeSantri.length > 0) {
-                activeSantri.sort((a,b) => a.nama.localeCompare(b.nama)).forEach(s => {
-                    // Menyimpan data kelas di dalam atribut "data-kelas" agar bisa ditarik saat submit
+                activeSantri.sort((a,b) => (a.nama || "").localeCompare(b.nama || "")).forEach(s => {
                     options += `<option value="${s.nama}" data-kelas="${s.kelas}">${s.nama} (Kelas ${s.kelas})</option>`;
                 });
             } else { options = `<option value="">Belum ada santri aktif</option>`; }
@@ -658,6 +736,27 @@
             const elSpp = document.getElementById('in-spp-nama');
             if(elNilai) elNilai.innerHTML = options;
             if(elSpp) elSpp.innerHTML = options;
+        }
+
+        function generateMapelPintar() {
+            const selNama = document.getElementById('in-nilai-nama');
+            const datalist = document.getElementById('list-mapel-kelas');
+            
+            datalist.innerHTML = ''; 
+            if (selNama.selectedIndex <= 0) return;
+            
+            const selectedKelas = selNama.options[selNama.selectedIndex].getAttribute('data-kelas');
+            let mapelSet = new Set();
+            
+            if (masterData.nilai) {
+                masterData.nilai.forEach(n => {
+                    if (n.kelas === selectedKelas && n.mapel) {
+                        mapelSet.add(n.mapel.trim().toUpperCase());
+                    }
+                });
+            }
+            
+            mapelSet.forEach(mapel => { datalist.innerHTML += `<option value="${mapel}">`; });
         }
 
         document.addEventListener('DOMContentLoaded', () => { 
@@ -694,12 +793,24 @@
             document.getElementById('guest-indicator').classList.add('hidden');
             document.getElementById('nav-admin-wrapper').classList.remove('hidden');
             document.getElementById('menu-download-file').classList.remove('hidden');
+            document.getElementById('spp-dashboard-btn').classList.remove('hidden'); 
+            document.getElementById('spp-dashboard-btn').classList.add('flex');
             document.getElementById('sidebar-role').innerText = currentUserRole === 'admin' ? "Super Admin" : "Pengurus TPQ";
             
             const sel = document.getElementById('admin-kategori');
-            let ops = `<option value="pengumuman">Informasi Pengumuman</option><option value="kebutuhan">Kebutuhan TPQ</option><option value="spp">Input SPP</option><option value="jadwal">Atur Jadwal Pelajaran</option><option value="nilai">Input Nilai Santri</option>`;
+            let ops = `
+                <option value="pengumuman">Informasi Pengumuman</option>
+                <option value="kebutuhan">Kebutuhan TPQ</option>
+                <option value="spp">Input Pembayaran SPP</option>
+                <option value="jadwal">Atur Jadwal Pelajaran</option>
+                <option value="nilai">Input Nilai Santri</option>`;
+                
             if (currentUserRole === 'admin') {
-                sel.innerHTML = `<option value="santri">Tambah Santri</option><option value="pengurus">Tambah Pengurus</option><option value="kelas">Tambah Kelas</option>` + ops;
+                sel.innerHTML = `
+                    <option value="santri">Tambah Santri</option>
+                    <option value="pengurus">Tambah Pengurus/Ustadz</option>
+                    <option value="kelas">Tambah Kelas</option>` + ops + `
+                    <option value="notif-spp">📣 Kirim Notif Tagihan SPP</option>`;
                 if(document.getElementById('dashboard-admin-tools')) document.getElementById('dashboard-admin-tools').classList.remove('hidden');
             } else { 
                 sel.innerHTML = ops; 
@@ -713,6 +824,7 @@
             
             changeAdminForm();
             showPhase('phase-dashboard');
+            renderPublicAnnouncements(); 
         }
 
         function checkLoginState() {
@@ -750,16 +862,25 @@
 
         function changeAdminForm() {
             const val = document.getElementById('admin-kategori').value;
-            ['form-santri','form-pengurus','form-kelas','form-spp','form-jadwal','form-nilai','form-pengumuman','form-kebutuhan'].forEach(id => {
+            ['form-santri','form-pengurus','form-kelas','form-spp','form-jadwal','form-nilai','form-pengumuman','form-kebutuhan','form-notif-spp'].forEach(id => {
                 const el = document.getElementById(id); if(el) el.classList.add('hidden');
             });
             const target = document.getElementById('form-'+val); if(target) target.classList.remove('hidden');
+            
+            const btn = document.getElementById('btn-submit-admin');
+            if(val === 'notif-spp') {
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim Notif ke Wali';
+                btn.className = "w-full py-4 bg-blue-600 text-white font-black uppercase rounded-2xl shadow-lg active:scale-95 transition mt-4";
+            } else {
+                btn.innerHTML = 'Simpan / Publikasikan';
+                btn.className = "w-full py-4 bg-emerald-600 text-white font-black uppercase rounded-2xl shadow-lg active:scale-95 transition mt-4";
+            }
         }
 
         async function handleAdminSubmit(e) {
             e.preventDefault();
             const kat = document.getElementById('admin-kategori').value;
-            const btn = e.target.querySelector('button[type="submit"]');
+            const btn = document.getElementById('btn-submit-admin');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
             
@@ -773,22 +894,18 @@
             } else if(kat === 'jadwal') {
                 payload = { kelas: document.getElementById('in-jadwal-kelas-select').value, tipe: document.getElementById('in-jadwal-tipe').value, konten: document.getElementById('in-jadwal-konten').value };
             } else if(kat === 'nilai') {
-                // Menarik data kelas secara otomatis dari dropdown nama
                 const selNama = document.getElementById('in-nilai-nama');
                 const selectedKelas = selNama.options[selNama.selectedIndex].getAttribute('data-kelas');
-                
                 payload = { 
                     nama: selNama.value, 
                     kelas: selectedKelas, 
                     mapel: document.getElementById('in-nilai-mapel').value, 
-                    materi: document.getElementById('in-nilai-materi').value, // Menangkap BAB MATERI
+                    materi: document.getElementById('in-nilai-materi').value,
                     skor: document.getElementById('in-nilai-skor').value 
                 };
-                
                 if(!payload.nama || !payload.mapel || !payload.materi) {
                     showToast("Lengkapi semua kolom nilai!", "fa-warning", "text-red-500");
-                    btn.innerHTML = originalText;
-                    return;
+                    btn.innerHTML = originalText; return;
                 }
             } else if(kat === 'pengumuman') {
                 endpoint = '/add-info';
@@ -799,12 +916,24 @@
                 payload = { nama: document.getElementById('in-pengurus-nama').value, kategori: document.getElementById('in-pengurus-kat').value, alamat: document.getElementById('in-pengurus-hp').value };
             } else if(kat === 'kelas') {
                 payload = { nama: document.getElementById('in-kelas-nama').value, wali: document.getElementById('in-kelas-wali').value };
+            } else if(kat === 'notif-spp') {
+                endpoint = '/add-info'; 
+                const triwulan = document.getElementById('in-tagihan-triwulan').value;
+                payload = { 
+                    judul: "📋 TAGIHAN SPP TPQ", 
+                    isi: `Assalamualaikum. Pemberitahuan kepada Bapak/Ibu Wali Santri, dimohon untuk segera melunasi pembayaran SPP untuk periode ${triwulan}. Terima kasih.`, 
+                    target: 'wali_santri', 
+                    target_notif: 'wali' 
+                };
             }
 
             try {
                 const res = await fetch(WORKER_URL + endpoint, { method: 'POST', body: JSON.stringify(payload) });
-                if(res.ok) { showToast("Data Berhasil Disimpan!"); e.target.reset(); await loadData(); switchTab('panel'); }
-                else { showToast("Gagal menyimpan data", "fa-xmark", "text-red-500"); }
+                if(res.ok) { 
+                    showToast(kat === 'notif-spp' ? "Notif Berhasil Dikirim!" : "Data Berhasil Disimpan!"); 
+                    e.target.reset(); await loadData(); switchTab('panel'); 
+                }
+                else { showToast("Gagal memproses", "fa-xmark", "text-red-500"); }
             } catch(err) { showToast("Error Koneksi", "fa-wifi", "text-red-500"); }
             finally { btn.innerHTML = originalText; }
         }
@@ -820,7 +949,7 @@
         }
 
         async function hapusData(tabel, id) {
-            if (!confirm('Apakah Anda yakin ingin menghapus data ini secara permanen?')) return;
+            if (!confirm('Hapus data ini secara permanen?')) return;
             try {
                 const response = await fetch(`${WORKER_URL}/delete-data`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tabel: tabel, id: id }) });
                 if (response.ok) { showToast("Data dihapus!", "fa-trash", "text-red-500"); await loadData(); closeMasterModal(); } 
@@ -829,19 +958,73 @@
         }
 
         function updateDashboardStats() {
-            if (document.getElementById('stat-santri')) document.getElementById('stat-santri').innerText = masterData.santri.length;
-            if (document.getElementById('count-santri')) document.getElementById('count-santri').innerText = masterData.santri.length;
-            if (document.getElementById('count-kelas')) document.getElementById('count-kelas').innerText = masterData.kelas.length;
-            if (document.getElementById('count-pengurus')) document.getElementById('count-pengurus').innerText = masterData.pengurus.length;
-            if (document.getElementById('stat-ustadz')) document.getElementById('stat-ustadz').innerText = masterData.pengurus.filter(p => p.kategori === "Ustadz/Pengajar").length;
-            if (document.getElementById('count-ustadz')) document.getElementById('count-ustadz').innerText = masterData.pengurus.filter(p => p.kategori === "Ustadz/Pengajar").length;
+            if (document.getElementById('stat-santri')) document.getElementById('stat-santri').innerText = masterData.santri.length || 0;
+            if (document.getElementById('count-santri')) document.getElementById('count-santri').innerText = masterData.santri.length || 0;
+            if (document.getElementById('count-kelas')) document.getElementById('count-kelas').innerText = masterData.kelas.length || 0;
+            if (document.getElementById('count-pengurus')) document.getElementById('count-pengurus').innerText = masterData.pengurus.length || 0;
+            if (document.getElementById('stat-ustadz')) document.getElementById('stat-ustadz').innerText = masterData.pengurus.filter(p => p.kategori === "Ustadz/Pengajar").length || 0;
+            if (document.getElementById('count-ustadz')) document.getElementById('count-ustadz').innerText = masterData.pengurus.filter(p => p.kategori === "Ustadz/Pengajar").length || 0;
         }
 
         function updateDropdownKelas() {
-            const kelasOptions = masterData.kelas.map(k => `<option value="${k.nama}">${k.nama}</option>`).join('');
+            const kelasOptions = (masterData.kelas || []).map(k => `<option value="${k.nama}">${k.nama}</option>`).join('');
             ['in-kelas', 'in-jadwal-kelas-select'].forEach(id => {
                 const el = document.getElementById(id); if(el) el.innerHTML = kelasOptions || '<option>Belum ada kelas</option>';
             });
+        }
+
+        function renderPublicAnnouncements() {
+            try {
+                let pubInfo = null;
+                const arrPengumuman = Array.isArray(masterData.pengumuman) ? masterData.pengumuman : [];
+                
+                if (arrPengumuman.length > 0) {
+                    const sorted = [...arrPengumuman].sort((a, b) => (b.id || 0) - (a.id || 0));
+                    pubInfo = sorted.find(p => p.target === 'wali_santri') || sorted[0];
+                }
+
+                const annEl = document.getElementById('announcement-text');
+                if (pubInfo && annEl) {
+                    let isiHtml = `<span class="font-bold">${pubInfo.judul || "Info"}</span> : ${pubInfo.isi || ""}`;
+                    if (isAdminActive) {
+                        isiHtml += ` <div class="mt-2"><button onclick="hapusData('pengumuman', ${pubInfo.id})" class="bg-red-500 text-white px-3 py-1 rounded-md text-[9px] uppercase font-black shadow-md hover:bg-red-600 transition active:scale-95"><i class="fa-solid fa-trash"></i> HAPUS INFO INI</button></div>`;
+                    }
+                    annEl.innerHTML = isiHtml;
+                } else if (annEl) {
+                    annEl.innerHTML = "Belum ada pengumuman terbaru.";
+                }
+
+                if (isAdminActive) {
+                    const internalBox = document.getElementById('kebutuhan-list-render');
+                    if (internalBox) {
+                        internalBox.innerHTML = '';
+                        const arrKebutuhan = Array.isArray(masterData.kebutuhan) ? masterData.kebutuhan : [];
+                        
+                        arrKebutuhan.forEach(k => {
+                            let color = 'emerald';
+                            let textSkala = 'Saran';
+                            if (k.skala === 'mendesak') { color = 'red'; textSkala = 'Mendesak'; }
+                            else if (k.skala === 'penting') { color = 'yellow'; textSkala = 'Penting'; }
+                            
+                            let tombolAksi = `
+                                <div class="flex gap-2">
+                                    <button onclick="this.parentElement.innerHTML = '<p class=\\'text-[10px] font-bold text-emerald-600\\'>✅ Diproses</p>'" class="text-[9px] font-black text-${color}-600 bg-white px-3 py-1.5 rounded shadow-sm border border-${color}-200 hover:bg-${color}-50 transition">TANGANI</button>
+                                    <button onclick="hapusData('kebutuhan', ${k.id})" class="text-[9px] font-black text-white bg-red-500 px-3 py-1.5 rounded shadow-sm hover:bg-red-600 transition"><i class="fa-solid fa-trash"></i></button>
+                                </div>`;
+                                
+                            internalBox.innerHTML += `
+                                <div class="p-3 bg-${color}-50 rounded-xl border border-${color}-100 flex justify-between items-center mb-2">
+                                    <div>
+                                        <span class="bg-${color}-500 text-white text-[7px] font-black uppercase px-2 py-0.5 rounded">${textSkala}</span>
+                                        <p class="text-[11px] font-bold text-gray-800">${k.nama}</p>
+                                        <p class="text-[8px] text-gray-500 font-bold mt-0.5">${k.keterangan}</p>
+                                    </div>
+                                    ${tombolAksi}
+                                </div>`;
+                        });
+                    }
+                }
+            } catch(e) { console.error("Render Announcements Error:", e); }
         }
 
         function openModal(type) { 
@@ -903,7 +1086,7 @@
                 <button onclick="renderSantriList('Aktif')" class="tab-btn flex-1 py-2 rounded-xl text-xs font-black uppercase border-2 ${statusTab === 'Aktif' ? 'active' : 'border-gray-200 text-gray-500'}">Santri Aktif</button>
                 <button onclick="renderSantriList('Tidak Aktif')" class="tab-btn flex-1 py-2 rounded-xl text-xs font-black uppercase border-2 ${statusTab === 'Tidak Aktif' ? 'active-red' : 'border-gray-200 text-gray-500'}">Tidak Aktif</button>`;
             
-            let filtered = masterData.santri.filter(s => s.status === statusTab);
+            let filtered = (masterData.santri || []).filter(s => s.status === statusTab);
             if(searchQuery.trim()) { const q = searchQuery.toLowerCase(); filtered = filtered.filter(s => s.nama.toLowerCase().includes(q) || s.kelas.toLowerCase().includes(q)); }
             
             const content = document.getElementById('modal-master-content');
@@ -959,7 +1142,7 @@
         function renderPengurusList(kategori, isDirect = false) {
             currentModalState = { type: 'pengurus_list' };
             setupModalUI(`${kategori}`, "Daftar Pengurus", !isDirect, false, false);
-            const filtered = masterData.pengurus.filter(p => p.kategori === kategori);
+            const filtered = (masterData.pengurus || []).filter(p => p.kategori === kategori);
             if(filtered.length === 0) { document.getElementById('modal-master-content').innerHTML = '<div class="text-center py-10 text-gray-400 font-bold text-xs uppercase">Kosong.</div>'; return; }
             
             let html = '<div class="space-y-3">';
@@ -972,11 +1155,11 @@
         function renderKelasList() {
             currentModalState = { type: 'kelas_list' };
             setupModalUI("Data Kelas", "Pembagian Ruang & Wali", false, false, false);
-            if(!masterData.kelas.length) { document.getElementById('modal-master-content').innerHTML = '<div class="text-center py-10 text-gray-400 font-bold text-xs uppercase">Kosong.</div>'; return; }
+            if(!masterData.kelas || !masterData.kelas.length) { document.getElementById('modal-master-content').innerHTML = '<div class="text-center py-10 text-gray-400 font-bold text-xs uppercase">Kosong.</div>'; return; }
             
             let html = '<div class="space-y-3">';
             masterData.kelas.forEach(k => {
-                const count = masterData.santri.filter(s => s.status === 'Aktif' && s.kelas === k.nama).length;
+                const count = (masterData.santri || []).filter(s => s.status === 'Aktif' && s.kelas === k.nama).length;
                 html += `<div onclick="renderKelasSantri('${k.nama}', '${k.wali}')" class="bg-white p-4 rounded-2xl border border-gray-200 flex items-center justify-between cursor-pointer hover:border-orange-400 group transition"><div class="flex items-center gap-4"><div class="w-12 h-12 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center text-xl font-black group-hover:bg-orange-500 group-hover:text-white transition">${k.nama.replace('Kelas ', '')}</div><div><p class="font-black text-sm text-gray-800 leading-tight">${k.nama}</p><p class="text-[10px] text-gray-500 font-bold uppercase mt-1">${k.wali} | ${count} Santri</p></div></div><i class="fa-solid fa-chevron-right text-gray-300 group-hover:text-orange-500"></i></div>`;
             });
             document.getElementById('modal-master-content').innerHTML = html + '</div>';
@@ -985,7 +1168,7 @@
         function renderKelasSantri(kelasName, waliName) {
             currentModalState = { type: 'kelas_santri' };
             setupModalUI(kelasName, `Wali: ${waliName}`, true, false, false);
-            const filtered = masterData.santri.filter(s => s.kelas === kelasName && s.status === 'Aktif');
+            const filtered = (masterData.santri || []).filter(s => s.kelas === kelasName && s.status === 'Aktif');
             let html = `<div class="bg-orange-50 border border-orange-200 p-3 rounded-xl mb-4 flex items-center justify-between"><span class="text-[10px] font-black uppercase text-orange-800">Total Santri Aktif</span><span class="text-sm font-black text-orange-600 bg-white px-3 py-1 rounded-lg shadow-sm">${filtered.length} Anak</span></div><div class="space-y-2">`;
             filtered.forEach((s, idx) => { html += `<div class="bg-white p-3 rounded-xl border border-gray-200 flex items-center gap-3"><div class="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-[10px] font-black text-gray-500">${idx+1}</div><div class="flex-1"><p class="font-black text-xs text-gray-800">${s.nama}</p><p class="text-[9px] text-gray-500 font-bold uppercase mt-0.5">Ortu: ${isAdminActive ? s.ortu : '***'}</p></div></div>`; });
             document.getElementById('modal-master-content').innerHTML = html + '</div>';
@@ -995,27 +1178,49 @@
             currentModalState = { type: 'spp_list' };
             setupModalUI("Data SPP Santri", "Status Pembayaran", false, true, false);
             const content = document.getElementById('modal-master-content');
-            const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-            const currentMonth = months[new Date().getMonth()] + " " + new Date().getFullYear();
             
-            let html = `<div class="bg-emerald-50 border border-emerald-200 p-3 rounded-xl mb-4 flex items-center justify-between"><span class="text-[10px] font-black uppercase text-emerald-800">Periode Tagihan</span><span class="text-xs font-black text-emerald-600 bg-white px-3 py-1 rounded-lg shadow-sm">${currentMonth}</span></div><div class="space-y-3">`;
-            const activeSantri = masterData.santri.filter(s => s.status === 'Aktif');
+            let html = `
+                <div class="mb-4 bg-emerald-50 border border-emerald-200 p-3 rounded-xl shadow-sm">
+                    <label class="text-[10px] font-black uppercase text-emerald-800 mb-1 block">Pilih Periode Penagihan</label>
+                    <select id="filter-triwulan" class="input-box-light w-full p-2 text-sm font-bold" onchange="renderSppData(this.value)">
+                        <option value="Triwulan 1">Triwulan 1 (Jan-Mar)</option>
+                        <option value="Triwulan 2">Triwulan 2 (Apr-Jun)</option>
+                        <option value="Triwulan 3">Triwulan 3 (Jul-Sep)</option>
+                        <option value="Triwulan 4">Triwulan 4 (Okt-Des)</option>
+                    </select>
+                </div>
+                <div id="spp-data-area" class="space-y-3"></div>`;
+                
+            content.innerHTML = html;
+            renderSppData("Triwulan 1"); 
+        }
+        
+        function renderSppData(triwulan) {
+            const area = document.getElementById('spp-data-area');
+            const activeSantri = (masterData.santri || []).filter(s => s.status === 'Aktif');
             
+            let html = '';
             activeSantri.forEach(s => {
                 let isLunas = false;
-                if(masterData.spp) { const cek = masterData.spp.find(x => x.nama_santri === s.nama && x.bulan === currentMonth); if(cek && cek.status === 'Lunas') isLunas = true; }
-                const btnClass = isLunas ? "bg-emerald-500 text-white shadow-emerald-500/30" : "bg-gray-100 text-gray-400";
-                html += `<div class="bg-white p-3.5 rounded-xl border ${isLunas ? 'border-emerald-200' : 'border-gray-200'} shadow-sm flex items-center justify-between transition-all" id="card-spp-${s.id}"><div class="flex-1"><p class="font-black text-xs text-gray-800">${s.nama}</p><p class="text-[9px] text-gray-500 font-bold uppercase mt-0.5">Kelas ${s.kelas}</p></div><button onclick="${isAdminActive ? `toggleSpp('${s.nama}', '${currentMonth}', ${isLunas})` : `showToast('Hanya Admin/Pengurus', 'fa-lock', 'text-red-500')`}" class="${btnClass} px-3 py-1.5 rounded-lg text-[9px] font-black uppercase flex items-center gap-1.5 active:scale-95 transition-all shadow-sm">${isLunas ? '<i class="fa-solid fa-check"></i> LUNAS' : '<i class="fa-solid fa-clock"></i> BELUM'}</button></div>`;
+                if(masterData.spp) { 
+                    const cek = masterData.spp.find(x => x.nama_santri === s.nama && x.bulan === triwulan); 
+                    if(cek && cek.status === 'Lunas') isLunas = true; 
+                }
+                const btnClass = isLunas ? "bg-emerald-500 text-white shadow-emerald-500/30" : "bg-gray-100 text-gray-400 border border-gray-300";
+                html += `<div class="bg-white p-3.5 rounded-xl border ${isLunas ? 'border-emerald-200' : 'border-gray-200'} shadow-sm flex items-center justify-between transition-all" id="card-spp-${s.id}"><div class="flex-1"><p class="font-black text-xs text-gray-800">${s.nama}</p><p class="text-[9px] text-gray-500 font-bold uppercase mt-0.5">Kelas ${s.kelas}</p></div><button onclick="${isAdminActive ? `toggleSpp('${s.nama}', '${triwulan}', ${isLunas})` : `void(0)`}" class="${btnClass} px-3 py-1.5 rounded-lg text-[9px] font-black uppercase flex items-center gap-1.5 active:scale-95 transition-all shadow-sm">${isLunas ? '<i class="fa-solid fa-check"></i> LUNAS' : '<i class="fa-solid fa-clock"></i> BELUM'}</button></div>`;
             });
-            content.innerHTML = html + '</div>';
+            area.innerHTML = html;
             
-            document.getElementById('modal-search-input').oninput = (e) => {
-                const q = e.target.value.toLowerCase();
-                activeSantri.forEach(s => {
-                    const card = document.getElementById(`card-spp-${s.id}`);
-                    if(card) card.style.display = (s.nama.toLowerCase().includes(q) || s.kelas.toLowerCase().includes(q)) ? 'flex' : 'none';
-                });
-            };
+            const searchInput = document.getElementById('modal-search-input');
+            if(searchInput) {
+                searchInput.oninput = (e) => {
+                    const q = e.target.value.toLowerCase();
+                    activeSantri.forEach(s => {
+                        const card = document.getElementById(`card-spp-${s.id}`);
+                        if(card) card.style.display = (s.nama.toLowerCase().includes(q) || s.kelas.toLowerCase().includes(q)) ? 'flex' : 'none';
+                    });
+                };
+            }
         }
 
         async function toggleSpp(nama, bulan, cur) {
@@ -1023,14 +1228,18 @@
             showToast("Menyimpan...", "fa-spinner fa-spin", "text-blue-500");
             try {
                 const res = await fetch(`${WORKER_URL}/update-spp`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ nama_santri: nama, bulan: bulan, status: next }) });
-                if(res.ok) { showToast(`SPP ${next}!`, "fa-check"); await loadData(); renderSppList(); }
+                if(res.ok) { 
+                    showToast(`SPP ${next}!`, "fa-check"); 
+                    await loadData(); 
+                    renderSppData(bulan); 
+                }
             } catch (e) { showToast("Error Koneksi", "fa-wifi", "text-red-500"); }
         }
 
         function renderJadwalList() {
             currentModalState = { type: 'jadwal_list' };
             setupModalUI("Jadwal Pelajaran", "Pilih Kelas", false, false, false);
-            if(!masterData.kelas.length) { document.getElementById('modal-master-content').innerHTML = '<p class="text-center opacity-50 font-bold py-10">Data kelas kosong</p>'; return; }
+            if(!masterData.kelas || !masterData.kelas.length) { document.getElementById('modal-master-content').innerHTML = '<p class="text-center opacity-50 font-bold py-10">Data kelas kosong</p>'; return; }
             
             let html = '<div class="grid gap-3">';
             masterData.kelas.forEach(k => {
@@ -1076,12 +1285,11 @@
             area.innerHTML = res + '</div>';
         }
 
-        // --- SISTEM NILAI PERKEMBANGAN DENGAN MATERI/BAB ---
         function renderNilaiKelasList() {
             currentModalState = { type: 'nilai_kelas_list' };
             setupModalUI("Nilai Santri", "Pilih Kelas", false, false, false);
             let html = '<div class="grid gap-3">';
-            masterData.kelas.forEach(k => {
+            (masterData.kelas || []).forEach(k => {
                 html += `<div onclick="renderNilaiSantriList('${k.nama}')" class="bg-white p-5 rounded-2xl border flex justify-between items-center cursor-pointer shadow-sm hover:border-purple-400 transition active:scale-95"><span class="font-black text-purple-800">${k.nama}</span><i class="fa-solid fa-user-graduate text-purple-300"></i></div>`;
             });
             document.getElementById('modal-master-content').innerHTML = html + '</div>';
@@ -1090,7 +1298,7 @@
         function renderNilaiSantriList(kelasName) {
             currentModalState = { type: 'nilai_santri_list', kelas: kelasName };
             setupModalUI(kelasName, "Pilih Nama Santri", true, true, false);
-            const filtered = masterData.santri.filter(s => s.kelas === kelasName && s.status === 'Aktif');
+            const filtered = (masterData.santri || []).filter(s => s.kelas === kelasName && s.status === 'Aktif');
             let html = '<div class="space-y-2">';
             filtered.forEach(s => {
                 html += `<div onclick="renderNilaiAkhir('${s.nama}')" class="bg-white p-4 rounded-xl border flex justify-between items-center cursor-pointer hover:bg-purple-50 hover:border-purple-200 transition"><p class="font-black text-xs text-gray-800">${s.nama}</p><i class="fa-solid fa-chevron-right text-gray-300"></i></div>`;
@@ -1100,48 +1308,58 @@
             document.getElementById('modal-search-input').oninput = (e) => {
                 const q = e.target.value.toLowerCase();
                 const cards = document.getElementById('modal-master-content').children[0].children;
-                filtered.forEach((s, i) => cards[i].style.display = s.nama.toLowerCase().includes(q) ? 'flex' : 'none');
+                filtered.forEach((s, i) => { if(cards[i]) cards[i].style.display = s.nama.toLowerCase().includes(q) ? 'flex' : 'none'; });
             };
         }
 
         function renderNilaiAkhir(nama) {
             currentModalState = { type: 'nilai_akhir', namaSantri: nama };
             setupModalUI("Hasil Studi", nama, true, false, false);
-            const records = masterData.nilai ? masterData.nilai.filter(n => n.nama.toLowerCase() === nama.toLowerCase()) : [];
+            const records = (masterData.nilai || []).filter(n => n.nama.toLowerCase() === nama.toLowerCase());
             
             if(!records.length) {
                 document.getElementById('modal-master-content').innerHTML = `<div class="text-center py-10"><i class="fa-solid fa-file-excel text-4xl text-gray-200 mb-2 block"></i><p class="text-xs font-bold text-gray-400 uppercase">Belum ada data nilai</p></div>`;
                 return;
             }
 
-            // Grouping nilai berdasarkan Mata Pelajaran
             const mapelGroups = {};
             records.forEach(r => {
-                if(!mapelGroups[r.mapel]) mapelGroups[r.mapel] = [];
-                mapelGroups[r.mapel].push(r);
+                let mapelKey = (r.mapel || "Lainnya").trim().toUpperCase(); 
+                if(!mapelGroups[mapelKey]) mapelGroups[mapelKey] = [];
+                mapelGroups[mapelKey].push(r);
             });
 
             let html = '<div class="space-y-5">';
             for(const mapel in mapelGroups) {
                 html += `
                 <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                    <div class="bg-purple-50 px-4 py-3 border-b border-purple-100">
-                        <p class="text-[9px] font-black text-purple-600 uppercase tracking-widest">Mata Pelajaran</p>
-                        <p class="text-sm font-black text-gray-800">${mapel}</p>
+                    <div class="bg-purple-50 px-4 py-3 border-b border-purple-100 flex justify-between items-center">
+                        <div>
+                            <p class="text-[9px] font-black text-purple-600 uppercase tracking-widest">Mata Pelajaran</p>
+                            <p class="text-sm font-black text-gray-800">${mapel}</p>
+                        </div>
                     </div>
                     <div class="p-2 space-y-1">`;
                 
                 mapelGroups[mapel].forEach(materiItem => {
                     const isBad = materiItem.skor === 'L-';
+                    let namaBab = materiItem.materi;
+                    if (!namaBab || namaBab === 'null' || namaBab.trim() === '') { namaBab = 'Evaluasi Umum'; }
+
+                    const btnHapus = isAdminActive 
+                        ? `<button onclick="hapusData('nilai', ${materiItem.id})" class="w-7 h-7 bg-red-50 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition flex items-center justify-center ml-2"><i class="fa-solid fa-trash text-[10px]"></i></button>` 
+                        : '';
+
                     html += `
                         <div class="flex justify-between items-center p-3 hover:bg-gray-50 rounded-xl transition">
                             <div class="flex items-center gap-3">
                                 <i class="fa-regular fa-file-lines text-gray-300"></i>
-                                <span class="text-xs font-bold text-gray-700">${materiItem.materi}</span>
+                                <span class="text-xs font-bold text-gray-700">${namaBab}</span>
                             </div>
-                            <span class="px-3 py-1 rounded border font-black text-xs shadow-sm ${isBad ? 'text-red-600 bg-red-50 border-red-200' : 'text-emerald-600 bg-emerald-50 border-emerald-200'}">
-                                ${materiItem.skor}
-                            </span>
+                            <div class="flex items-center">
+                                <span class="px-3 py-1 rounded border font-black text-xs shadow-sm ${isBad ? 'text-red-600 bg-red-50 border-red-200' : 'text-emerald-600 bg-emerald-50 border-emerald-200'}">${materiItem.skor}</span>
+                                ${btnHapus}
+                            </div>
                         </div>`;
                 });
                 html += `</div></div>`;
@@ -1149,7 +1367,6 @@
             document.getElementById('modal-master-content').innerHTML = html + '</div>';
         }
 
-        // --- EXPORT DATA ---
         function downloadExcelData() {
             if (!masterData.santri || masterData.santri.length === 0) { showToast("Data kosong", "fa-warning", "text-red-500"); return; }
             const dataToExport = masterData.santri.map((s, index) => ({ "No": index + 1, "Nama Lengkap": s.nama, "Tempat Tanggal Lahir": s.ttl, "Alamat": s.alamat, "Nama Wali": s.ortu, "Kelas": s.kelas, "Status": s.status }));
@@ -1161,7 +1378,58 @@
             showToast("Excel Berhasil Diunduh!", "fa-file-excel", "text-emerald-600");
         }
 
-        // --- SECURITY ---
+        // --- FITUR INSTALL APLIKASI (PWA) ---
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault(); 
+            deferredPrompt = e; 
+            const btn = document.getElementById('menu-install-app');
+            if (btn) btn.classList.remove('hidden');
+        });
+
+        function triggerPwaPromptUI() {
+            if (deferredPrompt) {
+                document.getElementById('pwa-install-popup').classList.remove('hidden');
+            }
+        }
+
+        async function executePwaInstall() {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            document.getElementById('pwa-install-popup').classList.add('hidden');
+            const btn = document.getElementById('menu-install-app');
+            if (btn) btn.classList.add('hidden');
+        }
+
+        window.addEventListener('appinstalled', () => {
+            document.getElementById('pwa-install-popup').classList.add('hidden');
+            const btn = document.getElementById('menu-install-app');
+            if (btn) btn.classList.add('hidden');
+            showToast("Aplikasi berhasil dipasang di HP!", "fa-check-circle");
+        });
+
+        async function installPWA() {
+            triggerPwaPromptUI();
+            toggleSidebar();
+        }
+
+        const ctx = document.getElementById('matrix-canvas').getContext('2d');
+        function initMatrix() {
+            const c = document.getElementById('matrix-canvas'); 
+            c.width = window.innerWidth; c.height = window.innerHeight;
+            const drops = Array(Math.floor(c.width/20)).fill(1);
+            setInterval(() => {
+                ctx.fillStyle = "rgba(5, 150, 105, 0.05)"; ctx.fillRect(0,0,c.width,c.height); 
+                ctx.fillStyle = "#34d399"; ctx.font = "15px monospace";
+                drops.forEach((y, i) => {
+                    ctx.fillText(String.fromCharCode(Math.random()*128), i*20, y*20);
+                    if(y*20 > c.height && Math.random() > 0.975) drops[i] = 0; 
+                    drops[i]++;
+                });
+            }, 50);
+        }
+        
         document.onselectstart = () => false;
         document.addEventListener('keydown', e => {
             if (e.ctrlKey && (e.keyCode == 67 || e.keyCode == 85 || e.keyCode == 83)) {
