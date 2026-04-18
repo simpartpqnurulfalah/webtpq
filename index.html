@@ -292,6 +292,15 @@
             </div>
         </div>
 
+        <div class="px-6 pt-6 pb-2 relative z-30">
+            <div class="relative">
+                <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="text" id="quick-search" placeholder="Cari nama santri dengan cepat..." oninput="handleQuickSearch(this.value)" class="w-full bg-white border border-gray-200 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-bold text-gray-700 outline-none focus:border-emerald-500 transition shadow-sm">
+                
+                <div id="quick-search-results" class="absolute top-[110%] left-0 w-full bg-white rounded-2xl shadow-2xl border border-gray-100 hidden max-h-60 overflow-y-auto z-50 divide-y divide-gray-50"></div>
+            </div>
+        </div>
+
         <div id="tab-panel" class="p-6 space-y-6">
             <div class="bg-gradient-to-r from-emerald-600 to-teal-700 p-5 rounded-3xl shadow-lg border border-emerald-500/30 flex items-start gap-4 relative overflow-hidden">
                 <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-white shrink-0 z-10 backdrop-blur-sm">
@@ -373,7 +382,24 @@
                     <p class="text-[9px] font-bold uppercase text-gray-500">Data Kelas</p>
                 </div>
             </div>
-
+<div class="flex items-center gap-2 pb-2 border-b border-gray-200 mt-6">
+                <i class="fa-solid fa-wallet text-gray-400"></i>
+                <h3 class="text-sm font-black italic uppercase text-gray-700">Administrasi & Keuangan</h3>
+            </div>
+            <div class="grid grid-cols-1 gap-4">
+                <div onclick="openModal('spp')" class="bg-white p-5 rounded-3xl border-l-4 border-emerald-500 flex items-center justify-between shadow-sm active:scale-95 transition cursor-pointer group">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center group-hover:scale-110 transition">
+                            <i class="fa-solid fa-money-bill-wave text-emerald-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-black text-gray-800">Manajemen SPP</p>
+                            <p class="text-[9px] font-bold uppercase text-gray-500 tracking-widest mt-0.5">Cek Status Tagihan Bulan Ini</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-gray-300"></i>
+                </div>
+            </div>
             <div id="dashboard-admin-tools" class="hidden grid grid-cols-1 gap-4 mt-4">
                 <button onclick="downloadExcelData()" class="w-full py-4 bg-white border border-emerald-100 rounded-3xl shadow-sm flex items-center justify-center gap-3 text-emerald-700 active:scale-95 transition">
                     <div class="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center">
@@ -635,9 +661,9 @@
         let deferredPrompt;
 
         let masterData = {
-            santri: [], pengurus: [], pengumuman: [], kebutuhan: [], kelas: [],
-            kategoriPengurus: ["Kesantrian", "Humas", "Keamanan", "Kurikulum", "Sarpras", "Bendahara", "Ustadz/Pengajar"]
-        };
+    santri: [], pengurus: [], pengumuman: [], kebutuhan: [], kelas: [], spp: [], // <--- Tambah spp: []
+    kategoriPengurus: ["Kesantrian", "Humas", "Keamanan", "Kurikulum", "Sarpras", "Bendahara", "Ustadz/Pengajar"]
+};
 
         async function loadData() {
             try {
@@ -648,6 +674,7 @@
                 if(data.pengumuman) masterData.pengumuman = data.pengumuman;
                 if(data.kebutuhan) masterData.kebutuhan = data.kebutuhan;
                 if(data.kelas) masterData.kelas = data.kelas;
+                if(data.spp) masterData.spp = data.spp;
                 updateDashboardStats();
                 updateDropdownKelas();
                 renderPublicAnnouncements();
@@ -982,9 +1009,41 @@ function handleLogin(e) {
             if(type === 'santri') renderSantriList('Aktif');
             else if (type === 'pengurus') renderPengurusKategori();
             else if (type === 'kelas') renderKelasList();
+                else if (type === 'spp') renderSppList();
             else if (type === 'ustadz') renderPengurusList('Ustadz/Pengajar', true);
         }
+// FUNGSI QUICK SEARCH
+        function handleQuickSearch(query) {
+            const container = document.getElementById('quick-search-results');
+            if(query.trim().length < 2) { container.classList.add('hidden'); return; }
+            
+            const q = query.toLowerCase();
+            const filtered = masterData.santri ? masterData.santri.filter(s => s.nama.toLowerCase().includes(q)) : [];
+            
+            if(filtered.length === 0) {
+                container.innerHTML = `<div class="p-4 text-center text-xs font-bold text-gray-400">Tidak ada santri bernama "${query}"</div>`;
+            } else {
+                let html = '';
+                filtered.forEach(s => {
+                    const bgStatus = s.status === 'Aktif' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700';
+                    html += `
+                    <div onclick="document.getElementById('quick-search').value=''; document.getElementById('quick-search-results').classList.add('hidden'); renderSantriDetail(${s.id}, '${s.status}')" class="p-4 hover:bg-gray-50 cursor-pointer flex justify-between items-center transition">
+                        <span class="text-xs font-black text-gray-800">${s.nama}</span>
+                        <span class="text-[9px] ${bgStatus} px-2 py-0.5 rounded font-bold uppercase tracking-widest">${s.kelas}</span>
+                    </div>`;
+                });
+                container.innerHTML = html;
+            }
+            container.classList.remove('hidden');
+        }
 
+        // Sembunyikan hasil pencarian jika layar diklik di luar kotak
+        document.addEventListener('click', (e) => {
+            if(!e.target.closest('#quick-search') && !e.target.closest('#quick-search-results')) {
+                const res = document.getElementById('quick-search-results');
+                if(res) res.classList.add('hidden');
+            }
+        });
         function renderSantriList(statusTab, searchQuery = "") {
             currentModalState = { type: 'santri_list', tab: statusTab };
             setupModalUI("Data Santri", "Keseluruhan Data Santri", false, true, true);
@@ -1136,7 +1195,86 @@ function handleLogin(e) {
             const btn = document.getElementById('menu-install-app');
             if (btn) btn.classList.remove('hidden');
         });
+// FUNGSI RENDER MODAL SPP
+        function renderSppList() {
+            currentModalState = { type: 'spp_list' };
+            setupModalUI("Data SPP Santri", "Status Pembayaran", false, true, false);
+            const content = document.getElementById('modal-master-content');
+            
+            // Dapatkan Bulan & Tahun saat ini (Format: April 2026)
+            const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            const d = new Date();
+            const currentMonth = monthNames[d.getMonth()] + " " + d.getFullYear();
+            
+            let html = `<div class="bg-emerald-50 border border-emerald-200 p-3 rounded-xl mb-4 flex items-center justify-between"><span class="text-[10px] font-black uppercase tracking-widest text-emerald-800">Periode Tagihan</span><span class="text-xs font-black text-emerald-600 bg-white px-3 py-1 rounded-lg shadow-sm">${currentMonth}</span></div>`;
+            
+            const activeSantri = masterData.santri ? masterData.santri.filter(s => s.status === 'Aktif') : [];
+            
+            if(activeSantri.length === 0) { html += `<div class="text-center py-6"><p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Belum ada santri aktif</p></div>`; } 
+            else {
+                html += '<div class="space-y-3">';
+                activeSantri.forEach(s => {
+                    // Cek status SPP di masterData
+                    let isLunas = false;
+                    if(masterData.spp) {
+                        const cek = masterData.spp.find(x => x.nama_santri === s.nama && x.bulan === currentMonth);
+                        if(cek && cek.status === 'Lunas') isLunas = true;
+                    }
+                    
+                    const btnClass = isLunas ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/30" : "bg-gray-100 text-gray-400 hover:bg-gray-200 border border-gray-200";
+                    const iconClass = isLunas ? "fa-check-circle" : "fa-clock";
+                    const textStatus = isLunas ? "LUNAS" : "BELUM";
+                    
+                    // Tombol hanya bisa diklik Admin/Pengurus
+                    const clickAction = isAdminActive ? `onclick="toggleSpp('${s.nama}', '${currentMonth}', ${isLunas})"` : `onclick="showToast('Hanya Admin yang bisa mengubah status', 'fa-lock', 'text-red-500')"`;
+                    
+                    html += `
+                    <div class="bg-white p-3.5 rounded-xl border ${isLunas ? 'border-emerald-200' : 'border-gray-200'} shadow-sm flex items-center justify-between transition-all" id="card-spp-${s.id}">
+                        <div class="flex-1">
+                            <p class="font-black text-xs text-gray-800">${s.nama}</p>
+                            <p class="text-[9px] text-gray-500 font-bold uppercase mt-0.5"><i class="fa-solid fa-door-open"></i> Kelas ${s.kelas}</p>
+                        </div>
+                        <button ${clickAction} class="${btnClass} px-3 py-1.5 rounded-lg text-[9px] font-black uppercase flex items-center gap-1.5 transition-all active:scale-95">
+                            <i class="fa-solid ${iconClass} text-sm"></i> ${textStatus}
+                        </button>
+                    </div>`;
+                });
+                html += '</div>';
+            }
+            content.innerHTML = html;
+            
+            // Fungsikan kolom pencarian khusus untuk Modal SPP
+            document.getElementById('modal-search-input').oninput = function(e) {
+                const q = e.target.value.toLowerCase();
+                activeSantri.forEach(s => {
+                    const card = document.getElementById(`card-spp-${s.id}`);
+                    if(card) {
+                        if(s.nama.toLowerCase().includes(q) || s.kelas.toLowerCase().includes(q)) card.style.display = 'flex';
+                        else card.style.display = 'none';
+                    }
+                });
+            };
+        }
 
+        // FUNGSI UPDATE SPP KE SERVER
+        async function toggleSpp(namaSantri, bulan, currentStatus) {
+            const newStatus = currentStatus ? 'Belum Lunas' : 'Lunas';
+            showToast("Menyimpan status...", "fa-spinner fa-spin", "text-blue-500");
+            
+            try {
+                const res = await fetch(`${WORKER_URL}/update-spp`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ nama_santri: namaSantri, bulan: bulan, status: newStatus })
+                });
+                
+                if(res.ok) {
+                    showToast(`SPP ${newStatus}!`, "fa-check", "text-emerald-600");
+                    await loadData(); // Reload data dari server
+                    renderSppList();  // Refresh modal secara otomatis
+                } else { showToast("Gagal update", "fa-xmark", "text-red-500"); }
+            } catch (e) { showToast("Koneksi Error", "fa-wifi", "text-red-500"); }
+        }
         async function installPWA() {
             if (!deferredPrompt) return;
             deferredPrompt.prompt();
