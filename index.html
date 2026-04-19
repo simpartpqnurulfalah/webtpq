@@ -207,6 +207,60 @@
         </div>
     </div>
 
+    <div id="phase-pendaftaran" class="hidden min-h-screen flex flex-col items-center justify-center p-6 animate-fadeIn pb-24">
+        <div class="mb-8 flex flex-col items-center text-center">
+            <div class="w-20 h-20 border-[3px] border-white rounded-[25px] flex items-center justify-center p-3 mb-6 shadow-2xl bg-white/10">
+                <i class="fa-solid fa-user-plus text-4xl text-white"></i>
+            </div>
+            <h1 class="text-2xl font-black italic glow-text tracking-tighter uppercase mb-1 text-white">Form Biodata Santri</h1>
+            <p class="text-[10px] text-white/70 uppercase tracking-widest leading-relaxed">Silakan isi data putra/putri Anda dengan benar untuk database TPQ Nurul Falah.</p>
+        </div>
+
+        <div class="login-card w-full max-w-md p-8 shadow-2xl">
+            <form class="space-y-4 text-white" id="form-public-daftar" onsubmit="handlePendaftaranPublic(event)">
+                <div>
+                    <label class="text-[10px] font-black uppercase italic tracking-widest ml-4 opacity-80">Nama Lengkap Santri</label>
+                    <div class="input-box flex items-center px-5 py-3 mt-1">
+                        <input type="text" id="pub-nama" class="bg-transparent w-full outline-none font-bold text-sm text-white placeholder-white/50" placeholder="Contoh: Ahmad Zaid" required>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[10px] font-black uppercase italic tracking-widest ml-4 opacity-80">Tempat Lahir</label>
+                        <div class="input-box flex items-center px-5 py-3 mt-1">
+                            <input type="text" id="pub-tempat" class="bg-transparent w-full outline-none font-bold text-sm text-white placeholder-white/50" placeholder="Kota" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black uppercase italic tracking-widest ml-4 opacity-80">Tgl Lahir</label>
+                        <div class="input-box flex items-center px-5 py-3 mt-1">
+                            <input type="date" id="pub-tanggal" class="bg-transparent w-full outline-none font-bold text-sm text-white placeholder-white/50" required>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[10px] font-black uppercase italic tracking-widest ml-4 opacity-80">Alamat Lengkap</label>
+                    <div class="input-box flex items-center px-5 py-3 mt-1">
+                        <textarea id="pub-alamat" class="bg-transparent w-full outline-none font-bold text-sm text-white placeholder-white/50 h-16" placeholder="Nama Jalan, RT/RW, Desa" required></textarea>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[10px] font-black uppercase italic tracking-widest ml-4 opacity-80">Nama Orang Tua / Wali</label>
+                    <div class="input-box flex items-center px-5 py-3 mt-1">
+                        <input type="text" id="pub-ortu" class="bg-transparent w-full outline-none font-bold text-sm text-white placeholder-white/50" placeholder="Nama Ayah / Ibu" required>
+                    </div>
+                </div>
+
+                <button type="submit" id="btn-pub-submit" class="bg-emerald-500 text-white w-full py-4 mt-6 text-[11px] font-black uppercase rounded-full shadow-xl active:scale-95 transition-all hover:bg-emerald-400">
+                    <i class="fa-solid fa-paper-plane mr-1"></i> Kirim Data Santri
+                </button>
+                <button type="button" onclick="window.location.href = window.location.pathname" class="w-full text-[10px] font-bold text-white/50 hover:text-white transition-colors uppercase mt-4">
+                    Batal & Kembali
+                </button>
+            </form>
+        </div>
+    </div>
+
     <div id="phase-landing" class="animate-fadeIn">
         <nav class="sticky top-4 z-50 mx-4">
             <div class="glass-card px-4 py-3 flex justify-between items-center bg-white/10 border-white/20">
@@ -524,7 +578,7 @@
                         </div>
                     </div>
 
-                                        <div id="form-pengurus" class="space-y-4 pt-2 border-t border-gray-100 hidden">
+                    <div id="form-pengurus" class="space-y-4 pt-2 border-t border-gray-100 hidden">
                         <input type="text" id="in-pengurus-nama" class="input-box-light w-full p-3 text-sm font-bold" placeholder="Nama Pengurus">
                         <select id="in-pengurus-kat" class="input-box-light w-full p-3 text-sm font-bold">
                             <option value="Ustadz/Pengajar">Ustadz/Pengajar</option>
@@ -769,6 +823,11 @@
             loadData(); 
             initMatrix(); 
             checkLoginState(); 
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('daftar') === 'true') {
+                showPhase('phase-pendaftaran');
+            }
         });
 
         function handleLogin(e) {
@@ -814,7 +873,7 @@
             if (currentUserRole === 'admin') {
                 sel.innerHTML = `
                     <option value="santri">Tambah Santri</option>
-                    <option value="pengurus">Tambah Pengurus/Ustadz</option>
+                    <option value="pengurus">Tambah Pengurus</option>
                     <option value="kelas">Tambah Kelas</option>` + ops + `
                     <option value="notif-spp">📣 Kirim Notif Tagihan SPP</option>`;
                 if(document.getElementById('dashboard-admin-tools')) document.getElementById('dashboard-admin-tools').classList.remove('hidden');
@@ -845,8 +904,12 @@
         function goToLanding() { localStorage.removeItem('tpq_isLoggedIn'); localStorage.removeItem('tpq_userRole'); location.reload(); }
 
         function showPhase(id) {
-            ['phase-landing', 'phase-login', 'phase-dashboard'].forEach(p => document.getElementById(p).classList.add('hidden'));
+            ['phase-landing', 'phase-login', 'phase-dashboard', 'phase-pendaftaran'].forEach(p => {
+                const el = document.getElementById(p);
+                if (el) el.classList.add('hidden');
+            });
             document.getElementById(id).classList.remove('hidden');
+            
             if(id === 'phase-dashboard') {
                 document.body.classList.add('bg-dashboard-light');
                 document.getElementById('matrix-canvas').style.opacity = '0';
@@ -954,15 +1017,13 @@
             } catch (e) { showToast("Koneksi Error!", "fa-circle-xmark", "text-red-500"); }
         }
 
-                async function hapusData(tabel, id) {
+        async function hapusData(tabel, id) {
             if (!confirm('Hapus data ini secara permanen?')) return;
             try {
                 const response = await fetch(`${WORKER_URL}/delete-data`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tabel: tabel, id: id }) });
                 if (response.ok) { 
                     showToast("Data dihapus!", "fa-trash", "text-red-500"); 
                     await loadData(); 
-                    
-                    // PERBAIKAN: Jika yang dihapus adalah nilai, jangan tutup modal, tapi refresh daftarnya saja
                     if (tabel === 'nilai' && currentModalState.type === 'nilai_akhir') {
                         renderNilaiAkhir(currentModalState.namaSantri);
                     } else {
@@ -1428,6 +1489,36 @@
         async function installPWA() {
             triggerPwaPromptUI();
             toggleSidebar();
+        }
+
+        // FITUR PENDAFTARAN MANDIRI WALI SANTRI
+        async function handlePendaftaranPublic(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-pub-submit');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
+            
+            const payload = { 
+                nama: document.getElementById('pub-nama').value, 
+                ttl: document.getElementById('pub-tempat').value + ", " + document.getElementById('pub-tanggal').value, 
+                alamat: document.getElementById('pub-alamat').value, 
+                ortu: document.getElementById('pub-ortu').value, 
+                kelas: "Belum Ditentukan", 
+                status: "Aktif" 
+            };
+
+            try {
+                const res = await fetch(WORKER_URL + '/add-santri', { method: 'POST', body: JSON.stringify(payload) });
+                if(res.ok) { 
+                    showToast("Terima kasih! Data berhasil dikirim.", "fa-check-circle"); 
+                    e.target.reset(); 
+                    setTimeout(() => {
+                        window.location.href = window.location.pathname; 
+                    }, 2000);
+                }
+                else { showToast("Gagal mengirim data", "fa-xmark", "text-red-500"); }
+            } catch(err) { showToast("Error Koneksi", "fa-wifi", "text-red-500"); }
+            finally { btn.innerHTML = originalText; }
         }
 
         const ctx = document.getElementById('matrix-canvas').getContext('2d');
