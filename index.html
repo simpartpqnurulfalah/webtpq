@@ -1169,7 +1169,6 @@
             });
             content.innerHTML = html + '</div>';
         }
-
         function renderSantriDetail(id, parentTab) {
             const s = masterData.santri.find(s => s.id === id); if(!s) return;
             currentModalState = { type: 'santri_detail', parentTab: parentTab };
@@ -1179,9 +1178,13 @@
             const displayAlamat = isAdminActive ? s.alamat : "*** (Mode Pribadi)";
             const displayTTL = isAdminActive ? s.ttl : "*** (Mode Pribadi)";
             
+            // LOGIKA BARU: Cek jika kelas belum ditentukan
             let statusKelasHTML = '';
-            const kelasList = masterData.kelas && masterData.kelas.length > 0 ? masterData.kelas.map(k => k.nama) : ['Jilid 1', 'Jilid 2', 'Jilid 3', 'Jilid 4', 'Jilid 5', 'Jilid 6', 'Al-Qur\'an'];
-            if (s.kelas === 'Belum Ditentukan' || !s.kelas) {
+            const kelasList = masterData.kelas && masterData.kelas.length > 0 
+                ? masterData.kelas.map(k => k.nama) 
+                : ['Jilid 1', 'Jilid 2', 'Jilid 3', 'Jilid 4', 'Jilid 5', 'Jilid 6', 'Al-Qur\'an'];
+
+            if (s.kelas === 'Belum Ditentukan' || !s.kelas || s.kelas === 'BELUM DITENTUKAN') {
                 statusKelasHTML = `
                     <div class="mt-2 p-3 bg-orange-50 rounded-xl border border-orange-200">
                         <label class="text-[9px] font-black text-orange-600 uppercase block mb-1">Klik Pilih Kelas:</label>
@@ -1210,7 +1213,30 @@
                     ${isAdminActive ? `<button onclick="hapusData('santri', ${s.id})" class="w-full text-red-500 font-bold text-[10px] py-3 border-t border-gray-100 mt-6 uppercase hover:bg-red-50 transition rounded-xl">Hapus Data Santri</button>` : ''}
                 </div>`;
         }
-
+                async function updateKelasOtomatis(id, kelasBaru) {
+            showToast("Menyinkronkan...", "fa-spinner fa-spin", "text-blue-500");
+            try {
+                const res = await fetch(`${WORKER_URL}/update-santri-class`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ id: id, kelas: kelasBaru }) 
+                });
+                
+                if(res.ok) { 
+                    const result = await res.json();
+                    if(result.success) {
+                        showToast("Sinkron Berhasil!", "fa-check-circle"); 
+                        await loadData(); // Ambil data terbaru dari server
+                        renderSantriDetail(id, currentModalState.parentTab); // Gambar ulang detailnya
+                    }
+                } else {
+                    showToast("Gagal Update", "fa-xmark", "text-red-500");
+                }
+            } catch (e) { 
+                showToast("Error Koneksi", "fa-wifi", "text-red-500"); 
+            }
+        }
+        
         async function updateKelasOtomatis(id, kelasBaru) {
             showToast("Menyinkronkan...", "fa-spinner fa-spin", "text-blue-500");
             try {
