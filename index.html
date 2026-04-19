@@ -954,11 +954,21 @@
             } catch (e) { showToast("Koneksi Error!", "fa-circle-xmark", "text-red-500"); }
         }
 
-        async function hapusData(tabel, id) {
+                async function hapusData(tabel, id) {
             if (!confirm('Hapus data ini secara permanen?')) return;
             try {
                 const response = await fetch(`${WORKER_URL}/delete-data`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tabel: tabel, id: id }) });
-                if (response.ok) { showToast("Data dihapus!", "fa-trash", "text-red-500"); await loadData(); closeMasterModal(); } 
+                if (response.ok) { 
+                    showToast("Data dihapus!", "fa-trash", "text-red-500"); 
+                    await loadData(); 
+                    
+                    // PERBAIKAN: Jika yang dihapus adalah nilai, jangan tutup modal, tapi refresh daftarnya saja
+                    if (tabel === 'nilai' && currentModalState.type === 'nilai_akhir') {
+                        renderNilaiAkhir(currentModalState.namaSantri);
+                    } else {
+                        closeMasterModal(); 
+                    }
+                } 
                 else { showToast("Gagal menghapus", "fa-circle-xmark", "text-red-500"); }
             } catch (error) { showToast("Error Koneksi!", "fa-wifi", "text-red-500"); }
         }
