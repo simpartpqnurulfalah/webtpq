@@ -844,10 +844,11 @@
         document.addEventListener('DOMContentLoaded', () => { 
             loadData(); 
             initMatrix(); 
-            checkLoginState(); 
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('daftar') === 'true') {
-                showPhase('phase-pendaftaran');
+                setTimeout(() => { showPhase('phase-pendaftaran'); }, 100);
+            } else {
+                checkLoginState(); 
             }
         });
 
@@ -866,12 +867,14 @@
             } else { showToast("ID atau Password Salah!", "fa-circle-xmark", "text-red-500"); }
         }
 
-        function successLogin(msg, isReload = false) {
+                function successLogin(msg, isReload = false) {
             localStorage.setItem('tpq_isLoggedIn', 'true');
             localStorage.setItem('tpq_userRole', currentUserRole);
             if (!isReload) showToast(msg, "fa-unlock");
+            
             window.OneSignalDeferred = window.OneSignalDeferred || [];
             OneSignalDeferred.push(async function(OS) { await OS.User.addTag("role", currentUserRole); });
+            
             document.getElementById('admin-indicator').classList.remove('hidden');
             document.getElementById('guest-indicator').classList.add('hidden');
             document.getElementById('nav-admin-wrapper').classList.remove('hidden');
@@ -879,28 +882,37 @@
             document.getElementById('spp-dashboard-btn').classList.remove('hidden'); 
             document.getElementById('spp-dashboard-btn').classList.add('flex');
             document.getElementById('sidebar-role').innerText = currentUserRole === 'admin' ? "Super Admin" : "Pengurus TPQ";
+            
             const sel = document.getElementById('admin-kategori');
-            let ops = `
-                <option value="pengumuman">Informasi Pengumuman</option>
-                <option value="kebutuhan">Kebutuhan TPQ</option>
-                <option value="spp">Input Pembayaran SPP</option>
-                <option value="jadwal">Atur Jadwal Pelajaran</option>
-                <option value="nilai">Input Nilai Santri</option>`;
+            
             if (currentUserRole === 'admin') {
+                // Tampilan Super Admin (Semua Fitur Lengkap)
                 sel.innerHTML = `
                     <option value="santri">Tambah Santri</option>
                     <option value="pengurus">Tambah Pengurus</option>
-                    <option value="kelas">Tambah Kelas</option>` + ops + `
+                    <option value="kelas">Tambah Kelas</option>
+                    <option value="pengumuman">Informasi Pengumuman</option>
+                    <option value="kebutuhan">Kebutuhan TPQ</option>
+                    <option value="spp">Input Pembayaran SPP</option>
+                    <option value="jadwal">Atur Jadwal Pelajaran</option>
+                    <option value="nilai">Input Nilai Santri</option>
                     <option value="notif-spp">📣 Kirim Notif Tagihan SPP</option>`;
                 if(document.getElementById('dashboard-admin-tools')) document.getElementById('dashboard-admin-tools').classList.remove('hidden');
             } else { 
-                sel.innerHTML = ops; 
+                // Tampilan khusus Pengurus (Hanya Fitur Tertentu)
+                sel.innerHTML = `
+                    <option value="pengumuman">Informasi Pengumuman</option>
+                    <option value="kebutuhan">Kebutuhan TPQ</option>
+                    <option value="spp">Input Pembayaran SPP</option>
+                    <option value="notif-spp">📣 Kirim Notif Tagihan SPP</option>`;
                 if(document.getElementById('dashboard-admin-tools')) document.getElementById('dashboard-admin-tools').classList.add('hidden');
             }
+            
             document.getElementById('internal-content-locked').classList.add('hidden');
             document.getElementById('internal-content-open').classList.remove('hidden');
             document.getElementById('badge-internal').classList.replace('bg-gray-100', 'bg-orange-100');
             document.getElementById('badge-internal').classList.replace('text-gray-400', 'text-orange-600');
+            
             changeAdminForm();
             showPhase('phase-dashboard');
             renderPublicAnnouncements(); 
@@ -973,7 +985,12 @@
                 const y = document.getElementById('in-tgl-y').value;
                 payload = { nama: document.getElementById('in-nama').value, ttl: document.getElementById('in-tempat').value + ", " + y + "-" + m + "-" + d, alamat: document.getElementById('in-alamat').value, ortu: document.getElementById('in-ortu').value, kelas: document.getElementById('in-kelas').value, status: document.getElementById('in-status').value };
             } else if(kat === 'spp') {
-                payload = { nama: document.getElementById('in-spp-nama').value, bulan: document.getElementById('in-spp-bulan').value, tahun: document.getElementById('in-spp-tahun').value, jumlah: document.getElementById('in-spp-jumlah').value };
+                payload = { 
+                    nama: document.getElementById('in-spp-nama').value, 
+                    bulan: document.getElementById('in-spp-bulan').value, 
+                    tahun: parseInt(document.getElementById('in-spp-tahun').value) || 2026, 
+                    jumlah: parseInt(document.getElementById('in-spp-jumlah').value) || 0 
+                };
             } else if(kat === 'jadwal') {
                 payload = { kelas: document.getElementById('in-jadwal-kelas-select').value, tipe: document.getElementById('in-jadwal-tipe').value, konten: document.getElementById('in-jadwal-konten').value };
             } else if(kat === 'nilai') {
@@ -999,14 +1016,25 @@
                 payload = { judul: "📋 TAGIHAN SPP TPQ", isi: `Assalamualaikum. Pemberitahuan kepada Bapak/Ibu Wali Santri, dimohon untuk segera melunasi pembayaran SPP untuk periode ${triwulan}. Terima kasih.`, target: 'wali_santri', target_notif: 'wali' };
             }
 
-            try {
+                        try {
                 const res = await fetch(WORKER_URL + endpoint, { method: 'POST', body: JSON.stringify(payload) });
                 if(res.ok) { 
                     showToast(kat === 'notif-spp' ? "Notif Berhasil Dikirim!" : "Data Berhasil Disimpan!"); 
-                    e.target.reset(); await loadData(); switchTab('panel'); 
+                    e.target.reset(); 
+                    await loadData(); 
+                    // Perintah kembali ke dashboard sudah dihapus agar layar tetap stay di form saat ini
                 }
-                else { showToast("Gagal memproses", "fa-xmark", "text-red-500"); }
-            } catch(err) { showToast("Error Koneksi", "fa-wifi", "text-red-500"); }
+                else { 
+
+                    const errText = await res.text();
+                    showToast("Gagal memproses", "fa-xmark", "text-red-500"); 
+                    if (errText.includes("column") && kat === 'spp') {
+                        alert("PEMBERITAHUAN SISTEM:\n\nDatabase SPP di Cloudflare Worker Anda belum memiliki kolom 'tahun' dan 'jumlah'.\n\nSilakan buka Cloudflare Worker, cari bagian '// Auto-patch kolom baru', lalu tambahkan 2 baris ini:\n\ntry { await env.DB.exec(`ALTER TABLE spp ADD COLUMN tahun INTEGER;`); } catch(e) {}\ntry { await env.DB.exec(`ALTER TABLE spp ADD COLUMN jumlah INTEGER;`); } catch(e) {}");
+                    }
+                }
+            } catch(err) { 
+                showToast("Error Koneksi", "fa-wifi", "text-red-500"); 
+            }
             finally { btn.innerHTML = originalText; }
         }
 
@@ -1169,6 +1197,7 @@
             });
             content.innerHTML = html + '</div>';
         }
+
         function renderSantriDetail(id, parentTab) {
             const s = masterData.santri.find(s => s.id === id); if(!s) return;
             currentModalState = { type: 'santri_detail', parentTab: parentTab };
@@ -1177,13 +1206,10 @@
             const displayOrtu = isAdminActive ? s.ortu : "*** (Mode Pribadi)";
             const displayAlamat = isAdminActive ? s.alamat : "*** (Mode Pribadi)";
             const displayTTL = isAdminActive ? s.ttl : "*** (Mode Pribadi)";
-            
-            // LOGIKA BARU: Cek jika kelas belum ditentukan
             let statusKelasHTML = '';
             const kelasList = masterData.kelas && masterData.kelas.length > 0 
                 ? masterData.kelas.map(k => k.nama) 
                 : ['Jilid 1', 'Jilid 2', 'Jilid 3', 'Jilid 4', 'Jilid 5', 'Jilid 6', 'Al-Qur\'an'];
-
             if (s.kelas === 'Belum Ditentukan' || !s.kelas || s.kelas === 'BELUM DITENTUKAN') {
                 statusKelasHTML = `
                     <div class="mt-2 p-3 bg-orange-50 rounded-xl border border-orange-200">
@@ -1196,7 +1222,6 @@
             } else {
                 statusKelasHTML = `<p class="text-xs font-bold text-emerald-600 uppercase tracking-widest mt-2 bg-emerald-50 px-3 py-1 rounded-full inline-block">${s.kelas}</p>`;
             }
-
             document.getElementById('modal-master-content').innerHTML = `
                 <div class="bg-white rounded-3xl p-6 border border-gray-200 shadow-sm relative overflow-hidden">
                     <div class="absolute top-0 right-0 px-4 py-1.5 ${badgeColor} text-white text-[9px] font-black uppercase rounded-bl-2xl shadow-sm">${s.status}</div>
@@ -1213,36 +1238,22 @@
                     ${isAdminActive ? `<button onclick="hapusData('santri', ${s.id})" class="w-full text-red-500 font-bold text-[10px] py-3 border-t border-gray-100 mt-6 uppercase hover:bg-red-50 transition rounded-xl">Hapus Data Santri</button>` : ''}
                 </div>`;
         }
-                async function updateKelasOtomatis(id, kelasBaru) {
-            showToast("Menyinkronkan...", "fa-spinner fa-spin", "text-blue-500");
-            try {
-                const res = await fetch(`${WORKER_URL}/update-santri-class`, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ id: id, kelas: kelasBaru }) 
-                });
-                
-                if(res.ok) { 
-                    const result = await res.json();
-                    if(result.success) {
-                        showToast("Sinkron Berhasil!", "fa-check-circle"); 
-                        await loadData(); // Ambil data terbaru dari server
-                        renderSantriDetail(id, currentModalState.parentTab); // Gambar ulang detailnya
-                    }
-                } else {
-                    showToast("Gagal Update", "fa-xmark", "text-red-500");
-                }
-            } catch (e) { 
-                showToast("Error Koneksi", "fa-wifi", "text-red-500"); 
-            }
-        }
-        
+
         async function updateKelasOtomatis(id, kelasBaru) {
             showToast("Menyinkronkan...", "fa-spinner fa-spin", "text-blue-500");
             try {
                 const res = await fetch(`${WORKER_URL}/update-santri-class`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, kelas: kelasBaru }) });
-                if(res.ok) { showToast("Sinkron Berhasil!", "fa-check-circle"); await loadData(); renderSantriDetail(id, currentModalState.parentTab); }
-            } catch (e) { showToast("Gagal!", "fa-xmark", "text-red-500"); }
+                if(res.ok) { 
+                    const result = await res.json();
+                    if(result.success) {
+                        showToast("Sinkron Berhasil!", "fa-check-circle"); 
+                        await loadData(); 
+                        renderSantriDetail(id, currentModalState.parentTab); 
+                    }
+                } else {
+                    showToast("Gagal Update", "fa-xmark", "text-red-500");
+                }
+            } catch (e) { showToast("Error Koneksi", "fa-wifi", "text-red-500"); }
         }
 
         function renderPengurusKategori() {
@@ -1519,7 +1530,6 @@
             const btn = document.getElementById('btn-pub-submit');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
-            
             const d = document.getElementById('pub-tgl-d').value;
             const m = document.getElementById('pub-tgl-m').value;
             const y = document.getElementById('pub-tgl-y').value;
