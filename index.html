@@ -419,7 +419,19 @@
             </div>
         </div>
 
-        <div id="tab-panel" class="p-6 space-y-6">
+                <div id="tab-panel" class="p-6 space-y-6">
+            
+            <div class="bg-emerald-50 border border-emerald-100 p-5 rounded-3xl shadow-sm flex items-start gap-4 relative overflow-hidden">
+                <div class="absolute -right-2 -top-2 opacity-5 text-6xl text-emerald-900"><i class="fa-solid fa-quote-right"></i></div>
+                <div class="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 shrink-0 z-10">
+                    <i class="fa-solid fa-book-quran"></i>
+                </div>
+                <div class="flex-1 z-10">
+                    <p class="text-[9px] font-black uppercase tracking-widest text-emerald-600 mb-1">Mutiara Hari Ini</p>
+                    <p class="text-xs font-bold text-gray-700 leading-relaxed italic" id="teks-hadits-harian">"Sebaik-baik kalian adalah orang yang belajar Al-Qur'an dan mengajarkannya."</p>
+                </div>
+            </div>
+
             <div class="bg-gradient-to-r from-emerald-600 to-teal-700 p-5 rounded-3xl shadow-lg border border-emerald-500/30 flex items-start gap-4 relative overflow-hidden">
                 <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-white shrink-0 z-10 backdrop-blur-sm">
                     <i class="fa-solid fa-bullhorn text-xl animate-swing"></i>
@@ -437,7 +449,7 @@
                 <h3 class="text-sm font-black italic uppercase text-gray-700">Administrasi & Akademik</h3>
             </div>
             <div class="grid grid-cols-1 gap-4">
-                <div id="spp-dashboard-btn" onclick="openModal('spp')" class="hidden bg-white p-5 rounded-3xl border-l-4 border-emerald-500 items-center justify-between shadow-sm active:scale-95 transition cursor-pointer group">
+                <div id="spp-dashboard-btn" onclick="openModal('spp')" class="flex bg-white p-5 rounded-3xl border-l-4 border-emerald-500 items-center justify-between shadow-sm active:scale-95 transition cursor-pointer group">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center">
                             <i class="fa-solid fa-money-bill-wave text-emerald-600 text-xl"></i>
@@ -1321,10 +1333,16 @@
             renderSppData("Triwulan 1"); 
         }
         
-        function renderSppData(triwulan) {
+                function renderSppData(triwulan) {
             const area = document.getElementById('spp-data-area');
             const activeSantri = (masterData.santri || []).filter(s => s.status === 'Aktif');
+            
             let html = '';
+            // Tampilan Gembok Privasi untuk Tamu
+            if (!isAdminActive) {
+                html = `<div id="privacy-lock-spp" class="text-center py-8"><i class="fa-solid fa-lock text-4xl text-gray-200 mb-3 block"></i><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Mode Privasi Aktif</p><p class="text-xs font-bold text-gray-500 mt-2">Ketik nama anak Anda di kolom pencarian (atas) untuk melihat data SPP.</p></div>`;
+            }
+            
             activeSantri.forEach(s => {
                 let isLunas = false;
                 if(masterData.spp) { 
@@ -1332,17 +1350,37 @@
                     if(cek && cek.status === 'Lunas') isLunas = true; 
                 }
                 const btnClass = isLunas ? "bg-emerald-500 text-white shadow-emerald-500/30" : "bg-gray-100 text-gray-400 border border-gray-300";
-                html += `<div class="bg-white p-3.5 rounded-xl border ${isLunas ? 'border-emerald-200' : 'border-gray-200'} shadow-sm flex items-center justify-between transition-all" id="card-spp-${s.id}"><div class="flex-1"><p class="font-black text-xs text-gray-800">${s.nama}</p><p class="text-[9px] text-gray-500 font-bold uppercase mt-0.5">Kelas ${s.kelas}</p></div><button onclick="${isAdminActive ? `toggleSpp('${s.nama}', '${triwulan}', ${isLunas})` : `void(0)`}" class="${btnClass} px-3 py-1.5 rounded-lg text-[9px] font-black uppercase flex items-center gap-1.5 active:scale-95 transition-all shadow-sm">${isLunas ? '<i class="fa-solid fa-check"></i> LUNAS' : '<i class="fa-solid fa-clock"></i> BELUM'}</button></div>`;
+                
+                // Sembunyikan default jika bukan admin
+                const displayStyle = isAdminActive ? "flex" : "none"; 
+                
+                html += `<div class="bg-white p-3.5 rounded-xl border ${isLunas ? 'border-emerald-200' : 'border-gray-200'} shadow-sm items-center justify-between transition-all" id="card-spp-${s.id}" style="display: ${displayStyle};"><div class="flex-1"><p class="font-black text-xs text-gray-800">${s.nama}</p><p class="text-[9px] text-gray-500 font-bold uppercase mt-0.5">Kelas ${s.kelas}</p></div><button onclick="${isAdminActive ? `toggleSpp('${s.nama}', '${triwulan}', ${isLunas})` : `void(0)`}" class="${btnClass} px-3 py-1.5 rounded-lg text-[9px] font-black uppercase flex items-center gap-1.5 active:scale-95 transition-all shadow-sm">${isLunas ? '<i class="fa-solid fa-check"></i> LUNAS' : '<i class="fa-solid fa-clock"></i> BELUM'}</button></div>`;
             });
             area.innerHTML = html;
+            
             const searchInput = document.getElementById('modal-search-input');
             if(searchInput) {
                 searchInput.oninput = (e) => {
                     const q = e.target.value.toLowerCase();
+                    const lockMsg = document.getElementById('privacy-lock-spp');
+                    let hasMatch = false;
+                    
                     activeSantri.forEach(s => {
                         const card = document.getElementById(`card-spp-${s.id}`);
-                        if(card) card.style.display = (s.nama.toLowerCase().includes(q) || s.kelas.toLowerCase().includes(q)) ? 'flex' : 'none';
+                        if(card) {
+                            if (q.length < 2 && !isAdminActive) {
+                                card.style.display = 'none'; // Sembunyikan lagi jika teks dihapus
+                            } else {
+                                const match = s.nama.toLowerCase().includes(q) || s.kelas.toLowerCase().includes(q);
+                                card.style.display = match ? 'flex' : 'none';
+                                if (match) hasMatch = true;
+                            }
+                        }
                     });
+                    
+                    if (!isAdminActive && lockMsg) {
+                        lockMsg.style.display = (q.length < 2 || !hasMatch) ? 'block' : 'none';
+                    }
                 };
             }
         }
@@ -1414,19 +1452,44 @@
             document.getElementById('modal-master-content').innerHTML = html + '</div>';
         }
 
-        function renderNilaiSantriList(kelasName) {
+                function renderNilaiSantriList(kelasName) {
             currentModalState = { type: 'nilai_santri_list', kelas: kelasName };
             setupModalUI(kelasName, "Pilih Nama Santri", true, true, false);
             const filtered = (masterData.santri || []).filter(s => s.kelas === kelasName && s.status === 'Aktif');
-            let html = '<div class="space-y-2">';
+            
+            let html = '';
+            if (!isAdminActive) {
+                html = `<div id="privacy-lock-nilai" class="text-center py-8"><i class="fa-solid fa-lock text-4xl text-gray-200 mb-3 block"></i><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Mode Privasi Aktif</p><p class="text-xs font-bold text-gray-500 mt-2">Ketik nama anak Anda di pencarian (atas) untuk melihat nilainya.</p></div>`;
+            }
+            
+            html += '<div class="space-y-2">';
             filtered.forEach(s => {
-                html += `<div onclick="renderNilaiAkhir('${s.nama}')" class="bg-white p-4 rounded-xl border flex justify-between items-center cursor-pointer hover:bg-purple-50 hover:border-purple-200 transition"><p class="font-black text-xs text-gray-800">${s.nama}</p><i class="fa-solid fa-chevron-right text-gray-300"></i></div>`;
+                const displayStyle = isAdminActive ? "flex" : "none";
+                html += `<div id="card-nilai-${s.id}" style="display: ${displayStyle};" onclick="renderNilaiAkhir('${s.nama}')" class="bg-white p-4 rounded-xl border items-center justify-between cursor-pointer hover:bg-purple-50 hover:border-purple-200 transition"><p class="font-black text-xs text-gray-800">${s.nama}</p><i class="fa-solid fa-chevron-right text-gray-300"></i></div>`;
             });
             document.getElementById('modal-master-content').innerHTML = html + '</div>';
+            
             document.getElementById('modal-search-input').oninput = (e) => {
                 const q = e.target.value.toLowerCase();
-                const cards = document.getElementById('modal-master-content').children[0].children;
-                filtered.forEach((s, i) => { if(cards[i]) cards[i].style.display = s.nama.toLowerCase().includes(q) ? 'flex' : 'none'; });
+                const lockMsg = document.getElementById('privacy-lock-nilai');
+                let hasMatch = false;
+                
+                filtered.forEach((s) => { 
+                    const card = document.getElementById(`card-nilai-${s.id}`);
+                    if(card) {
+                        if (q.length < 2 && !isAdminActive) {
+                            card.style.display = 'none';
+                        } else {
+                            const match = s.nama.toLowerCase().includes(q);
+                            card.style.display = match ? 'flex' : 'none';
+                            if (match) hasMatch = true;
+                        }
+                    }
+                });
+                
+                if (!isAdminActive && lockMsg) {
+                    lockMsg.style.display = (q.length < 2 || !hasMatch) ? 'block' : 'none';
+                }
             };
         }
 
@@ -1579,6 +1642,51 @@
         const styleSelect = document.createElement('style');
         styleSelect.innerHTML = "* { -webkit-user-select: none; user-select: none; } input, textarea, select { user-select: text !important; }";
         document.head.appendChild(styleSelect);
+                // --- FITUR MUTIARA HARIAN ---
+        const daftarMutiara = [
+            '"Sebaik-baik kalian adalah orang yang belajar Al-Qur\'an dan mengajarkannya." (HR. Bukhari)',
+            '"Tuntutlah ilmu dari ayunan hingga liang lahat."',
+            '"Barangsiapa menempuh jalan untuk mencari ilmu, Allah akan mudahkan baginya jalan menuju surga." (HR. Muslim)',
+            '"Ilmu itu lebih baik daripada harta. Ilmu menjagamu, sedangkan engkau yang harus menjaga harta." (Ali bin Abi Thalib)',
+            '"Didiklah anak-anakmu dengan agama, kelak mereka akan menjadi makhkota cahaya untukmu di akhirat."',
+            '"Senyummu di hadapan saudaramu adalah sedekah." (HR. Tirmidzi)',
+            '"Membaca Al-Qur\'an adalah obat bagi hati yang gelisah dan pikiran yang gundah."',
+            '"Doa orang tua untuk anaknya sama seperti doa nabi untuk umatnya."'
+        ];
+
+        let indeksMutiaraSaatIni = 0; // Biar muternya urut, nggak ada yang dobel
+
+        function gantiMutiaraOtomatis() {
+            const el = document.getElementById('teks-hadits-harian');
+            if (el) {
+                // Turunkan opacity jadi 0 (efek menghilang sebentar)
+                el.style.opacity = 0;
+                
+                setTimeout(() => {
+                    // Ganti teksnya saat sedang transparan
+                    indeksMutiaraSaatIni = (indeksMutiaraSaatIni + 1) % daftarMutiara.length;
+                    el.innerText = daftarMutiara[indeksMutiaraSaatIni];
+                    
+                    // Kembalikan opacity ke 1 (teks muncul lagi perlahan)
+                    el.style.opacity = 1;
+                }, 400); // Jeda transisi 0.4 detik
+            }
+        }
+        
+        // Jalankan saat web pertama kali dibuka
+        document.addEventListener('DOMContentLoaded', () => { 
+            const el = document.getElementById('teks-hadits-harian');
+            if(el) {
+                // Tambahkan CSS untuk efek halus
+                el.style.transition = "opacity 0.4s ease-in-out";
+                // Tampilkan hadits pertama acak
+                indeksMutiaraSaatIni = Math.floor(Math.random() * daftarMutiara.length);
+                el.innerText = daftarMutiara[indeksMutiaraSaatIni];
+            }
+            
+            // Set timer pergantian setiap 4000 milidetik (4 detik)
+            setInterval(gantiMutiaraOtomatis, 4000); 
+        });        
     </script>
 </body>
 </html>
