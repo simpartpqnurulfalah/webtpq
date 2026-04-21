@@ -1210,7 +1210,7 @@
             content.innerHTML = html + '</div>';
         }
 
-        function renderSantriDetail(id, parentTab) {
+                function renderSantriDetail(id, parentTab) {
             const s = masterData.santri.find(s => s.id === id); if(!s) return;
             currentModalState = { type: 'santri_detail', parentTab: parentTab };
             setupModalUI("Detail Santri", "Informasi Lengkap", true, false, false);
@@ -1218,22 +1218,34 @@
             const displayOrtu = isAdminActive ? s.ortu : "*** (Mode Pribadi)";
             const displayAlamat = isAdminActive ? s.alamat : "*** (Mode Pribadi)";
             const displayTTL = isAdminActive ? s.ttl : "*** (Mode Pribadi)";
+            
             let statusKelasHTML = '';
             const kelasList = masterData.kelas && masterData.kelas.length > 0 
                 ? masterData.kelas.map(k => k.nama) 
                 : ['Jilid 1', 'Jilid 2', 'Jilid 3', 'Jilid 4', 'Jilid 5', 'Jilid 6', 'Al-Qur\'an'];
-            if (s.kelas === 'Belum Ditentukan' || !s.kelas || s.kelas === 'BELUM DITENTUKAN') {
+            
+            if (isAdminActive) {
+                // ADMIN: Tampilkan Dropdown untuk Pindah Kelas Langsung
                 statusKelasHTML = `
-                    <div class="mt-2 p-3 bg-orange-50 rounded-xl border border-orange-200">
-                        <label class="text-[9px] font-black text-orange-600 uppercase block mb-1">Klik Pilih Kelas:</label>
-                        <select onchange="updateKelasOtomatis(${s.id}, this.value)" class="w-full bg-white border border-orange-200 rounded-lg py-2 px-3 text-xs font-bold text-gray-700 outline-none">
-                            <option value="" selected disabled>Pilih...</option>
-                            ${kelasList.map(kls => `<option value="${kls}">${kls}</option>`).join('')}
-                        </select>
+                    <div class="mt-2 flex flex-col items-center justify-center">
+                        <div class="relative inline-block">
+                            <select onchange="updateKelasOtomatis(${s.id}, this.value)" class="appearance-none bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold rounded-full py-1.5 pl-4 pr-8 outline-none cursor-pointer hover:bg-emerald-100 transition text-center uppercase tracking-widest shadow-sm">
+                                <option value="Belum Ditentukan" ${!s.kelas || s.kelas === 'Belum Ditentukan' ? 'selected' : ''}>PILIH KELAS...</option>
+                                ${kelasList.map(kls => `<option value="${kls}" ${s.kelas === kls ? 'selected' : ''}>${kls}</option>`).join('')}
+                            </select>
+                            <i class="fa-solid fa-pen text-[10px] text-emerald-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                        </div>
+                        <p class="text-[8px] text-gray-400 mt-1.5 italic">*Klik kolom kelas di atas untuk memindah kelas</p>
                     </div>`;
             } else {
-                statusKelasHTML = `<p class="text-xs font-bold text-emerald-600 uppercase tracking-widest mt-2 bg-emerald-50 px-3 py-1 rounded-full inline-block">${s.kelas}</p>`;
+                // TAMU / WALI SANTRI: Tampilkan teks biasa (tidak bisa diedit)
+                if (s.kelas === 'Belum Ditentukan' || !s.kelas || s.kelas === 'BELUM DITENTUKAN') {
+                    statusKelasHTML = `<p class="text-xs font-bold text-orange-600 uppercase tracking-widest mt-2 bg-orange-50 px-3 py-1 rounded-full inline-block border border-orange-200">Belum Ada Kelas</p>`;
+                } else {
+                    statusKelasHTML = `<p class="text-xs font-bold text-emerald-600 uppercase tracking-widest mt-2 bg-emerald-50 px-3 py-1 rounded-full inline-block">${s.kelas}</p>`;
+                }
             }
+
             document.getElementById('modal-master-content').innerHTML = `
                 <div class="bg-white rounded-3xl p-6 border border-gray-200 shadow-sm relative overflow-hidden">
                     <div class="absolute top-0 right-0 px-4 py-1.5 ${badgeColor} text-white text-[9px] font-black uppercase rounded-bl-2xl shadow-sm">${s.status}</div>
