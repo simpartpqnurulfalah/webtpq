@@ -1329,25 +1329,48 @@
 
             document.getElementById('modal-master-content').innerHTML = html;
         }
-        function renderSppList() {
+                function renderSppList() {
             currentModalState = { type: 'spp_list' };
-            setupModalUI("Data SPP Santri", "Status Pembayaran", false, true, false);
-            const content = document.getElementById('modal-master-content');
-            let html = `
-                <div class="mb-4 bg-emerald-50 border border-emerald-200 p-3 rounded-xl shadow-sm">
-                    <label class="text-[10px] font-black uppercase text-emerald-800 mb-1 block">Pilih Periode Penagihan</label>
-                    <select id="filter-triwulan" class="input-box-light w-full p-2 text-sm font-bold" onchange="renderSppData(this.value)">
-                        <option value="Triwulan 1">Triwulan 1 (Jan-Mar)</option>
-                        <option value="Triwulan 2">Triwulan 2 (Apr-Jun)</option>
-                        <option value="Triwulan 3">Triwulan 3 (Jul-Sep)</option>
-                        <option value="Triwulan 4">Triwulan 4 (Okt-Des)</option>
-                    </select>
-                </div>
-                <div id="spp-data-area" class="space-y-3"></div>`;
-            content.innerHTML = html;
-            renderSppData("Triwulan 1"); 
+            
+            // Jika yang akses adalah ADMIN/PENGURUS, tampilkan alat manajemen SPP
+            if (isAdminActive) {
+                setupModalUI("Manajemen SPP", "Status Pembayaran Santri", false, true, false);
+                const content = document.getElementById('modal-master-content');
+                let html = `
+                    <div class="mb-4 bg-emerald-50 border border-emerald-200 p-3 rounded-xl shadow-sm">
+                        <label class="text-[10px] font-black uppercase text-emerald-800 mb-1 block">Pilih Periode Penagihan</label>
+                        <select id="filter-triwulan" class="input-box-light w-full p-2 text-sm font-bold" onchange="renderSppData(this.value)">
+                            <option value="Triwulan 1">Triwulan 1 (Jan-Mar)</option>
+                            <option value="Triwulan 2">Triwulan 2 (Apr-Jun)</option>
+                            <option value="Triwulan 3">Triwulan 3 (Jul-Sep)</option>
+                            <option value="Triwulan 4">Triwulan 4 (Okt-Des)</option>
+                        </select>
+                    </div>
+                    <div id="spp-data-area" class="space-y-3"></div>`;
+                content.innerHTML = html;
+                renderSppData("Triwulan 1"); 
+            } 
+            // Jika yang akses adalah WALI SANTRI (TAMU), tampilkan pesan Pengembangan
+            else {
+                setupModalUI("Info Pembayaran SPP", "Status Fitur", false, false, false);
+                const content = document.getElementById('modal-master-content');
+                content.innerHTML = `
+                    <div class="bg-white rounded-[30px] p-8 border border-gray-100 shadow-sm text-center">
+                        <div class="w-20 h-20 bg-gray-50 text-gray-300 rounded-full flex items-center justify-center text-3xl mx-auto mb-6 border-2 border-dashed border-gray-200">
+                            <i class="fa-solid fa-lock"></i>
+                        </div>
+                        <h3 class="text-lg font-black text-gray-800 uppercase italic mb-3">Akses SPP Belum Tersedia 🔒</h3>
+                        <p class="text-xs font-bold text-gray-500 leading-relaxed uppercase tracking-tight">
+                            Fitur riwayat pembayaran SPP saat ini sedang dalam masa perancangan web dan belum dapat digunakan oleh publik. 
+                        </p>
+                        <div class="h-px bg-gray-100 my-6 w-full"></div>
+                        <p class="text-[10px] font-medium text-gray-400 leading-relaxed italic">
+                            Rekap administrasi TPQ tetap berjalan aman secara manual. Silakan hubungi pengurus untuk informasi pembayaran putra-putri Anda. Terima kasih.
+                        </p>
+                    </div>
+                `;
+            }
         }
-        
                 function renderSppData(triwulan) {
             const area = document.getElementById('spp-data-area');
             const activeSantri = (masterData.santri || []).filter(s => s.status === 'Aktif');
