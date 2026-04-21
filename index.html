@@ -1305,15 +1305,30 @@
             document.getElementById('modal-master-content').innerHTML = html + '</div>';
         }
 
-        function renderKelasSantri(kelasName, waliName) {
+                function renderKelasSantri(kelasName, waliName) {
             currentModalState = { type: 'kelas_santri' };
             setupModalUI(kelasName, `Wali: ${waliName}`, true, false, false);
             const filtered = (masterData.santri || []).filter(s => s.kelas === kelasName && s.status === 'Aktif');
-            let html = `<div class="bg-orange-50 border border-orange-200 p-3 rounded-xl mb-4 flex items-center justify-between"><span class="text-[10px] font-black uppercase text-orange-800">Total Santri Aktif</span><span class="text-sm font-black text-orange-600 bg-white px-3 py-1 rounded-lg shadow-sm">${filtered.length} Anak</span></div><div class="space-y-2">`;
-            filtered.forEach((s, idx) => { html += `<div class="bg-white p-3 rounded-xl border border-gray-200 flex items-center gap-3"><div class="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-[10px] font-black text-gray-500">${idx+1}</div><div class="flex-1"><p class="font-black text-xs text-gray-800">${s.nama}</p><p class="text-[9px] text-gray-500 font-bold uppercase mt-0.5">Ortu: ${isAdminActive ? s.ortu : '***'}</p></div></div>`; });
-            document.getElementById('modal-master-content').innerHTML = html + '</div>';
-        }
+            
+            // Cari ID Kelas di database untuk fitur hapus
+            const kelasObj = masterData.kelas.find(k => k.nama === kelasName);
+            const kelasId = kelasObj ? kelasObj.id : null;
 
+            let html = `<div class="bg-orange-50 border border-orange-200 p-3 rounded-xl mb-4 flex items-center justify-between"><span class="text-[10px] font-black uppercase text-orange-800">Total Santri Aktif</span><span class="text-sm font-black text-orange-600 bg-white px-3 py-1 rounded-lg shadow-sm">${filtered.length} Anak</span></div><div class="space-y-2">`;
+            
+            filtered.forEach((s, idx) => { 
+                html += `<div class="bg-white p-3 rounded-xl border border-gray-200 flex items-center gap-3"><div class="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-[10px] font-black text-gray-500">${idx+1}</div><div class="flex-1"><p class="font-black text-xs text-gray-800">${s.nama}</p><p class="text-[9px] text-gray-500 font-bold uppercase mt-0.5">Ortu: ${isAdminActive ? s.ortu : '***'}</p></div></div>`; 
+            });
+            
+            html += '</div>';
+
+            // Tambahkan tombol Hapus Kelas khusus untuk Admin
+            if (isAdminActive && kelasId) {
+                html += `<button onclick="hapusData('kelas', ${kelasId})" class="w-full text-white bg-red-500 font-black text-[10px] py-3 mt-8 uppercase hover:bg-red-600 transition rounded-xl shadow-md active:scale-95"><i class="fa-solid fa-trash mr-1"></i> Hapus Kelas Ini</button>`;
+            }
+
+            document.getElementById('modal-master-content').innerHTML = html;
+        }
         function renderSppList() {
             currentModalState = { type: 'spp_list' };
             setupModalUI("Data SPP Santri", "Status Pembayaran", false, true, false);
