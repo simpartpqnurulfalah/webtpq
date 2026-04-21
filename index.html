@@ -910,16 +910,19 @@
                     <option value="nilai">Input Nilai Santri</option>
                     <option value="notif-spp">📣 Kirim Notif Tagihan SPP</option>`;
                 if(document.getElementById('dashboard-admin-tools')) document.getElementById('dashboard-admin-tools').classList.remove('hidden');
-            } else { 
-                // Tampilan khusus Pengurus (Hanya Fitur Tertentu)
+                        } else { 
+                // UPDATE: Sekarang Pengurus juga bisa menambah Santri & Pengurus lain
                 sel.innerHTML = `
+                    <option value="santri">Tambah Santri</option>
+                    <option value="pengurus">Tambah Pengurus</option>
                     <option value="pengumuman">Informasi Pengumuman</option>
                     <option value="kebutuhan">Kebutuhan TPQ</option>
                     <option value="spp">Input Pembayaran SPP</option>
                     <option value="notif-spp">📣 Kirim Notif Tagihan SPP</option>`;
+                
                 if(document.getElementById('dashboard-admin-tools')) document.getElementById('dashboard-admin-tools').classList.add('hidden');
             }
-            
+
             document.getElementById('internal-content-locked').classList.add('hidden');
             document.getElementById('internal-content-open').classList.remove('hidden');
             document.getElementById('badge-internal').classList.replace('bg-gray-100', 'bg-orange-100');
@@ -1280,16 +1283,32 @@
             } catch (e) { showToast("Error Koneksi", "fa-wifi", "text-red-500"); }
         }
 
-        function renderPengurusKategori() {
+                function renderPengurusKategori() {
             currentModalState = { type: 'pengurus_kategori' };
             setupModalUI("Kepengurusan", "Struktur Organisasi TPQ", false, false, false);
+            
             let html = '<div class="grid grid-cols-2 gap-3">';
+            
+            // NEW: Tombol Tambah Pengurus Baru (Hanya muncul jika Admin/Pengurus Aktif)
+            if (isAdminActive) {
+                html += `
+                <div onclick="closeMasterModal(); switchTab('admin'); document.getElementById('admin-kategori').value='pengurus'; changeAdminForm();" 
+                     class="bg-emerald-600 p-4 rounded-2xl border border-emerald-500 shadow-lg cursor-pointer hover:scale-95 transition flex flex-col items-center text-center gap-2">
+                    <div class="w-12 h-12 bg-white/20 text-white rounded-full flex items-center justify-center text-xl shadow-inner">
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <p class="font-black text-[11px] text-white uppercase italic">Tambah Pengurus</p>
+                </div>`;
+            }
+
             const icons = ["fa-chalkboard-user", "fa-bullhorn", "fa-shield-halved", "fa-book-open", "fa-boxes-stacked", "fa-wallet"];
             const colors = ["emerald", "blue", "red", "purple", "orange", "yellow"];
+            
             masterData.kategoriPengurus.forEach((kat, i) => {
                 if (kat === "Ustadz/Pengajar") return;
                 html += `<div onclick="renderPengurusList('${kat}')" class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm cursor-pointer hover:scale-95 transition flex flex-col items-center text-center gap-2"><div class="w-12 h-12 bg-${colors[i%6]}-50 text-${colors[i%6]}-600 rounded-full flex items-center justify-center text-xl"><i class="fa-solid ${icons[i%6]}"></i></div><p class="font-black text-[11px] text-gray-700 uppercase">${kat}</p></div>`;
             });
+            
             document.getElementById('modal-master-content').innerHTML = html + '</div>';
         }
 
