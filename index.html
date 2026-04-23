@@ -701,9 +701,20 @@
                         <textarea id="in-jadwal-konten" class="input-box-light w-full p-3 text-sm font-bold h-32" placeholder="Contoh: Senin: Tajwid & Fiqh"></textarea>
                     </div>
 
-                    <div id="form-nilai" class="space-y-4 pt-2 border-t border-gray-100 hidden">
-                        <select id="in-nilai-nama" class="input-box-light w-full p-3 text-sm font-bold" onchange="generateMapelPintar()"></select>
-                        <div class="relative">
+                                        <div id="form-nilai" class="space-y-4 pt-2 border-t border-gray-100 hidden">
+                        <div class="bg-purple-50 p-3 rounded-2xl border border-purple-100 mb-2">
+                            <label class="text-[10px] font-black text-purple-800 uppercase mb-1 block"><i class="fa-solid fa-filter mr-1"></i> 1. Filter Kelas Dulu</label>
+                            <select id="in-nilai-kelas-filter" class="input-box-light w-full p-2.5 text-sm font-bold text-purple-900 border-purple-200 outline-none focus:border-purple-500" onchange="filterSantriByKelasForNilai()">
+                                <option value="">-- Semua Kelas --</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="text-[10px] font-black text-gray-500 uppercase mb-1 ml-2 block">2. Pilih Nama Santri</label>
+                            <select id="in-nilai-nama" class="input-box-light w-full p-3 text-sm font-bold" onchange="generateMapelPintar()"></select>
+                        </div>
+                        
+                        <div class="relative mt-4">
                             <input type="text" id="in-nilai-mapel" list="list-mapel-kelas" class="input-box-light w-full p-3 text-sm font-bold text-gray-800" placeholder="Pilih / Ketik Mata Pelajaran">
                             <datalist id="list-mapel-kelas"></datalist>
                             <p class="text-[8px] text-gray-400 mt-1 italic ml-2">*Klik kolom untuk melihat daftar pelajaran di kelas santri ini.</p>
@@ -879,7 +890,7 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
             }
         }
 
-        function updateDropdownSantri() {
+                function updateDropdownSantri() {
             const activeSantri = (masterData.santri || []).filter(s => s.status === 'Aktif');
             let options = '<option value="">-- Pilih Nama Santri --</option>';
             if (activeSantri.length > 0) {
@@ -888,10 +899,45 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
                 });
             } else { options = `<option value="">Belum ada santri aktif</option>`; }
             
-            const elNilai = document.getElementById('in-nilai-nama');
+            // Untuk SPP biarkan tampil semua
             const elSpp = document.getElementById('in-spp-nama');
-            if(elNilai) elNilai.innerHTML = options;
             if(elSpp) elSpp.innerHTML = options;
+
+            // Untuk Nilai, jalankan mesin filter yang baru
+            if(typeof filterSantriByKelasForNilai === 'function') filterSantriByKelasForNilai();
+        }
+
+        // --- FUNGSI BARU: FILTER KELAS UNTUK INPUT NILAI ---
+        function filterSantriByKelasForNilai() {
+            const selectedKelas = document.getElementById('in-nilai-kelas-filter') ? document.getElementById('in-nilai-kelas-filter').value : "";
+            const elNilai = document.getElementById('in-nilai-nama');
+            if (!elNilai) return;
+
+            let activeSantri = (masterData.santri || []).filter(s => s.status === 'Aktif');
+
+            // Jika ada kelas yang dipilih, saring datanya!
+            if (selectedKelas !== "") {
+                activeSantri = activeSantri.filter(s => s.kelas === selectedKelas);
+            }
+
+            let options = '<option value="">-- Pilih Nama Santri --</option>';
+            if (activeSantri.length > 0) {
+                activeSantri.sort((a,b) => (a.nama || "").localeCompare(b.nama || "")).forEach(s => {
+                    // Kalau kelas sudah difilter, nama kelas di dalam kurung dihilangkan biar rapi
+                    const label = selectedKelas !== "" ? s.nama : `${s.nama} (Kelas ${s.kelas})`;
+                    options += `<option value="${s.nama}" data-kelas="${s.kelas}">${label}</option>`;
+                });
+            } else { 
+                options = `<option value="">Belum ada santri di kelas ini</option>`; 
+            }
+            
+            elNilai.innerHTML = options;
+            
+            // Kosongkan input mapel jika ganti kelas untuk mencegah salah input
+            const elMapelList = document.getElementById('list-mapel-kelas');
+            const elMapelInp = document.getElementById('in-nilai-mapel');
+            if(elMapelList) elMapelList.innerHTML = '';
+            if(elMapelInp) elMapelInp.value = '';
         }
 
         function generateMapelPintar() {
@@ -1164,12 +1210,21 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
             if (document.getElementById('count-ustadz')) document.getElementById('count-ustadz').innerText = masterData.pengurus.filter(p => p.kategori === "Ustadz/Pengajar").length || 0;
         }
 
-        function updateDropdownKelas() {
+                function updateDropdownKelas() {
             const kelasOptions = (masterData.kelas || []).map(k => `<option value="${k.nama}">${k.nama}</option>`).join('');
+            
             ['in-kelas', 'in-jadwal-kelas-select'].forEach(id => {
-                const el = document.getElementById(id); if(el) el.innerHTML = kelasOptions || '<option>Belum ada kelas</option>';
+                const el = document.getElementById(id); 
+                if(el) el.innerHTML = kelasOptions || '<option>Belum ada kelas</option>';
             });
+
+            // Pemasangan otomatis ke fitur Filter Kelas Input Nilai
+            const filterNilai = document.getElementById('in-nilai-kelas-filter');
+            if (filterNilai) {
+                filterNilai.innerHTML = '<option value="">-- Semua Kelas --</option>' + (kelasOptions || '');
+            }
         }
+
 
         function renderPublicAnnouncements() {
             try {
