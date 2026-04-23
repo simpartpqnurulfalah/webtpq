@@ -701,7 +701,7 @@
                         <textarea id="in-jadwal-konten" class="input-box-light w-full p-3 text-sm font-bold h-32" placeholder="Contoh: Senin: Tajwid & Fiqh"></textarea>
                     </div>
 
-                                        <div id="form-nilai" class="space-y-4 pt-2 border-t border-gray-100 hidden">
+                                                            <div id="form-nilai" class="space-y-4 pt-2 border-t border-gray-100 hidden">
                         <div class="bg-purple-50 p-3 rounded-2xl border border-purple-100 mb-2">
                             <label class="text-[10px] font-black text-purple-800 uppercase mb-1 block"><i class="fa-solid fa-filter mr-1"></i> 1. Filter Kelas Dulu</label>
                             <select id="in-nilai-kelas-filter" class="input-box-light w-full p-2.5 text-sm font-bold text-purple-900 border-purple-200 outline-none focus:border-purple-500" onchange="filterSantriByKelasForNilai()">
@@ -713,6 +713,11 @@
                             <label class="text-[10px] font-black text-gray-500 uppercase mb-1 ml-2 block">2. Pilih Nama Santri</label>
                             <select id="in-nilai-nama" class="input-box-light w-full p-3 text-sm font-bold" onchange="generateMapelPintar()"></select>
                         </div>
+
+                        <div>
+                            <label class="text-[10px] font-black text-gray-500 uppercase mb-1 ml-2 block">3. Tanggal Penilaian</label>
+                            <input type="date" id="in-nilai-tgl" class="input-box-light w-full p-3 text-sm font-bold text-gray-800">
+                        </div>
                         
                         <div class="relative mt-4">
                             <input type="text" id="in-nilai-mapel" list="list-mapel-kelas" class="input-box-light w-full p-3 text-sm font-bold text-gray-800" placeholder="Pilih / Ketik Mata Pelajaran">
@@ -723,8 +728,10 @@
                         <select id="in-nilai-skor" class="input-box-light w-full p-3 text-sm font-bold">
                             <option value="L+">L+ (Nilai Baik)</option>
                             <option value="L-">L- (Nilai Kurang Baik)</option>
+                            <option value="0">0 (Tidak Berangkat / ALPA)</option>
                         </select>
                     </div>
+
 
                     <div id="form-notif-spp" class="space-y-4 pt-2 border-t border-gray-100 hidden">
                         <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
@@ -890,7 +897,7 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
             }
         }
 
-                function updateDropdownSantri() {
+                        function updateDropdownSantri() {
             const activeSantri = (masterData.santri || []).filter(s => s.status === 'Aktif');
             let options = '<option value="">-- Pilih Nama Santri --</option>';
             if (activeSantri.length > 0) {
@@ -899,15 +906,13 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
                 });
             } else { options = `<option value="">Belum ada santri aktif</option>`; }
             
-            // Untuk SPP biarkan tampil semua
             const elSpp = document.getElementById('in-spp-nama');
             if(elSpp) elSpp.innerHTML = options;
 
-            // Untuk Nilai, jalankan mesin filter yang baru
             if(typeof filterSantriByKelasForNilai === 'function') filterSantriByKelasForNilai();
         }
 
-        // --- FUNGSI BARU: FILTER KELAS UNTUK INPUT NILAI ---
+        // --- FUNGSI BARU: FILTER KELAS ---
         function filterSantriByKelasForNilai() {
             const selectedKelas = document.getElementById('in-nilai-kelas-filter') ? document.getElementById('in-nilai-kelas-filter').value : "";
             const elNilai = document.getElementById('in-nilai-nama');
@@ -915,7 +920,6 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
 
             let activeSantri = (masterData.santri || []).filter(s => s.status === 'Aktif');
 
-            // Jika ada kelas yang dipilih, saring datanya!
             if (selectedKelas !== "") {
                 activeSantri = activeSantri.filter(s => s.kelas === selectedKelas);
             }
@@ -923,7 +927,6 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
             let options = '<option value="">-- Pilih Nama Santri --</option>';
             if (activeSantri.length > 0) {
                 activeSantri.sort((a,b) => (a.nama || "").localeCompare(b.nama || "")).forEach(s => {
-                    // Kalau kelas sudah difilter, nama kelas di dalam kurung dihilangkan biar rapi
                     const label = selectedKelas !== "" ? s.nama : `${s.nama} (Kelas ${s.kelas})`;
                     options += `<option value="${s.nama}" data-kelas="${s.kelas}">${label}</option>`;
                 });
@@ -933,7 +936,6 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
             
             elNilai.innerHTML = options;
             
-            // Kosongkan input mapel jika ganti kelas untuk mencegah salah input
             const elMapelList = document.getElementById('list-mapel-kelas');
             const elMapelInp = document.getElementById('in-nilai-mapel');
             if(elMapelList) elMapelList.innerHTML = '';
@@ -1135,14 +1137,31 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
                 };
             } else if(kat === 'jadwal') {
                 payload = { kelas: document.getElementById('in-jadwal-kelas-select').value, tipe: document.getElementById('in-jadwal-tipe').value, konten: document.getElementById('in-jadwal-konten').value };
-            } else if(kat === 'nilai') {
+                       } else if(kat === 'nilai') {
                 const selNama = document.getElementById('in-nilai-nama');
-                const selectedKelas = selNama.options[selNama.selectedIndex].getAttribute('data-kelas');
-                payload = { nama: selNama.value, kelas: selectedKelas, mapel: document.getElementById('in-nilai-mapel').value, materi: document.getElementById('in-nilai-materi').value, skor: document.getElementById('in-nilai-skor').value };
-                if(!payload.nama || !payload.mapel || !payload.materi) {
-                    showToast("Lengkapi semua kolom nilai!", "fa-warning", "text-red-500");
+                const selectedKelas = selNama.selectedIndex > 0 ? selNama.options[selNama.selectedIndex].getAttribute('data-kelas') : "";
+                
+                const tglNilai = document.getElementById('in-nilai-tgl').value;
+                const mapelVal = document.getElementById('in-nilai-mapel').value;
+                const materiVal = document.getElementById('in-nilai-materi').value;
+                const skorVal = document.getElementById('in-nilai-skor').value;
+
+                if(!selNama.value || !mapelVal || !materiVal || !tglNilai) {
+                    showToast("Lengkapi Nama, Tanggal, Mapel, & Materi!", "fa-warning", "text-red-500");
                     btn.innerHTML = originalText; return;
                 }
+                
+                // Ubah format tanggal & gabung
+                const formatTgl = tglNilai.split('-').reverse().join('/');
+                const materiGabung = materiVal + " (" + formatTgl + ")";
+
+                payload = { 
+                    nama: selNama.value, 
+                    kelas: selectedKelas, 
+                    mapel: mapelVal, 
+                    materi: materiGabung, 
+                    skor: skorVal 
+                };
             } else if(kat === 'pengumuman') {
                 endpoint = '/add-info';
                 payload = { judul: document.getElementById('in-judul').value, isi: document.getElementById('in-isi').value, target: 'wali_santri', target_notif: document.getElementById('in-target-notif').value };
@@ -1210,7 +1229,7 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
             if (document.getElementById('count-ustadz')) document.getElementById('count-ustadz').innerText = masterData.pengurus.filter(p => p.kategori === "Ustadz/Pengajar").length || 0;
         }
 
-                function updateDropdownKelas() {
+                        function updateDropdownKelas() {
             const kelasOptions = (masterData.kelas || []).map(k => `<option value="${k.nama}">${k.nama}</option>`).join('');
             
             ['in-kelas', 'in-jadwal-kelas-select'].forEach(id => {
@@ -1218,13 +1237,12 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
                 if(el) el.innerHTML = kelasOptions || '<option>Belum ada kelas</option>';
             });
 
-            // Pemasangan otomatis ke fitur Filter Kelas Input Nilai
+            // Pasang ke filter nilai
             const filterNilai = document.getElementById('in-nilai-kelas-filter');
             if (filterNilai) {
                 filterNilai.innerHTML = '<option value="">-- Semua Kelas --</option>' + (kelasOptions || '');
             }
         }
-
 
         function renderPublicAnnouncements() {
             try {
@@ -1720,32 +1738,64 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
                 if(!mapelGroups[mapelKey]) mapelGroups[mapelKey] = [];
                 mapelGroups[mapelKey].push(r);
             });
-            let html = '<div class="space-y-5">';
+                        let html = '<div class="space-y-5">';
             for(const mapel in mapelGroups) {
+                const mapelKapital = mapel.toUpperCase(); // Mapel jadi KAPITAL
+                
                 html += `
                 <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                     <div class="bg-purple-50 px-4 py-3 border-b border-purple-100 flex justify-between items-center">
                         <div>
-                            <p class="text-[9px] font-black text-purple-600 uppercase tracking-widest">Mata Pelajaran</p>
-                            <p class="text-sm font-black text-gray-800">${mapel}</p>
+                            <p class="text-[10px] font-bold text-purple-600 capitalize">Mata pelajaran</p>
+                            <p class="text-sm font-black text-gray-800">${mapelKapital}</p>
                         </div>
                     </div>
                     <div class="p-2 space-y-1">`;
+                
                 mapelGroups[mapel].forEach(materiItem => {
-                    const isBad = materiItem.skor === 'L-';
+                    let skorClass = 'text-emerald-600 bg-emerald-50 border-emerald-200'; 
+                    let teksSkor = materiItem.skor; 
+                    
+                    if (materiItem.skor === 'L-') {
+                        skorClass = 'text-red-600 bg-red-50 border-red-200';
+                    } else if (materiItem.skor === '0') {
+                        skorClass = 'text-orange-600 bg-orange-50 border-orange-200';
+                        teksSkor = 'ALPA'; // Tampilkan kata ALPA jika skornya 0
+                    }
+                    
                     let namaBab = materiItem.materi;
-                    if (!namaBab || namaBab === 'null' || namaBab.trim() === '') { namaBab = 'Evaluasi Umum'; }
+                    if (!namaBab || namaBab === 'null' || namaBab.trim() === '') { namaBab = 'EVALUASI UMUM'; }
+                    
+                    let tglTeks = "";
+                    let materiTeks = namaBab.toUpperCase(); // Materi jadi KAPITAL
+                    
+                    // Bongkar tanggal dari dalam kurung
+                    if (namaBab.includes("(") && namaBab.endsWith(")")) {
+                        const parts = namaBab.split(" (");
+                        tglTeks = parts.pop().replace(")", ""); 
+                        materiTeks = parts.join(" (").toUpperCase();
+                    }
+                    
+                    let teksTampilanHtml = "";
+                    if (tglTeks !== "") {
+                        teksTampilanHtml = `<span class="text-purple-600 mr-1.5">${tglTeks}</span> <span>${materiTeks}</span>`;
+                    } else {
+                        teksTampilanHtml = `<span>${materiTeks}</span>`;
+                    }
+                    
                     const btnHapus = isAdminActive 
                         ? `<button onclick="hapusData('nilai', ${materiItem.id})" class="w-7 h-7 bg-red-50 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition flex items-center justify-center ml-2"><i class="fa-solid fa-trash text-[10px]"></i></button>` 
                         : '';
+                        
                     html += `
-                        <div class="flex justify-between items-center p-3 hover:bg-gray-50 rounded-xl transition">
-                            <div class="flex items-center gap-3">
-                                <i class="fa-regular fa-file-lines text-gray-300"></i>
-                                <span class="text-xs font-bold text-gray-700">${namaBab}</span>
+                        <div class="flex justify-between items-center p-3 hover:bg-gray-50 rounded-xl transition border-b border-gray-50 last:border-0">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-book-open text-gray-300 text-[10px]"></i>
+                                <span class="text-[10px] font-black text-gray-700 tracking-wide">${teksTampilanHtml}</span>
                             </div>
-                            <div class="flex items-center">
-                                <span class="px-3 py-1 rounded border font-black text-xs shadow-sm ${isBad ? 'text-red-600 bg-red-50 border-red-200' : 'text-emerald-600 bg-emerald-50 border-emerald-200'}">${materiItem.skor}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[9px] font-black text-gray-400 uppercase italic">NILAI</span>
+                                <span class="px-2 py-1 rounded border font-black text-[10px] shadow-sm ${skorClass}">${teksSkor}</span>
                                 ${btnHapus}
                             </div>
                         </div>`;
@@ -1753,8 +1803,7 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
                 html += `</div></div>`;
             }
             document.getElementById('modal-master-content').innerHTML = html + '</div>';
-        }
-
+}
         function downloadExcelData() {
             if (!masterData.santri || masterData.santri.length === 0) { showToast("Data kosong", "fa-warning", "text-red-500"); return; }
             const dataToExport = masterData.santri.map((s, index) => ({ "No": index + 1, "Nama Lengkap": s.nama, "Tempat Tanggal Lahir": s.ttl, "Alamat": s.alamat, "Nama Wali": s.ortu, "Kelas": s.kelas, "Status": s.status }));
