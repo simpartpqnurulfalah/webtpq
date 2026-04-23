@@ -163,6 +163,15 @@
         .tab-btn { transition: all 0.3s ease; }
         .tab-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
         .tab-btn.active-red { background: #ef4444; color: white; border-color: #ef4444; }
+
+        /* KODE CSS TABEL KAS */
+        .table-kas-tpq { width: 100%; min-width: 400px; border-collapse: collapse; background: white; border-radius: 15px; overflow: hidden; font-size: 11px; }
+        .table-kas-tpq th { background: #059669; color: white; padding: 12px 8px; text-transform: uppercase; font-weight: 800; border: 1px solid #047857; text-align: center; white-space: nowrap; }
+        .table-kas-tpq td { padding: 12px 8px; border: 1px solid #eee; text-align: center; font-weight: 600; color: #374151; white-space: nowrap; }
+        .table-kas-tpq .row-pemasukan { color: #059669; }
+        .table-kas-tpq .row-pengeluaran { color: #dc2626; }
+        .table-kas-tpq .row-saldo { background: #f0fdf4; font-weight: 800; }
+        .scroll-table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 15px; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); border: 1px solid #f3f4f6; }
     </style>
     
     <script>
@@ -487,6 +496,20 @@
                     </div>
                     <i class="fa-solid fa-chevron-right text-gray-300"></i>
                 </div>
+
+                <div id="btn-laporan-kas" onclick="renderLaporanKas()" class="hidden bg-white p-5 rounded-3xl border-l-4 border-amber-500 items-center justify-between shadow-sm active:scale-95 transition cursor-pointer group">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center">
+                            <i class="fa-solid fa-file-invoice-dollar text-amber-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-black text-gray-800">Laporan Keuangan Kas</p>
+                            <p class="text-[9px] font-bold uppercase text-gray-500 mt-0.5">Buku Kas Pemasukan & Pengeluaran</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-gray-300"></i>
+                </div>
+
             </div>
 
             <div id="info-internal-box" class="bg-white p-5 rounded-3xl shadow-sm border border-gray-100">
@@ -708,6 +731,40 @@
                         </div>
                     </div>
 
+                    <div id="form-kas" class="space-y-4 pt-2 border-t border-gray-100 hidden">
+                        <div class="bg-emerald-50 p-3 rounded-2xl border border-emerald-100 mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-wallet text-emerald-600 text-lg"></i>
+                            <div>
+                                <p class="text-[11px] font-black text-emerald-800 uppercase leading-none">Buku Kas Keuangan</p>
+                                <p class="text-[8px] font-bold text-emerald-600 uppercase mt-1">Input Pemasukan & Pengeluaran</p>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="text-[9px] font-black uppercase text-gray-500 ml-2 mb-1 block">Tanggal Transaksi</label>
+                            <input type="date" id="in-kas-tgl" class="input-box-light w-full p-3 text-sm font-bold" required>
+                        </div>
+                        
+                        <div>
+                            <label class="text-[9px] font-black uppercase text-gray-500 ml-2 mb-1 block">Keterangan / Nama Transaksi</label>
+                            <input type="text" id="in-kas-ket" class="input-box-light w-full p-3 text-sm font-bold" placeholder="Contoh: Saldo Awal / Beli Sapu" required>
+                        </div>
+
+                        <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200 shadow-inner">
+                            <p class="text-[10px] font-bold text-center text-gray-500 mb-3 uppercase tracking-widest italic">* Isi nominal pada kolom yang sesuai</p>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-[10px] font-black uppercase text-emerald-600 ml-1 mb-1.5 block"><i class="fa-solid fa-arrow-down mr-1"></i> Dana Masuk</label>
+                                    <input type="number" id="in-kas-masuk" class="input-box-light w-full p-3 text-sm font-black text-emerald-700 border-emerald-200 focus:border-emerald-500 outline-none transition" placeholder="Rp. 0">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-black uppercase text-red-600 ml-1 mb-1.5 block"><i class="fa-solid fa-arrow-up mr-1"></i> Pengeluaran</label>
+                                    <input type="number" id="in-kas-keluar" class="input-box-light w-full p-3 text-sm font-black text-red-600 border-red-200 focus:border-red-500 outline-none transition" placeholder="Rp. 0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <button id="btn-submit-admin" type="submit" class="w-full py-4 bg-emerald-600 text-white font-black uppercase rounded-2xl shadow-lg active:scale-95 transition mt-4">
                         Simpan / Publikasikan
                     </button>
@@ -795,7 +852,7 @@
         let isAdminActive = false; 
         let currentModalState = {};
         let deferredPrompt;
-        let masterData = { santri: [], pengurus: [], pengumuman: [], kebutuhan: [], kelas: [], spp: [], jadwal: [], nilai: [], kategoriPengurus: ["Kesantrian", "Humas", "Keamanan", "Kurikulum", "Sarpras", "Bendahara", "Ustadz/Pengajar"] };
+        let masterData = { santri: [], pengurus: [], pengumuman: [], kebutuhan: [], kelas: [], spp: [], jadwal: [], nilai: [], kas: [], kategoriPengurus: ["Kesantrian", "Humas", "Keamanan", "Kurikulum", "Sarpras", "Bendahara", "Ustadz/Pengajar"] };
 
         async function loadData() {
             try {
@@ -810,6 +867,7 @@
                 masterData.spp = Array.isArray(data.spp) ? data.spp : [];
                 masterData.jadwal = Array.isArray(data.jadwal) ? data.jadwal : [];
                 masterData.nilai = Array.isArray(data.nilai) ? data.nilai : [];
+masterData.kas = Array.isArray(data.kas) ? data.kas : [];
 
                 updateDashboardStats();
                 updateDropdownKelas();
@@ -879,7 +937,7 @@
             } else { showToast("ID atau Password Salah!", "fa-circle-xmark", "text-red-500"); }
         }
 
-                function successLogin(msg, isReload = false) {
+        function successLogin(msg, isReload = false) {
             localStorage.setItem('tpq_isLoggedIn', 'true');
             localStorage.setItem('tpq_userRole', currentUserRole);
             if (!isReload) showToast(msg, "fa-unlock");
@@ -896,9 +954,10 @@
             document.getElementById('sidebar-role').innerText = currentUserRole === 'admin' ? "Super Admin" : "Pengurus TPQ";
             
             const sel = document.getElementById('admin-kategori');
+            const btnKas = document.getElementById('btn-laporan-kas');
             
             if (currentUserRole === 'admin') {
-                // Tampilan Super Admin (Semua Fitur Lengkap)
+                // Tampilan Admin Murni (Kas Dihilangkan)
                 sel.innerHTML = `
                     <option value="santri">Tambah Santri</option>
                     <option value="pengurus">Tambah Pengurus</option>
@@ -910,17 +969,21 @@
                     <option value="nilai">Input Nilai Santri</option>
                     <option value="notif-spp">📣 Kirim Notif Tagihan SPP</option>`;
                 if(document.getElementById('dashboard-admin-tools')) document.getElementById('dashboard-admin-tools').classList.remove('hidden');
-                        } else { 
-                // UPDATE: Sekarang Pengurus juga bisa menambah Santri & Pengurus lain
+                if(btnKas) { btnKas.classList.add('hidden'); btnKas.classList.remove('flex'); }
+
+            } else { 
+                // Tampilan Pengurus (Menu Kas Muncul)
                 sel.innerHTML = `
                     <option value="santri">Tambah Santri</option>
                     <option value="pengurus">Tambah Pengurus</option>
                     <option value="pengumuman">Informasi Pengumuman</option>
                     <option value="kebutuhan">Kebutuhan TPQ</option>
                     <option value="spp">Input Pembayaran SPP</option>
+                    <option value="kas">💰 Buku Kas Keuangan</option>
                     <option value="notif-spp">📣 Kirim Notif Tagihan SPP</option>`;
                 
                 if(document.getElementById('dashboard-admin-tools')) document.getElementById('dashboard-admin-tools').classList.add('hidden');
+                if(btnKas) { btnKas.classList.remove('hidden'); btnKas.classList.add('flex'); }
             }
 
             document.getElementById('internal-content-locked').classList.add('hidden');
@@ -971,7 +1034,7 @@
 
         function changeAdminForm() {
             const val = document.getElementById('admin-kategori').value;
-            ['form-santri','form-pengurus','form-kelas','form-spp','form-jadwal','form-nilai','form-pengumuman','form-kebutuhan','form-notif-spp'].forEach(id => {
+            ['form-santri','form-pengurus','form-kelas','form-spp','form-jadwal','form-nilai','form-pengumuman','form-kebutuhan','form-notif-spp','form-kas'].forEach(id => {
                 const el = document.getElementById(id); if(el) el.classList.add('hidden');
             });
             const target = document.getElementById('form-'+val); if(target) target.classList.remove('hidden');
@@ -993,6 +1056,24 @@
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
             let endpoint = '/add-' + kat;
             let payload = {};
+
+            // --- KODE BARU: LOGIKA SIMPAN KAS 2 KOLOM ---
+                        // LOGIKA SIMPAN KAS KE CLOUDFLARE
+            if(kat === 'kas') {
+                const tgl = document.getElementById('in-kas-tgl').value;
+                const ket = document.getElementById('in-kas-ket').value;
+                const masuk = parseInt(document.getElementById('in-kas-masuk').value) || 0;
+                const keluar = parseInt(document.getElementById('in-kas-keluar').value) || 0;
+
+                if(!tgl || !ket) { showToast("Tanggal & Keterangan wajib diisi!", "fa-warning", "text-red-500"); btn.innerHTML = originalText; return; }
+                if(masuk === 0 && keluar === 0) { showToast("Isi minimal salah satu nominal!", "fa-warning", "text-red-500"); btn.innerHTML = originalText; return; }
+
+                // Kita pakai payload untuk fetch di bawah
+                endpoint = '/add-kas';
+                payload = { tgl: tgl, ket: ket, masuk: masuk, keluar: keluar };
+                
+                // Jangan pakai return di sini, biarkan meluncur ke script fetch di bawahnya
+            }
 
             if(kat === 'santri') {
                 const d = document.getElementById('in-tgl-d').value;
@@ -1031,21 +1112,15 @@
                 payload = { judul: "📋 TAGIHAN SPP TPQ", isi: `Assalamualaikum. Pemberitahuan kepada Bapak/Ibu Wali Santri, dimohon untuk segera melunasi pembayaran SPP untuk periode ${triwulan}. Terima kasih.`, target: 'wali_santri', target_notif: 'wali' };
             }
 
-                        try {
+            try {
                 const res = await fetch(WORKER_URL + endpoint, { method: 'POST', body: JSON.stringify(payload) });
                 if(res.ok) { 
                     showToast(kat === 'notif-spp' ? "Notif Berhasil Dikirim!" : "Data Berhasil Disimpan!"); 
                     e.target.reset(); 
                     await loadData(); 
-                    // Perintah kembali ke dashboard sudah dihapus agar layar tetap stay di form saat ini
                 }
                 else { 
-
-                    const errText = await res.text();
                     showToast("Gagal memproses", "fa-xmark", "text-red-500"); 
-                    if (errText.includes("column") && kat === 'spp') {
-                        alert("PEMBERITAHUAN SISTEM:\n\nDatabase SPP di Cloudflare Worker Anda belum memiliki kolom 'tahun' dan 'jumlah'.\n\nSilakan buka Cloudflare Worker, cari bagian '// Auto-patch kolom baru', lalu tambahkan 2 baris ini:\n\ntry { await env.DB.exec(`ALTER TABLE spp ADD COLUMN tahun INTEGER;`); } catch(e) {}\ntry { await env.DB.exec(`ALTER TABLE spp ADD COLUMN jumlah INTEGER;`); } catch(e) {}");
-                    }
                 }
             } catch(err) { 
                 showToast("Error Koneksi", "fa-wifi", "text-red-500"); 
@@ -1725,7 +1800,8 @@
         const styleSelect = document.createElement('style');
         styleSelect.innerHTML = "* { -webkit-user-select: none; user-select: none; } input, textarea, select { user-select: text !important; }";
         document.head.appendChild(styleSelect);
-                // --- FITUR MUTIARA HARIAN ---
+        
+        // --- FITUR MUTIARA HARIAN ---
         const daftarMutiara = [
             '"Sebaik-baik kalian adalah orang yang belajar Al-Qur\'an dan mengajarkannya." (HR. Bukhari)',
             '"Tuntutlah ilmu dari ayunan hingga liang lahat."',
@@ -1737,39 +1813,174 @@
             '"Doa orang tua untuk anaknya sama seperti doa nabi untuk umatnya."'
         ];
 
-        let indeksMutiaraSaatIni = 0; // Biar muternya urut, nggak ada yang dobel
+        let indeksMutiaraSaatIni = 0;
 
         function gantiMutiaraOtomatis() {
             const el = document.getElementById('teks-hadits-harian');
             if (el) {
-                // Turunkan opacity jadi 0 (efek menghilang sebentar)
                 el.style.opacity = 0;
-                
                 setTimeout(() => {
-                    // Ganti teksnya saat sedang transparan
                     indeksMutiaraSaatIni = (indeksMutiaraSaatIni + 1) % daftarMutiara.length;
                     el.innerText = daftarMutiara[indeksMutiaraSaatIni];
-                    
-                    // Kembalikan opacity ke 1 (teks muncul lagi perlahan)
                     el.style.opacity = 1;
-                }, 400); // Jeda transisi 0.4 detik
+                }, 400);
             }
         }
         
-        // Jalankan saat web pertama kali dibuka
         document.addEventListener('DOMContentLoaded', () => { 
             const el = document.getElementById('teks-hadits-harian');
             if(el) {
-                // Tambahkan CSS untuk efek halus
                 el.style.transition = "opacity 0.4s ease-in-out";
-                // Tampilkan hadits pertama acak
                 indeksMutiaraSaatIni = Math.floor(Math.random() * daftarMutiara.length);
                 el.innerText = daftarMutiara[indeksMutiaraSaatIni];
             }
-            
-            // Set timer pergantian setiap 4000 milidetik (4 detik)
-            setInterval(gantiMutiaraOtomatis, 4000); 
+            setInterval(gantiMutiaraOtomatis, 6000); 
         });        
+
+                // --- KODE BARU: FUNGSI RENDER LAPORAN KAS ---
+        function renderLaporanKas() {
+            setupModalUI("Laporan Kas TPQ", "Arus Keuangan Masuk & Keluar", false, false, false);
+            // Ambil data dari Cloudflare (masterData), bukan dari localStorage lagi
+            let kasData = masterData.kas || [];
+            
+            let html = `
+                <div class="flex gap-2 mb-6">
+                    <button onclick="exportKasExcel()" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-black text-[10px] uppercase shadow-lg flex items-center justify-center gap-2 active:scale-95 transition">
+                        <i class="fa-solid fa-file-excel"></i> Excel
+                    </button>
+                    <button onclick="window.print()" class="flex-1 bg-slate-800 text-white py-3 rounded-xl font-black text-[10px] uppercase shadow-lg flex items-center justify-center gap-2 active:scale-95 transition">
+                        <i class="fa-solid fa-print"></i> PDF
+                    </button>
+                </div>
+                <div class="scroll-table-wrapper">
+                    <table id="table-kas-tpq-print" class="table-kas-tpq">
+                        <thead>
+                            <tr>
+                                <th>Tgl</th>
+                                <th>Ket</th>
+                                <th>Masuk</th>
+                                <th>Keluar</th>
+                                <th>Saldo</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+            
+            let currentSaldo = 0;
+            if(kasData.length === 0) {
+                html += `<tr><td colspan="5" class="p-10 text-center font-bold text-gray-400">Belum ada riwayat keuangan.</td></tr>`;
+            } else {
+                kasData.forEach(item => {
+                    // Pakai item.tanggal dari database, dan hapus .slice(1) agar tahunnya kelihatan
+                    const formatTgl = item.tanggal ? item.tanggal.split('-').reverse().join('/') : "-"; 
+                    const danaMasuk = parseInt(item.masuk) || 0;
+                    const danaKeluar = parseInt(item.keluar) || 0;
+                    
+                    currentSaldo += (danaMasuk - danaKeluar);
+                    html += `
+                        <tr>
+                            <td>${formatTgl}</td>
+                            <td style="text-align: left; min-width: 120px;">${item.keterangan || "Transaksi"}</td>
+                            <td class="row-pemasukan">${danaMasuk > 0 ? danaMasuk.toLocaleString() : '-'}</td>
+                            <td class="row-pengeluaran">${danaKeluar > 0 ? danaKeluar.toLocaleString() : '-'}</td>
+                            <td class="row-saldo">${currentSaldo.toLocaleString()}</td>
+                        </tr>`;
+                });
+            }
+
+            html += `</tbody></table></div>`;
+            
+            // Tampilkan 2 tombol Reset hanya untuk Pengurus/Admin
+            if (isAdminActive) {
+                html += `
+                <div class="mt-8 pt-6 border-t border-dashed border-gray-300 flex flex-col gap-3 items-center">
+                    <button onclick="resetBukuKasSmart()" class="w-full text-blue-600 bg-blue-50 px-4 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition shadow-sm border border-blue-100">
+                        <i class="fa-solid fa-clock-rotate-left mr-1"></i> Tutup Buku & Pindah Saldo
+                    </button>
+                    <button onclick="resetBukuKasTotal()" class="w-full text-red-500 bg-red-50 px-4 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition shadow-sm border border-red-100">
+                        <i class="fa-solid fa-trash mr-1"></i> Kosongkan Riwayat (Reset ke 0)
+                    </button>
+                </div>`;
+            }
+            
+            document.getElementById('modal-master-content').innerHTML = html;
+        }
+
+        // FUNGSI TUTUP BUKU / RESET CERDAS KE CLOUDFLARE
+        async function resetBukuKasSmart() {
+            let kasData = masterData.kas || [];
+            if (kasData.length === 0) return showToast("Data kas masih kosong!", "fa-warning", "text-orange-500");
+
+            let currentSaldo = 0;
+            kasData.forEach(item => { currentSaldo += ((parseInt(item.masuk) || 0) - (parseInt(item.keluar) || 0)); });
+
+            if (confirm('TUTUP BUKU BULAN INI?\n\nSisa saldo (Rp ' + currentSaldo.toLocaleString() + ') akan dipindahkan sebagai Saldo Awal di catatan baru.')) {
+                
+                const dateObj = new Date();
+                const tglBaru = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+                
+                showToast("Menutup buku...", "fa-spinner fa-spin", "text-blue-500");
+                try {
+                    const res = await fetch(`${WORKER_URL}/reset-kas`, { 
+                        method: 'POST', 
+                        body: JSON.stringify({ type: 'smart', sisaSaldo: currentSaldo, tglBaru: tglBaru }) 
+                    });
+                    if(res.ok) { 
+                        showToast("Buku Kas Ditutup!", "fa-check", "text-emerald-600"); 
+                        await loadData(); 
+                        renderLaporanKas(); 
+                    }
+                } catch(e) { showToast("Gagal Koneksi", "fa-wifi", "text-red-500"); }
+            }
+        }
+
+        // FUNGSI KOSONGKAN BUKU KAS (RESET KE 0) KE CLOUDFLARE
+        async function resetBukuKasTotal() {
+            let kasData = masterData.kas || [];
+            if (kasData.length === 0) return showToast("Data kas sudah kosong!", "fa-warning", "text-orange-500");
+
+            if (confirm('PERINGATAN!\n\nAnda yakin ingin MENGHAPUS BERSIH seluruh riwayat kas di Database?')) {
+                showToast("Menghapus data...", "fa-spinner fa-spin", "text-red-500");
+                try {
+                    const res = await fetch(`${WORKER_URL}/reset-kas`, { 
+                        method: 'POST', 
+                        body: JSON.stringify({ type: 'total' }) 
+                    });
+                    if(res.ok) { 
+                        showToast("Buku Kas Dikosongkan!", "fa-trash", "text-red-600"); 
+                        await loadData(); 
+                        renderLaporanKas(); 
+                    }
+                } catch(e) { showToast("Gagal Koneksi", "fa-wifi", "text-red-500"); }
+            }
+        }
+
+        // FUNGSI EXPORT EXCEL
+        function exportKasExcel() {
+            let kasData = masterData.kas || [];
+            if (kasData.length === 0) { showToast("Data kas kosong!", "fa-warning", "text-red-500"); return; }
+            
+            let currentSaldo = 0;
+            const dataToExport = kasData.map((item, index) => {
+                const masuk = parseInt(item.masuk) || 0;
+                const keluar = parseInt(item.keluar) || 0;
+                currentSaldo += (masuk - keluar);
+                return {
+                    "No": index + 1,
+                    "Tanggal": item.tanggal, // Pakai item.tanggal dari DB Cloudflare
+                    "Keterangan": item.keterangan || "Transaksi",
+                    "Pemasukan": masuk,
+                    "Pengeluaran": keluar,
+                    "Saldo Akhir": currentSaldo
+                };
+            });
+
+            const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+            worksheet['!cols'] = [ {wch:5}, {wch:15}, {wch:30}, {wch:15}, {wch:15}, {wch:15} ];
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Buku Kas TPQ");
+            XLSX.writeFile(workbook, "Laporan_Buku_Kas_Nurul_Falah.xlsx");
+            showToast("Excel Berhasil Diunduh!", "fa-file-excel", "text-emerald-600");
+        }
     </script>
 </body>
 </html>
