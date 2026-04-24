@@ -983,19 +983,28 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
             }
         });
 
-        function handleLogin(e) {
+       function handleLogin(e) {
             e.preventDefault();
             const user = document.getElementById('input-username').value;
             const pass = document.getElementById('input-password').value;
-            const _u1 = "YWRtaW50cHE=";      
-            const _p1 = "YWRtaW50cHExMjM=";   
-            const _u2 = "UGVuZ3VydXN0cHE=";   
-            const _p2 = "UGVuZ3VydXN0cHExMjM="; 
+            
+            const _u1 = "YWRtaW50cHE=";       // admintpq
+            const _p1 = "YWRtaW50cHExMjM=";   // admintpq123
+            const _u2 = "UGVuZ3VydXN0cHE=";   // Pengurustpq
+            const _p2 = "UGVuZ3VydXN0cHExMjM="; // Pengurustpq123
+            // INI KUNCI BARU KHUSUS BENDAHARA
+            const _u3 = "YmVuZGFoYXJhdHBx";   // bendaharatpq
+            const _p3 = "YmVuZGFoYXJhMTIz";   // bendahara123
+
             if (btoa(user) === _u1 && btoa(pass) === _p1) {
                 currentUserRole = 'admin'; isAdminActive = true; successLogin("Login Admin Berhasil");
+            } else if (btoa(user) === _u3 && btoa(pass) === _p3) {
+                currentUserRole = 'bendahara'; isAdminActive = true; successLogin("Login Bendahara Berhasil");
             } else if (btoa(user) === _u2 && btoa(pass) === _p2) {
                 currentUserRole = 'pengurus'; isAdminActive = true; successLogin("Login Pengurus Berhasil");
-            } else { showToast("ID atau Password Salah!", "fa-circle-xmark", "text-red-500"); }
+            } else { 
+                showToast("ID atau Password Salah!", "fa-circle-xmark", "text-red-500"); 
+            }
         }
 
         function successLogin(msg, isReload = false) {
@@ -1012,13 +1021,18 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
             document.getElementById('menu-download-file').classList.remove('hidden');
             document.getElementById('spp-dashboard-btn').classList.remove('hidden'); 
             document.getElementById('spp-dashboard-btn').classList.add('flex');
-            document.getElementById('sidebar-role').innerText = currentUserRole === 'admin' ? "Super Admin" : "Pengurus TPQ";
             
             const sel = document.getElementById('admin-kategori');
             const btnKas = document.getElementById('btn-laporan-kas');
             
-            if (currentUserRole === 'admin') {
-                // Tampilan Admin Murni (Kas Dihilangkan)
+            // Ganti nama label di menu samping
+            let labelRole = "Pengurus TPQ";
+            if (currentUserRole === 'admin') labelRole = "Super Admin";
+            else if (currentUserRole === 'bendahara') labelRole = "Bendahara TPQ";
+            document.getElementById('sidebar-role').innerText = labelRole;
+
+            // --- MENU UNTUK ADMIN DAN BENDAHARA (BISA AKSES BUKU KAS) ---
+            if (currentUserRole === 'admin' || currentUserRole === 'bendahara') {
                 sel.innerHTML = `
                     <option value="santri">Tambah Santri</option>
                     <option value="pengurus">Tambah Pengurus</option>
@@ -1026,27 +1040,35 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
                     <option value="pengumuman">Informasi Pengumuman</option>
                     <option value="kebutuhan">Kebutuhan TPQ</option>
                     <option value="spp">Input Pembayaran SPP</option>
+                    <option value="kas">💰 Buku Kas Keuangan</option>
                     <option value="jadwal">Atur Jadwal Pelajaran</option>
                     <option value="nilai">Input Nilai Santri</option>
                     <option value="notif-spp">📣 Kirim Notif Tagihan SPP</option>`;
-                if(document.getElementById('dashboard-admin-tools')) document.getElementById('dashboard-admin-tools').classList.remove('hidden');
-                if(btnKas) { btnKas.classList.add('hidden'); btnKas.classList.remove('flex'); }
-
-            } else { 
-                // Tampilan Pengurus (Menu Kas Muncul)
+                
+                // Munculkan Tombol Kas di Dashboard
+                if(btnKas) { btnKas.classList.remove('hidden'); btnKas.classList.add('flex'); }
+                
+                // Tombol Download Excel Santri hanya untuk Admin Murni
+                if(document.getElementById('dashboard-admin-tools')) {
+                    if (currentUserRole === 'admin') document.getElementById('dashboard-admin-tools').classList.remove('hidden');
+                    else document.getElementById('dashboard-admin-tools').classList.add('hidden');
+                }
+            } 
+            // --- MENU UNTUK PENGURUS BIASA/USTADZ (BUKU KAS DIHILANGKAN) ---
+            else { 
                 sel.innerHTML = `
                     <option value="santri">Tambah Santri</option>
                     <option value="pengurus">Tambah Pengurus</option>
                     <option value="pengumuman">Informasi Pengumuman</option>
                     <option value="kebutuhan">Kebutuhan TPQ</option>
                     <option value="spp">Input Pembayaran SPP</option>
-                    <option value="kas">💰 Buku Kas Keuangan</option>
+                    <option value="nilai">Input Nilai Santri</option>
                     <option value="notif-spp">📣 Kirim Notif Tagihan SPP</option>`;
                 
-                if(document.getElementById('dashboard-admin-tools')) document.getElementById('dashboard-admin-tools').classList.add('hidden');
+                // Sembunyikan Tombol Kas di Dashboard
                 if(btnKas) { btnKas.classList.remove('hidden'); btnKas.classList.add('flex'); }
+                if(document.getElementById('dashboard-admin-tools')) document.getElementById('dashboard-admin-tools').classList.add('hidden');
             }
-
             document.getElementById('internal-content-locked').classList.add('hidden');
             document.getElementById('internal-content-open').classList.remove('hidden');
             document.getElementById('badge-internal').classList.replace('bg-gray-100', 'bg-orange-100');
@@ -2033,7 +2055,7 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
 
             html += `</tbody></table></div>`;
             
-            if (isAdminActive) {
+            if (currentUserRole === 'bendahara') {
                 html += `
                 <div class="mt-8 pt-6 border-t border-dashed border-gray-300 flex flex-col gap-3 items-center">
                     <button onclick="resetBukuKasSmart()" class="w-full text-blue-600 bg-blue-50 px-4 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition shadow-sm border border-blue-100">
