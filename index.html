@@ -428,7 +428,7 @@
             </div>
         </div>
 
-                <div id="tab-panel" class="p-6 space-y-6">
+        <div id="tab-panel" class="p-6 space-y-6">
             
             <div class="bg-emerald-50 border border-emerald-100 p-5 rounded-3xl shadow-sm flex items-start gap-4 relative overflow-hidden">
                 <div class="absolute -right-2 -top-2 opacity-5 text-6xl text-emerald-900"><i class="fa-solid fa-quote-right"></i></div>
@@ -927,7 +927,7 @@
                 masterData.spp = Array.isArray(data.spp) ? data.spp : [];
                 masterData.jadwal = Array.isArray(data.jadwal) ? data.jadwal : [];
                 masterData.nilai = Array.isArray(data.nilai) ? data.nilai : [];
-masterData.kas = Array.isArray(data.kas) ? data.kas : [];
+                masterData.kas = Array.isArray(data.kas) ? data.kas : [];
 
                 updateDashboardStats();
                 updateDropdownKelas();
@@ -988,13 +988,12 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
             const user = document.getElementById('input-username').value;
             const pass = document.getElementById('input-password').value;
             
-            const _u1 = "YWRtaW50cHE=";       // admintpq
-            const _p1 = "YWRtaW50cHExMjM=";   // admintpq123
-            const _u2 = "UGVuZ3VydXN0cHE=";   // Pengurustpq
-            const _p2 = "UGVuZ3VydXN0cHExMjM="; // Pengurustpq123
-            // INI KUNCI BARU KHUSUS BENDAHARA
-            const _u3 = "YmVuZGFoYXJhdHBx";   // bendaharatpq
-            const _p3 = "YmVuZGFoYXJhMTIz";   // bendahara123
+            const _u1 = "YWRtaW50cHE=";       
+            const _p1 = "YWRtaW50cHExMjM=";   
+            const _u2 = "UGVuZ3VydXN0cHE=";   
+            const _p2 = "UGVuZ3VydXN0cHExMjM="; 
+            const _u3 = "YmVuZGFoYXJhdHBx";   
+            const _p3 = "YmVuZGFoYXJhMTIz";   
 
             if (btoa(user) === _u1 && btoa(pass) === _p1) {
                 currentUserRole = 'admin'; isAdminActive = true; successLogin("Login Admin Berhasil");
@@ -1025,13 +1024,11 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
             const sel = document.getElementById('admin-kategori');
             const btnKas = document.getElementById('btn-laporan-kas');
             
-            // Ganti nama label di menu samping
             let labelRole = "Pengurus TPQ";
             if (currentUserRole === 'admin') labelRole = "Super Admin";
             else if (currentUserRole === 'bendahara') labelRole = "Bendahara TPQ";
             document.getElementById('sidebar-role').innerText = labelRole;
 
-            // --- MENU UNTUK ADMIN DAN BENDAHARA (BISA AKSES BUKU KAS) ---
             if (currentUserRole === 'admin' || currentUserRole === 'bendahara') {
                 sel.innerHTML = `
                     <option value="santri">Tambah Santri</option>
@@ -1045,16 +1042,13 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
                     <option value="nilai">Input Nilai Santri</option>
                     <option value="notif-spp">📣 Kirim Notif Tagihan SPP</option>`;
                 
-                // Munculkan Tombol Kas di Dashboard
                 if(btnKas) { btnKas.classList.remove('hidden'); btnKas.classList.add('flex'); }
                 
-                // Tombol Download Excel Santri hanya untuk Admin Murni
                 if(document.getElementById('dashboard-admin-tools')) {
                     if (currentUserRole === 'admin') document.getElementById('dashboard-admin-tools').classList.remove('hidden');
                     else document.getElementById('dashboard-admin-tools').classList.add('hidden');
                 }
             } 
-            // --- MENU UNTUK PENGURUS BIASA/USTADZ (BUKU KAS DIHILANGKAN) ---
             else { 
                 sel.innerHTML = `
                     <option value="santri">Tambah Santri</option>
@@ -1065,7 +1059,6 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
                     <option value="nilai">Input Nilai Santri</option>
                     <option value="notif-spp">📣 Kirim Notif Tagihan SPP</option>`;
                 
-                // Sembunyikan Tombol Kas di Dashboard
                 if(btnKas) { btnKas.classList.remove('hidden'); btnKas.classList.add('flex'); }
                 if(document.getElementById('dashboard-admin-tools')) document.getElementById('dashboard-admin-tools').classList.add('hidden');
             }
@@ -1140,8 +1133,6 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
             let endpoint = '/add-' + kat;
             let payload = {};
 
-            // --- KODE BARU: LOGIKA SIMPAN KAS 2 KOLOM ---
-                        // LOGIKA SIMPAN KAS KE CLOUDFLARE
             if(kat === 'kas') {
                 const tgl = document.getElementById('in-kas-tgl').value;
                 const ket = document.getElementById('in-kas-ket').value;
@@ -1151,14 +1142,10 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
                 if(!tgl || !ket) { showToast("Tanggal & Keterangan wajib diisi!", "fa-warning", "text-red-500"); btn.innerHTML = originalText; return; }
                 if(masuk === 0 && keluar === 0) { showToast("Isi minimal salah satu nominal!", "fa-warning", "text-red-500"); btn.innerHTML = originalText; return; }
 
-                // Kita pakai payload untuk fetch di bawah
                 endpoint = '/add-kas';
                 payload = { tgl: tgl, ket: ket, masuk: masuk, keluar: keluar };
                 
-                // Jangan pakai return di sini, biarkan meluncur ke script fetch di bawahnya
-            }
-
-            if(kat === 'santri') {
+            } else if(kat === 'santri') {
                 const d = document.getElementById('in-tgl-d').value;
                 const m = document.getElementById('in-tgl-m').value;
                 const y = document.getElementById('in-tgl-y').value;
@@ -1178,11 +1165,9 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
                 
                 const tglNilai = document.getElementById('in-nilai-tgl').value;
                 
-                // Cek Mapel (Lainnya atau Normal)
                 let mapelVal = document.getElementById('in-nilai-mapel').value;
                 if (mapelVal === 'LAINNYA') { mapelVal = document.getElementById('in-nilai-mapel-input').value; }
                 
-                // Cek Materi (Otomatis atau Manual)
                 const autoDiv = document.getElementById('mode-materi-otomatis');
                 let materiVal = "";
                 if (autoDiv && !autoDiv.classList.contains('hidden')) {
@@ -1201,7 +1186,6 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
                     btn.innerHTML = originalText; return;
                 }
                 
-                // Gabungkan tanggal dengan nama materi
                 const formatTgl = tglNilai.split('-').reverse().join('/');
                 const materiGabung = materiVal + " (" + formatTgl + ")";
 
@@ -1233,9 +1217,8 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
                     const currentMapelInput = document.getElementById('in-nilai-mapel-input') ? document.getElementById('in-nilai-mapel-input').value : "";
                     const currentTingkat = document.getElementById('in-nilai-tingkat') ? document.getElementById('in-nilai-tingkat').value : "";
                     
-                    e.target.reset(); // Bersihkan Form
+                    e.target.reset(); 
                     
-                    // Kembalikan Posisi
                     document.getElementById('admin-kategori').value = currentKat;
                     changeAdminForm(); 
                     
@@ -1405,7 +1388,53 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
             container.classList.remove('hidden');
         }
 
-        function handleSearch(q) { if(currentModalState.type === 'santri_list') renderSantriList(currentModalState.tab, q); }
+        function handleSearch(q) { 
+            const query = q.toLowerCase();
+
+            if (currentModalState.type === 'santri_list') {
+                renderSantriList(currentModalState.tab, query);
+            } 
+            else if (currentModalState.type === 'spp_list') {
+                const activeSantri = (masterData.santri || []).filter(s => s.status === 'Aktif');
+                const lockMsg = document.getElementById('privacy-lock-spp');
+                let hasMatch = false;
+
+                activeSantri.forEach(s => {
+                    const card = document.getElementById(`card-spp-${s.id}`);
+                    if(card) {
+                        if (query.length < 2 && !isAdminActive) {
+                            card.style.display = 'none'; 
+                        } else {
+                            const match = s.nama.toLowerCase().includes(query) || s.kelas.toLowerCase().includes(query);
+                            card.style.display = match ? 'flex' : 'none';
+                            if (match) hasMatch = true;
+                        }
+                    }
+                });
+
+                if (!isAdminActive && lockMsg) lockMsg.style.display = (query.length < 2 || !hasMatch) ? 'block' : 'none';
+            } 
+            else if (currentModalState.type === 'nilai_santri_list') {
+                const filtered = (masterData.santri || []).filter(s => s.kelas === currentModalState.kelas && s.status === 'Aktif');
+                const lockMsg = document.getElementById('privacy-lock-nilai');
+                let hasMatch = false;
+
+                filtered.forEach((s) => { 
+                    const card = document.getElementById(`card-nilai-${s.id}`);
+                    if(card) {
+                        if (query.length < 2 && !isAdminActive) {
+                            card.style.display = 'none';
+                        } else {
+                            const match = s.nama.toLowerCase().includes(query);
+                            card.style.display = match ? 'flex' : 'none';
+                            if (match) hasMatch = true;
+                        }
+                    }
+                });
+                
+                if (!isAdminActive && lockMsg) lockMsg.style.display = (query.length < 2 || !hasMatch) ? 'block' : 'none';
+            }
+        }
 
         function renderSantriList(statusTab, searchQuery = "") {
             currentModalState = { type: 'santri_list', tab: statusTab };
@@ -1440,7 +1469,6 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
                 : ['Jilid 1', 'Jilid 2', 'Jilid 3', 'Jilid 4', 'Jilid 5', 'Jilid 6', 'Al-Qur\'an'];
             
             if (isAdminActive) {
-                // ADMIN: Tampilkan Dropdown untuk Pindah Kelas Langsung
                 statusKelasHTML = `
                     <div class="mt-2 flex flex-col items-center justify-center">
                         <div class="relative inline-block">
@@ -1453,7 +1481,6 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
                         <p class="text-[8px] text-gray-400 mt-1.5 italic">*Klik kolom kelas di atas untuk memindah kelas</p>
                     </div>`;
             } else {
-                // TAMU / WALI SANTRI: Tampilkan teks biasa (tidak bisa diedit)
                 if (s.kelas === 'Belum Ditentukan' || !s.kelas || s.kelas === 'BELUM DITENTUKAN') {
                     statusKelasHTML = `<p class="text-xs font-bold text-orange-600 uppercase tracking-widest mt-2 bg-orange-50 px-3 py-1 rounded-full inline-block border border-orange-200">Belum Ada Kelas</p>`;
                 } else {
@@ -1501,7 +1528,6 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
             
             let html = '<div class="grid grid-cols-2 gap-3">';
             
-            // NEW: Tombol Tambah Pengurus Baru (Hanya muncul jika Admin/Pengurus Aktif)
             if (isAdminActive) {
                 html += `
                 <div onclick="closeMasterModal(); switchTab('admin'); document.getElementById('admin-kategori').value='pengurus'; changeAdminForm();" 
@@ -1553,7 +1579,6 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
             setupModalUI(kelasName, `Wali: ${waliName}`, true, false, false);
             const filtered = (masterData.santri || []).filter(s => s.kelas === kelasName && s.status === 'Aktif');
             
-            // Cari ID Kelas di database untuk fitur hapus
             const kelasObj = masterData.kelas.find(k => k.nama === kelasName);
             const kelasId = kelasObj ? kelasObj.id : null;
 
@@ -1565,7 +1590,6 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
             
             html += '</div>';
 
-            // Tambahkan tombol Hapus Kelas khusus untuk Admin
             if (isAdminActive && kelasId) {
                 html += `<button onclick="hapusData('kelas', ${kelasId})" class="w-full text-white bg-red-500 font-black text-[10px] py-3 mt-8 uppercase hover:bg-red-600 transition rounded-xl shadow-md active:scale-95"><i class="fa-solid fa-trash mr-1"></i> Hapus Kelas Ini</button>`;
             }
@@ -1576,7 +1600,6 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
         function renderSppList() {
             currentModalState = { type: 'spp_list' };
             
-            // Jika yang akses adalah ADMIN/PENGURUS, tampilkan alat manajemen SPP
             if (isAdminActive) {
                 setupModalUI("Manajemen SPP", "Status Pembayaran Santri", false, true, false);
                 const content = document.getElementById('modal-master-content');
@@ -1594,7 +1617,6 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
                 content.innerHTML = html;
                 renderSppData("Triwulan 1"); 
             } 
-            // Jika yang akses adalah WALI SANTRI (TAMU), tampilkan pesan Pengembangan
             else {
                 setupModalUI("Info Pembayaran SPP", "Status Fitur", false, false, false);
                 const content = document.getElementById('modal-master-content');
@@ -1621,7 +1643,6 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
             const activeSantri = (masterData.santri || []).filter(s => s.status === 'Aktif');
             
             let html = '';
-            // Tampilan Gembok Privasi untuk Tamu
             if (!isAdminActive) {
                 html = `<div id="privacy-lock-spp" class="text-center py-8"><i class="fa-solid fa-lock text-4xl text-gray-200 mb-3 block"></i><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Mode Privasi Aktif</p><p class="text-xs font-bold text-gray-500 mt-2">Ketik nama anak Anda di kolom pencarian (atas) untuk melihat data SPP.</p></div>`;
             }
@@ -1634,38 +1655,13 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
                 }
                 const btnClass = isLunas ? "bg-emerald-500 text-white shadow-emerald-500/30" : "bg-gray-100 text-gray-400 border border-gray-300";
                 
-                // Sembunyikan default jika bukan admin
                 const displayStyle = isAdminActive ? "flex" : "none"; 
+                // KODE BARU: Mengamankan tanda kutip di SPP
+                const namaAman = s.nama.replace(/'/g, "\\'");
                 
-                html += `<div class="bg-white p-3.5 rounded-xl border ${isLunas ? 'border-emerald-200' : 'border-gray-200'} shadow-sm items-center justify-between transition-all" id="card-spp-${s.id}" style="display: ${displayStyle};"><div class="flex-1"><p class="font-black text-xs text-gray-800">${s.nama}</p><p class="text-[9px] text-gray-500 font-bold uppercase mt-0.5">Kelas ${s.kelas}</p></div><button onclick="${isAdminActive ? `toggleSpp('${s.nama}', '${triwulan}', ${isLunas})` : `void(0)`}" class="${btnClass} px-3 py-1.5 rounded-lg text-[9px] font-black uppercase flex items-center gap-1.5 active:scale-95 transition-all shadow-sm">${isLunas ? '<i class="fa-solid fa-check"></i> LUNAS' : '<i class="fa-solid fa-clock"></i> BELUM'}</button></div>`;
+                html += `<div class="bg-white p-3.5 rounded-xl border ${isLunas ? 'border-emerald-200' : 'border-gray-200'} shadow-sm items-center justify-between transition-all" id="card-spp-${s.id}" style="display: ${displayStyle};"><div class="flex-1"><p class="font-black text-xs text-gray-800">${s.nama}</p><p class="text-[9px] text-gray-500 font-bold uppercase mt-0.5">Kelas ${s.kelas}</p></div><button onclick="${isAdminActive ? `toggleSpp('${namaAman}', '${triwulan}', ${isLunas})` : `void(0)`}" class="${btnClass} px-3 py-1.5 rounded-lg text-[9px] font-black uppercase flex items-center gap-1.5 active:scale-95 transition-all shadow-sm">${isLunas ? '<i class="fa-solid fa-check"></i> LUNAS' : '<i class="fa-solid fa-clock"></i> BELUM'}</button></div>`;
             });
             area.innerHTML = html;
-            
-            const searchInput = document.getElementById('modal-search-input');
-            if(searchInput) {
-                searchInput.oninput = (e) => {
-                    const q = e.target.value.toLowerCase();
-                    const lockMsg = document.getElementById('privacy-lock-spp');
-                    let hasMatch = false;
-                    
-                    activeSantri.forEach(s => {
-                        const card = document.getElementById(`card-spp-${s.id}`);
-                        if(card) {
-                            if (q.length < 2 && !isAdminActive) {
-                                card.style.display = 'none'; // Sembunyikan lagi jika teks dihapus
-                            } else {
-                                const match = s.nama.toLowerCase().includes(q) || s.kelas.toLowerCase().includes(q);
-                                card.style.display = match ? 'flex' : 'none';
-                                if (match) hasMatch = true;
-                            }
-                        }
-                    });
-                    
-                    if (!isAdminActive && lockMsg) {
-                        lockMsg.style.display = (q.length < 2 || !hasMatch) ? 'block' : 'none';
-                    }
-                };
-            }
         }
 
         async function toggleSpp(nama, bulan, cur) {
@@ -1718,20 +1714,17 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
             }
             const data = window.activeSchedules.find(s => s.tipe === tipe);
             
-            // Jika jadwal kosong
             if(!data) { 
                 area.innerHTML = '<div class="text-center py-10 opacity-40 text-xs font-bold uppercase"><i class="fa-solid fa-calendar-xmark text-3xl mb-2 block"></i> Belum ada jadwal</div>'; 
                 return; 
             }
             
-            // Jika jadwal ada, render isinya
             let res = '<div class="bg-white rounded-3xl p-5 border space-y-3 mb-4">';
             data.konten.split('\n').forEach(item => {
                 if(item.trim()) res += `<div class="flex items-center gap-3 border-b border-gray-50 pb-2 last:border-0"><i class="fa-solid fa-check text-blue-500 text-[10px]"></i><p class="text-sm font-bold text-gray-700">${item}</p></div>`;
             });
             res += '</div>';
 
-            // Tambahkan tombol Hapus khusus untuk Admin
             if (isAdminActive && data.id) {
                 res += `<button onclick="hapusData('jadwal', ${data.id})" class="w-full text-white bg-red-500 font-black text-[10px] py-3 uppercase hover:bg-red-600 transition rounded-xl shadow-md active:scale-95"><i class="fa-solid fa-trash mr-1"></i> Hapus Jadwal Ini</button>`;
             }
@@ -1762,42 +1755,25 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
             html += '<div class="space-y-2">';
             filtered.forEach(s => {
                 const displayStyle = isAdminActive ? "flex" : "none";
-                html += `<div id="card-nilai-${s.id}" style="display: ${displayStyle};" onclick="renderNilaiAkhir('${s.nama}')" class="bg-white p-4 rounded-xl border items-center justify-between cursor-pointer hover:bg-purple-50 hover:border-purple-200 transition"><p class="font-black text-xs text-gray-800">${s.nama}</p><i class="fa-solid fa-chevron-right text-gray-300"></i></div>`;
+                // KODE BARU: Mengamankan tanda kutip di Nilai
+                const namaAman = s.nama.replace(/'/g, "\\'"); 
+                
+                html += `<div id="card-nilai-${s.id}" style="display: ${displayStyle};" onclick="renderNilaiAkhir('${namaAman}')" class="bg-white p-4 rounded-xl border items-center justify-between cursor-pointer hover:bg-purple-50 hover:border-purple-200 transition"><p class="font-black text-xs text-gray-800">${s.nama}</p><i class="fa-solid fa-chevron-right text-gray-300"></i></div>`;
             });
             document.getElementById('modal-master-content').innerHTML = html + '</div>';
-            
-            document.getElementById('modal-search-input').oninput = (e) => {
-                const q = e.target.value.toLowerCase();
-                const lockMsg = document.getElementById('privacy-lock-nilai');
-                let hasMatch = false;
-                
-                filtered.forEach((s) => { 
-                    const card = document.getElementById(`card-nilai-${s.id}`);
-                    if(card) {
-                        if (q.length < 2 && !isAdminActive) {
-                            card.style.display = 'none';
-                        } else {
-                            const match = s.nama.toLowerCase().includes(q);
-                            card.style.display = match ? 'flex' : 'none';
-                            if (match) hasMatch = true;
-                        }
-                    }
-                });
-                
-                if (!isAdminActive && lockMsg) {
-                    lockMsg.style.display = (q.length < 2 || !hasMatch) ? 'block' : 'none';
-                }
-            };
         }
 
         function renderNilaiAkhir(nama) {
             currentModalState = { type: 'nilai_akhir', namaSantri: nama };
             setupModalUI("Hasil Studi", nama, true, false, false);
-            const records = (masterData.nilai || []).filter(n => n.nama.toLowerCase() === nama.toLowerCase());
+            
+            const records = (masterData.nilai || []).filter(n => (n.nama || "").trim().toLowerCase() === nama.trim().toLowerCase());
+            
             if(!records.length) {
                 document.getElementById('modal-master-content').innerHTML = `<div class="text-center py-10"><i class="fa-solid fa-file-excel text-4xl text-gray-200 mb-2 block"></i><p class="text-xs font-bold text-gray-400 uppercase">Belum ada data nilai</p></div>`;
                 return;
             }
+            
             const mapelGroups = {};
             records.forEach(r => {
                 let mapelKey = (r.mapel || "Lainnya").trim().toUpperCase(); 
@@ -1805,62 +1781,37 @@ masterData.kas = Array.isArray(data.kas) ? data.kas : [];
                 mapelGroups[mapelKey].push(r);
             });
             
-            let html = '<div class="space-y-5">';
+            let html = '<div class="space-y-4">';
             for(const mapel in mapelGroups) {
-                const mapelKapital = mapel.toUpperCase(); 
-                
                 html += `
-                <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                    <div class="bg-purple-50 px-4 py-3 border-b border-purple-100 flex justify-between items-center">
-                        <div>
-                            <p class="text-[10px] font-bold text-purple-600 capitalize">Mata pelajaran</p>
-                            <p class="text-sm font-black text-gray-800">${mapelKapital}</p>
+                <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-4">
+                    <div class="bg-gradient-to-r from-purple-50 to-white px-4 py-3 border-b border-purple-100 flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center"><i class="fa-solid fa-book-open text-xs"></i></div>
+                            <div>
+                                <p class="text-[9px] font-black text-purple-600 uppercase tracking-widest">Kategori Pelajaran</p>
+                                <p class="text-sm font-black text-gray-800">${mapel}</p>
+                            </div>
                         </div>
+                        <span class="text-[10px] font-black bg-white px-2 py-1 rounded-lg text-purple-600 border border-purple-100 shadow-sm">${mapelGroups[mapel].length} Data</span>
                     </div>
                     <div class="p-2 space-y-1">`;
                 
                 mapelGroups[mapel].forEach(materiItem => {
-                    let skorClass = 'text-emerald-600 bg-emerald-50 border-emerald-200'; 
-                    let teksSkor = materiItem.skor; 
-                    
-                    if (materiItem.skor === 'L-') {
-                        skorClass = 'text-red-600 bg-red-50 border-red-200';
-                    } else if (materiItem.skor === '0') {
-                        skorClass = 'text-orange-600 bg-orange-50 border-orange-200';
-                        teksSkor = 'ALPA'; 
-                    }
-                    
+                    const isBad = materiItem.skor === 'L-';
                     let namaBab = materiItem.materi;
-                    if (!namaBab || namaBab === 'null' || namaBab.trim() === '') { namaBab = 'EVALUASI UMUM'; }
-                    
-                    let tglTeks = "";
-                    let materiTeks = namaBab.toUpperCase(); 
-                    
-                    if (namaBab.includes("(") && namaBab.endsWith(")")) {
-                        const parts = namaBab.split(" (");
-                        tglTeks = parts.pop().replace(")", ""); 
-                        materiTeks = parts.join(" (").toUpperCase();
-                    }
-                    
-                                        let teksTampilanHtml = "";
-                    if (tglTeks !== "") {
-                        teksTampilanHtml = `<span class="text-purple-600 mr-1.5">${tglTeks}</span> <span class="font-black text-[11px]">${materiTeks}</span>`;
-                    } else {
-                        teksTampilanHtml = `<span class="font-black text-[11px]">${materiTeks}</span>`;
-                    }
+                    if (!namaBab || namaBab === 'null' || namaBab.trim() === '') { namaBab = 'Evaluasi Umum'; }
                     const btnHapus = isAdminActive 
-                        ? `<button onclick="hapusData('nilai', ${materiItem.id})" class="w-7 h-7 bg-red-50 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition flex items-center justify-center ml-2"><i class="fa-solid fa-trash text-[10px]"></i></button>` 
+                        ? `<button onclick="hapusData('nilai', ${materiItem.id})" class="w-7 h-7 bg-red-50 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition flex items-center justify-center ml-2 shrink-0"><i class="fa-solid fa-trash text-[10px]"></i></button>` 
                         : '';
-                        
                     html += `
-                        <div class="flex justify-between items-center p-3 hover:bg-gray-50 rounded-xl transition border-b border-gray-50 last:border-0">
-                            <div class="flex items-center gap-2">
-                                <i class="fa-solid fa-book-open text-gray-300 text-[10px]"></i>
-                                <span class="text-[10px] text-gray-700 tracking-wide">${teksTampilanHtml}</span>
+                        <div class="flex justify-between items-center p-3 hover:bg-gray-50 rounded-xl transition border border-transparent hover:border-gray-100">
+                            <div class="flex items-center gap-3 pr-2">
+                                <i class="fa-solid fa-file-lines text-gray-300"></i>
+                                <span class="text-xs font-bold text-gray-700 leading-snug">${namaBab}</span>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-[9px] font-black text-gray-400 uppercase italic">NILAI</span>
-                                <span class="px-2 py-1 rounded border font-black text-[10px] shadow-sm ${skorClass}">${teksSkor}</span>
+                            <div class="flex items-center shrink-0">
+                                <span class="px-3 py-1 rounded-lg border font-black text-[10px] shadow-sm uppercase tracking-wider ${isBad ? 'text-red-600 bg-red-50 border-red-200' : 'text-emerald-600 bg-emerald-50 border-emerald-200'}">${materiItem.skor}</span>
                                 ${btnHapus}
                             </div>
                         </div>`;
