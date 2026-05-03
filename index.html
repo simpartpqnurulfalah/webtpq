@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -640,7 +641,7 @@
                     </div>
 
                     <div id="form-pengurus" class="space-y-4 pt-2 border-t border-gray-100 hidden">
-                        <input type="text" id="in-pengurus-nama" class="input-box-light w-full p-3 text-sm font-bold" placeholder="Nama Pengurus">
+                        <input type="text" id="in-pengurus-nama" class="input-box-light w-full p-3 text-sm font-bold" placeholder="Nama Lengkap Pengurus/Ustadz">
                         <select id="in-pengurus-kat" class="input-box-light w-full p-3 text-sm font-bold">
                             <option value="Ustadz/Pengajar">Ustadz/Pengajar</option>
                             <option value="Kesantrian">Kesantrian</option>
@@ -650,7 +651,21 @@
                             <option value="Sarpras">Sarpras</option>
                             <option value="Bendahara">Bendahara</option>
                         </select>
-                        <input type="text" id="in-pengurus-hp" class="input-box-light w-full p-3 text-sm font-bold" placeholder="Kontak">
+                        <input type="number" id="in-pengurus-nik" class="input-box-light w-full p-3 text-sm font-bold" placeholder="NIK (Nomor Induk Kependudukan)">
+                        <input type="text" id="in-pengurus-ttl" class="input-box-light w-full p-3 text-sm font-bold" placeholder="Tempat, Tanggal Lahir">
+                        <textarea id="in-pengurus-alamat-lengkap" class="input-box-light w-full p-3 text-sm font-bold h-20" placeholder="Alamat Lengkap"></textarea>
+                        <select id="in-pengurus-agama" class="input-box-light w-full p-3 text-sm font-bold">
+                            <option value="Islam">Agama: Islam</option>
+                            <option value="Lainnya">Lainnya</option>
+                        </select>
+                        <select id="in-pengurus-kawin" class="input-box-light w-full p-3 text-sm font-bold">
+                            <option value="">-- Status Perkawinan --</option>
+                            <option value="Belum Kawin">Belum Kawin</option>
+                            <option value="Kawin">Kawin</option>
+                            <option value="Cerai Hidup">Cerai Hidup</option>
+                            <option value="Cerai Mati">Cerai Mati</option>
+                        </select>
+                        <input type="text" id="in-pengurus-hp" class="input-box-light w-full p-3 text-sm font-bold" placeholder="Nomor HP / Kontak Aktif">
                     </div>
 
                     <div id="form-kelas" class="space-y-4 pt-2 border-t border-gray-100 hidden">
@@ -1221,7 +1236,16 @@
             } else if(kat === 'kebutuhan') {
                 payload = { nama: document.getElementById('input-keb-nama').value, skala: document.getElementById('input-keb-skala').value, keterangan: document.getElementById('input-keb-ket').value };
             } else if(kat === 'pengurus') {
-                payload = { nama: document.getElementById('in-pengurus-nama').value, kategori: document.getElementById('in-pengurus-kat').value, alamat: document.getElementById('in-pengurus-hp').value };
+                payload = { 
+                    nama: document.getElementById('in-pengurus-nama').value, 
+                    kategori: document.getElementById('in-pengurus-kat').value, 
+                    alamat: document.getElementById('in-pengurus-hp').value,
+                    nik: document.getElementById('in-pengurus-nik') ? document.getElementById('in-pengurus-nik').value : '',
+                    ttl: document.getElementById('in-pengurus-ttl') ? document.getElementById('in-pengurus-ttl').value : '',
+                    alamat_lengkap: document.getElementById('in-pengurus-alamat-lengkap') ? document.getElementById('in-pengurus-alamat-lengkap').value : '',
+                    agama: document.getElementById('in-pengurus-agama') ? document.getElementById('in-pengurus-agama').value : '',
+                    status_kawin: document.getElementById('in-pengurus-kawin') ? document.getElementById('in-pengurus-kawin').value : ''
+                };
             } else if(kat === 'kelas') {
                 payload = { nama: document.getElementById('in-kelas-nama').value, wali: document.getElementById('in-kelas-wali').value };
             } else if(kat === 'notif-spp') {
@@ -1590,7 +1614,26 @@
             if(filtered.length === 0) { document.getElementById('modal-master-content').innerHTML = '<div class="text-center py-10 text-gray-400 font-bold text-xs uppercase">Kosong.</div>'; return; }
             let html = '<div class="space-y-3">';
             filtered.forEach(p => {
-                html += `<div class="bg-white p-5 rounded-2xl border border-gray-200 flex flex-col gap-3"><div class="flex items-center gap-3 border-b border-gray-100 pb-3"><div class="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center text-white"><i class="fa-solid fa-user-tie"></i></div><div><p class="font-black text-sm text-gray-800 leading-tight">${p.nama}</p><p class="text-[10px] text-emerald-600 font-bold uppercase tracking-widest mt-0.5">${p.kategori}</p></div></div><div class="text-xs font-bold text-gray-600 pl-2"><i class="fa-solid fa-location-dot text-gray-400 w-4"></i> ${isAdminActive ? p.alamat : '*** (Mode Pribadi)'}</div>${isAdminActive ? `<button onclick="hapusData('pengurus_data', ${p.id})" class="text-[10px] font-black text-red-500 bg-red-50 py-2 rounded-xl mt-1 uppercase hover:bg-red-100">Hapus Data</button>` : ''}</div>`;
+                let detailData = '';
+                if(isAdminActive) {
+                    let detailArr = [];
+                    if(p.nik) detailArr.push(`<b>NIK:</b> ${p.nik}`);
+                    if(p.ttl) detailArr.push(`<b>TTL:</b> ${p.ttl}`);
+                    if(p.agama) detailArr.push(`<b>Agama:</b> ${p.agama}`);
+                    if(p.status_kawin) detailArr.push(`<b>Status Perkawinan:</b> ${p.status_kawin}`);
+                    if(p.alamat_lengkap) detailArr.push(`<b>Alamat:</b> ${p.alamat_lengkap}`);
+                    if(p.alamat) detailArr.push(`<b>Kontak:</b> ${p.alamat}`);
+                    
+                    if(detailArr.length > 0) {
+                        detailData = `<div class="text-[11px] text-gray-600 pl-2 mt-1 space-y-1">${detailArr.map(d => `<p>${d}</p>`).join('')}</div>`;
+                    } else {
+                        detailData = `<div class="text-xs font-bold text-gray-600 pl-2"><i class="fa-solid fa-location-dot text-gray-400 w-4"></i> ${p.alamat}</div>`;
+                    }
+                } else {
+                    detailData = `<div class="text-xs font-bold text-gray-600 pl-2"><i class="fa-solid fa-location-dot text-gray-400 w-4"></i> *** (Mode Pribadi)</div>`;
+                }
+
+                html += `<div class="bg-white p-5 rounded-2xl border border-gray-200 flex flex-col gap-3"><div class="flex items-center gap-3 border-b border-gray-100 pb-3"><div class="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center text-white"><i class="fa-solid fa-user-tie"></i></div><div><p class="font-black text-sm text-gray-800 leading-tight">${p.nama}</p><p class="text-[10px] text-emerald-600 font-bold uppercase tracking-widest mt-0.5">${p.kategori}</p></div></div>${detailData}${isAdminActive ? `<button onclick="hapusData('pengurus_data', ${p.id})" class="text-[10px] font-black text-red-500 bg-red-50 py-2 rounded-xl mt-1 uppercase hover:bg-red-100">Hapus Data</button>` : ''}</div>`;
             });
             document.getElementById('modal-master-content').innerHTML = html + '</div>';
         }
@@ -2208,6 +2251,7 @@
                 btn.className = "mt-3 w-full py-2 bg-white rounded-xl text-[9px] font-black text-emerald-600 uppercase shadow-sm border border-emerald-100 active:scale-95 transition";
             }
         }
+
     </script>
 </body>
-</html> 
+</html>
