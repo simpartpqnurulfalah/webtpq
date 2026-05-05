@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -1206,7 +1205,7 @@
                 } else if (autoDiv && !autoDiv.classList.contains('hidden')) {
                     const tingkat = document.getElementById('in-nilai-tingkat').value;
                     const hal = document.getElementById('in-nilai-halaman').value;
-                    let separator = tingkat.includes('BAB') || tingkat.includes('SURAH') ? " " : " HAL halaman ";
+                    let separator = tingkat.includes('BAB') || tingkat.includes('SURAH') ? " " : " HAL ";
                     materiVal = tingkat + separator + hal;
                 } else {
                     materiVal = document.getElementById('in-nilai-materi-manual').value;
@@ -1342,10 +1341,18 @@
             const kelasOptions = (masterData.kelas || []).map(k => `<option value="${k.nama}">${k.nama}</option>`).join('');
             ['in-kelas', 'in-jadwal-kelas-select'].forEach(id => {
                 const el = document.getElementById(id); 
-                if(el) el.innerHTML = kelasOptions || '<option>Belum ada kelas</option>';
+                if(el) {
+                    const currentVal = el.value;
+                    el.innerHTML = kelasOptions || '<option>Belum ada kelas</option>';
+                    if(currentVal) el.value = currentVal;
+                }
             });
             const filterNilai = document.getElementById('in-nilai-kelas-filter');
-            if (filterNilai) filterNilai.innerHTML = '<option value="">-- Semua Kelas --</option>' + (kelasOptions || '');
+            if (filterNilai) {
+                const currentFilterVal = filterNilai.value;
+                filterNilai.innerHTML = '<option value="">-- Semua Kelas --</option>' + (kelasOptions || '');
+                if(currentFilterVal) filterNilai.value = currentFilterVal;
+            }
         }
 
         function renderPublicAnnouncements() {
