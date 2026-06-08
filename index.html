@@ -605,7 +605,9 @@
             </div>
 
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-200">
-                <form class="space-y-5" onsubmit="handleAdminSubmit(event)">
+                <form class="space-y-5" id="admin-main-form" onsubmit="handleAdminSubmit(event)">
+                    <input type="hidden" id="edit-nilai-id" value="">
+                    
                     <div>
                         <label class="text-[10px] font-black text-gray-600 uppercase mb-2 block">Pilih Kategori Input</label>
                         <select id="admin-kategori" class="input-box-light w-full p-3 text-sm font-bold text-gray-800 outline-none" onchange="changeAdminForm()">
@@ -715,7 +717,18 @@
                         <textarea id="in-jadwal-konten" class="input-box-light w-full p-3 text-sm font-bold h-32" placeholder="Contoh: Senin: Tajwid & Fiqh"></textarea>
                     </div>
 
-                    <div id="form-nilai" class="space-y-4 pt-2 border-t border-gray-100 hidden">
+                    <div id="form-nilai" class="space-y-4 pt-2 border-t border-gray-100 hidden relative">
+                        <div id="edit-nilai-indicator" class="hidden bg-blue-50 border border-blue-200 p-3 rounded-2xl mb-4 flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-pen-to-square text-blue-600"></i>
+                                <div>
+                                    <p class="text-[10px] font-black text-blue-800 uppercase leading-none">Mode Edit Nilai</p>
+                                    <p class="text-[8px] font-bold text-blue-600 uppercase mt-1">Mengubah data sebelumnya</p>
+                                </div>
+                            </div>
+                            <button type="button" onclick="batalEditNilai()" class="text-[9px] font-black text-red-500 hover:text-red-700 bg-white px-2 py-1 rounded shadow-sm border border-red-100">Batal Edit</button>
+                        </div>
+                        
                         <div class="bg-purple-50 p-3 rounded-2xl border border-purple-100 mb-2">
                             <label class="text-[10px] font-black text-purple-800 uppercase mb-1 block"><i class="fa-solid fa-filter mr-1"></i> 1. Filter Kelas</label>
                             <select id="in-nilai-kelas-filter" class="input-box-light w-full p-2.5 text-sm font-bold text-purple-900 border-purple-200 outline-none focus:border-purple-500" onchange="filterSantriByKelasForNilai()">
@@ -1136,12 +1149,23 @@
 
         function changeAdminForm() {
             const val = document.getElementById('admin-kategori').value;
+            
+            if(val !== 'nilai') {
+                const editIdInput = document.getElementById('edit-nilai-id');
+                if(editIdInput && editIdInput.value) batalEditNilai();
+            }
+
             ['form-santri','form-pengurus','form-kelas','form-spp','form-jadwal','form-nilai','form-pengumuman','form-kebutuhan','form-notif-spp','form-kas'].forEach(id => {
                 const el = document.getElementById(id); if(el) el.classList.add('hidden');
             });
             const target = document.getElementById('form-'+val); if(target) target.classList.remove('hidden');
             const btn = document.getElementById('btn-submit-admin');
-            if(val === 'notif-spp') {
+            
+            const editIdInput = document.getElementById('edit-nilai-id');
+            if (val === 'nilai' && editIdInput && editIdInput.value) {
+                btn.innerHTML = '<i class="fa-solid fa-save"></i> Simpan Perubahan Nilai';
+                btn.className = "w-full py-4 bg-blue-600 text-white font-black uppercase rounded-2xl shadow-lg active:scale-95 transition mt-4";
+            } else if(val === 'notif-spp') {
                 btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim Notif ke Wali';
                 btn.className = "w-full py-4 bg-blue-600 text-white font-black uppercase rounded-2xl shadow-lg active:scale-95 transition mt-4";
             } else {
@@ -1228,7 +1252,13 @@
                 const formatTgl = tglNilai.split('-').reverse().join('/');
                 const materiGabung = materiVal + " (" + formatTgl + ")";
 
-                payload = { nama: selNama.value, kelas: selectedKelas, mapel: mapelVal, materi: materiGabung, skor: skorVal };
+                const editId = document.getElementById('edit-nilai-id').value;
+                if(editId) {
+                    endpoint = '/update-data';
+                    payload = { tabel: 'nilai', id: editId, data: { nama: selNama.value, kelas: selectedKelas, mapel: mapelVal, materi: materiGabung, skor: skorVal } };
+                } else {
+                    payload = { nama: selNama.value, kelas: selectedKelas, mapel: mapelVal, materi: materiGabung, skor: skorVal };
+                }
             } else if(kat === 'pengumuman') {
                 endpoint = '/add-info';
                 payload = { judul: document.getElementById('in-judul').value, isi: document.getElementById('in-isi').value, target: 'wali_santri', target_notif: document.getElementById('in-target-notif').value };
@@ -1256,7 +1286,8 @@
             try {
                 const res = await fetch(WORKER_URL + endpoint, { method: 'POST', body: JSON.stringify(payload) });
                 if(res.ok) { 
-                    showToast(kat === 'notif-spp' ? "Notif Berhasil Dikirim!" : "Data Berhasil Disimpan!"); 
+                    const isEditMode = (kat === 'nilai' && document.getElementById('edit-nilai-id').value !== '');
+                    showToast(kat === 'notif-spp' ? "Notif Berhasil Dikirim!" : (isEditMode ? "Perubahan Disimpan!" : "Data Berhasil Disimpan!")); 
                     
                     const currentKat = document.getElementById('admin-kategori').value;
                     const currentKelasFilter = document.getElementById('in-nilai-kelas-filter') ? document.getElementById('in-nilai-kelas-filter').value : "";
@@ -1265,7 +1296,8 @@
                     const currentMapelInput = document.getElementById('in-nilai-mapel-input') ? document.getElementById('in-nilai-mapel-input').value : "";
                     const currentTingkat = document.getElementById('in-nilai-tingkat') ? document.getElementById('in-nilai-tingkat').value : "";
                     
-                    e.target.reset(); 
+                    if (isEditMode) batalEditNilai();
+                    else e.target.reset(); 
                     
                     document.getElementById('admin-kategori').value = currentKat;
                     changeAdminForm(); 
@@ -1273,19 +1305,22 @@
                     if (currentKat === 'nilai') {
                         document.getElementById('in-nilai-kelas-filter').value = currentKelasFilter;
                         filterSantriByKelasForNilai(); 
-                        document.getElementById('in-nilai-tgl').value = currentTglNilai;
-                        document.getElementById('in-nilai-mapel').value = currentMapel;
-                        if(document.getElementById('in-nilai-tingkat')) document.getElementById('in-nilai-tingkat').value = currentTingkat;
                         
-                        if(currentMapel === 'LAINNYA') {
-                            document.getElementById('in-nilai-mapel-input').classList.remove('hidden');
-                            document.getElementById('in-nilai-mapel-input').value = currentMapelInput;
+                        if(!isEditMode) {
+                            document.getElementById('in-nilai-tgl').value = currentTglNilai;
+                            document.getElementById('in-nilai-mapel').value = currentMapel;
+                            if(document.getElementById('in-nilai-tingkat')) document.getElementById('in-nilai-tingkat').value = currentTingkat;
+                            
+                            if(currentMapel === 'LAINNYA') {
+                                document.getElementById('in-nilai-mapel-input').classList.remove('hidden');
+                                document.getElementById('in-nilai-mapel-input').value = currentMapelInput;
+                            }
+                            
+                            cekMapelLainnya(currentMapel);
                         }
                         
-                        cekMapelLainnya(currentMapel);
-                        
                         const inputAngka = document.getElementById('in-nilai-skor-angka');
-                        if (inputAngka) {
+                        if (inputAngka && !isEditMode) {
                             inputAngka.classList.add('hidden');
                             inputAngka.value = '';
                         }
@@ -1298,7 +1333,9 @@
             } catch(err) { 
                 showToast("Error Koneksi", "fa-wifi", "text-red-500"); 
             }
-            finally { btn.innerHTML = originalText; }
+            finally { 
+                btn.innerHTML = document.getElementById('edit-nilai-id').value ? '<i class="fa-solid fa-save"></i> Simpan Perubahan Nilai' : (kat === 'notif-spp' ? '<i class="fa-solid fa-paper-plane"></i> Kirim Notif ke Wali' : 'Simpan / Publikasikan');
+            }
         }
 
         async function saveKebutuhanQuick() {
@@ -1903,6 +1940,11 @@
                     const btnHapus = isAdminActive 
                         ? `<button onclick="hapusData('nilai', ${materiItem.id})" class="w-7 h-7 bg-red-50 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition flex items-center justify-center ml-2 shrink-0"><i class="fa-solid fa-trash text-[10px]"></i></button>` 
                         : '';
+                        
+                    const btnEdit = isAdminActive
+                        ? `<button onclick='editNilaiSantri(${JSON.stringify(materiItem).replace(/'/g, "&#39;")})' class="w-7 h-7 bg-blue-50 text-blue-500 rounded-lg hover:bg-blue-500 hover:text-white transition flex items-center justify-center ml-1 shrink-0"><i class="fa-solid fa-pen text-[10px]"></i></button>`
+                        : '';
+
                     html += `
                         <div class="flex justify-between items-center p-3 hover:bg-gray-50 rounded-xl transition border border-transparent hover:border-gray-100">
                             <div class="flex items-center gap-3 pr-2">
@@ -1911,6 +1953,7 @@
                             </div>
                             <div class="flex items-center shrink-0">
                                 <span class="px-3 py-1 rounded-lg border font-black text-[10px] shadow-sm uppercase tracking-wider ${badgeClass}">${skorTeks}</span>
+                                ${btnEdit}
                                 ${btnHapus}
                             </div>
                         </div>`;
@@ -1918,6 +1961,123 @@
                 html += `</div></div>`;
             }
             document.getElementById('modal-master-content').innerHTML = html + '</div>';
+        }
+        
+        function editNilaiSantri(data) {
+            closeMasterModal();
+            switchTab('admin');
+            document.getElementById('admin-kategori').value = 'nilai';
+            changeAdminForm();
+            
+            document.getElementById('edit-nilai-id').value = data.id;
+            document.getElementById('edit-nilai-indicator').classList.remove('hidden');
+            
+            document.getElementById('in-nilai-kelas-filter').value = data.kelas || "";
+            filterSantriByKelasForNilai();
+            
+            setTimeout(() => {
+                document.getElementById('in-nilai-nama').value = data.nama;
+            }, 100);
+            
+            if(data.materi && data.materi.includes('(') && data.materi.includes(')')) {
+                const tglMatch = data.materi.match(/\((.*?)\)/);
+                if(tglMatch && tglMatch[1]) {
+                    const parts = tglMatch[1].split('/');
+                    if(parts.length === 3) {
+                        document.getElementById('in-nilai-tgl').value = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                    }
+                }
+            }
+
+            const mapelSelect = document.getElementById('in-nilai-mapel');
+            let mapelDitemukan = false;
+            for(let i=0; i < mapelSelect.options.length; i++) {
+                if(mapelSelect.options[i].value === data.mapel) {
+                    mapelDitemukan = true; break;
+                }
+            }
+            
+            if(mapelDitemukan) {
+                mapelSelect.value = data.mapel;
+                cekMapelLainnya(data.mapel);
+            } else {
+                mapelSelect.value = 'LAINNYA';
+                cekMapelLainnya('LAINNYA');
+                document.getElementById('in-nilai-mapel-input').value = data.mapel;
+            }
+
+            const skorSelect = document.getElementById('in-nilai-skor');
+            if(data.skor === 'L+' || data.skor === 'L-' || data.skor === '0') {
+                skorSelect.value = data.skor;
+                cekSkorAngka(data.skor);
+            } else {
+                skorSelect.value = 'ANGKA';
+                cekSkorAngka('ANGKA');
+                document.getElementById('in-nilai-skor-angka').value = data.skor;
+            }
+
+            let materiTeks = data.materi ? data.materi.split(' (')[0] : "";
+            
+            if(data.mapel === "Al-Qur'an") {
+                if(materiTeks.includes('Juz ')) {
+                    let parts = materiTeks.split(' Ayat ');
+                    document.getElementById('in-nilai-juz').value = parts[0];
+                    document.getElementById('in-nilai-ayat').value = parts[1] || "";
+                }
+            } else {
+                let diprosesOtomatis = false;
+                const optTingkat = document.getElementById('in-nilai-tingkat').options;
+                
+                for(let i=0; i < optTingkat.length; i++) {
+                    const valTingkat = optTingkat[i].value;
+                    if(materiTeks.startsWith(valTingkat)) {
+                        document.getElementById('in-nilai-tingkat').value = valTingkat;
+                        
+                        let sisaMateri = materiTeks.replace(valTingkat, '').trim();
+                        sisaMateri = sisaMateri.replace(/^HAL /i, '').trim();
+                        
+                        if(!isNaN(sisaMateri) && sisaMateri !== "") {
+                            document.getElementById('in-nilai-halaman').value = sisaMateri;
+                            diprosesOtomatis = true;
+                        }
+                        break;
+                    }
+                }
+                
+                if(!diprosesOtomatis) {
+                    const autoDiv = document.getElementById('mode-materi-otomatis');
+                    if(!autoDiv.classList.contains('hidden')) {
+                        toggleMateriMode(); 
+                    }
+                    document.getElementById('in-nilai-materi-manual').value = materiTeks;
+                } else {
+                    const autoDiv = document.getElementById('mode-materi-otomatis');
+                    if(autoDiv.classList.contains('hidden')) {
+                        toggleMateriMode(); 
+                    }
+                }
+            }
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        function batalEditNilai() {
+            document.getElementById('edit-nilai-id').value = '';
+            document.getElementById('edit-nilai-indicator').classList.add('hidden');
+            
+            const btn = document.getElementById('btn-submit-admin');
+            btn.innerHTML = 'Simpan / Publikasikan';
+            btn.className = "w-full py-4 bg-emerald-600 text-white font-black uppercase rounded-2xl shadow-lg active:scale-95 transition mt-4";
+            
+            document.getElementById('admin-main-form').reset();
+            
+            cekMapelLainnya(document.getElementById('in-nilai-mapel').value);
+            cekSkorAngka(document.getElementById('in-nilai-skor').value);
+            
+            const autoDiv = document.getElementById('mode-materi-otomatis');
+            if(autoDiv.classList.contains('hidden') && document.getElementById('in-nilai-mapel').value !== "Al-Qur'an") {
+                toggleMateriMode(); 
+            }
         }
 
         function downloadExcelData() {
