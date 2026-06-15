@@ -6,7 +6,7 @@
     <link rel="apple-touch-icon" href="https://i.ibb.co.com/JRx6VXCf/fix-logo-tpq-png.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TPQ Nurul Falah | Management System</title>
+    <title>Madrasah Diniyah Takmiliyah | Management System</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
@@ -203,7 +203,7 @@
                 <i class="fa-solid fa-download animate-bounce"></i>
             </div>
             <h3 class="text-xl font-black text-gray-800 mb-1 uppercase italic">Pasang Aplikasi</h3>
-            <p class="text-[11px] font-bold text-gray-500 mb-6 leading-relaxed">Agar lebih mudah mengecek nilai dan SPP, pasang aplikasi TPQ Nurul Falah di layar utama HP Anda sekarang.</p>
+            <p class="text-[11px] font-bold text-gray-500 mb-6 leading-relaxed">Agar lebih mudah mengecek nilai dan SPP, pasang aplikasi Madrasah Diniyah Takmiliyah Nurul Falah di layar utama HP Anda sekarang.</p>
             <div class="flex flex-col gap-3">
                 <button onclick="executePwaInstall()" class="w-full py-4 bg-emerald-600 text-white font-black uppercase rounded-2xl shadow-xl active:scale-95 transition">
                     Ya, Pasang Sekarang
@@ -221,7 +221,7 @@
                 <i class="fa-solid fa-user-plus text-4xl text-white"></i>
             </div>
             <h1 class="text-2xl font-black italic glow-text tracking-tighter uppercase mb-1 text-white">Form Biodata Santri</h1>
-            <p class="text-[10px] text-white/70 uppercase tracking-widest leading-relaxed">Silakan isi data putra/putri Anda dengan benar untuk database TPQ Nurul Falah.</p>
+            <p class="text-[10px] text-white/70 uppercase tracking-widest leading-relaxed">Silakan isi data putra/putri Anda dengan benar untuk database Madrasah Diniyah Takmiliyah Nurul Falah.</p>
         </div>
 
         <div class="login-card w-full max-w-md p-8 shadow-2xl">
@@ -410,7 +410,7 @@
                 <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-white p-0.5 border border-emerald-100 overflow-hidden">
                     <img src="https://i.ibb.co.com/JRx6VXCf/fix-logo-tpq-png.png" alt="Logo TPQ" class="w-full h-full object-contain">
                 </div>
-                <h1 class="text-lg font-black italic uppercase tracking-tighter text-gray-800">TPQ Nurul Falah</h1>
+                <h1 class="text-lg font-black italic uppercase tracking-tighter text-gray-800">MDT Nurul Falah</h1>
             </div>
             <div id="admin-indicator" class="hidden w-10 h-10 rounded-full bg-yellow-400 flex items-center justify-center text-emerald-900 shadow-sm">
                 <i class="fa-solid fa-crown text-sm"></i>
@@ -784,6 +784,12 @@
                                     <select id="in-nilai-halaman" class="input-box-light w-full p-2.5 text-[11px] font-bold text-gray-800">
                                         <script>for(let i=1;i<=150;i++) document.write('<option value="'+i+'">'+i+'</option>');</script>
                                     </select>
+                                    <select id="in-nilai-bagian" class="input-box-light w-auto p-2.5 text-[11px] font-bold text-gray-800">
+                                        <option value="">Full</option>
+                                        <option value="1/2">1/2</option>
+                                        <option value="1/4">1/4</option>
+                                        <option value="3/4">3/4</option>
+                                    </select>
                                 </div>
                             </div>
 
@@ -808,6 +814,8 @@
                                 <option value="L+">✅ L+ (Nilai Baik / Lulus)</option>
                                 <option value="L-">❌ L- (Kurang Baik / Mengulang)</option>
                                 <option value="0">⚠️ 0 (Tidak Berangkat / ALPA)</option>
+                                <option value="IJIN">🟨 IJIN (Tidak Berangkat)</option>
+                                <option value="ALFA">🟥 ALFA (Tanpa Keterangan)</option>
                                 <option value="ANGKA">🔢 Nilai Angka (Ulangan/Ujian)</option>
                             </select>
                             <input type="number" id="in-nilai-skor-angka" class="input-box-light w-full p-3 text-sm font-bold text-blue-700 hidden mt-2 border-blue-200" placeholder="Ketik Nilai Angka (Misal: 85, 90, 100)">
@@ -1218,23 +1226,6 @@
                 let mapelVal = document.getElementById('in-nilai-mapel').value;
                 if (mapelVal === 'LAINNYA') { mapelVal = document.getElementById('in-nilai-mapel-input').value; }
                 
-                const autoDiv = document.getElementById('mode-materi-otomatis');
-                const quranDiv = document.getElementById('mode-materi-alquran');
-                let materiVal = "";
-
-                if (mapelVal === "Al-Qur'an") {
-                    const juz = document.getElementById('in-nilai-juz').value;
-                    const ayat = document.getElementById('in-nilai-ayat').value;
-                    materiVal = juz + (ayat ? " Ayat " + ayat : "");
-                } else if (autoDiv && !autoDiv.classList.contains('hidden')) {
-                    const tingkat = document.getElementById('in-nilai-tingkat').value;
-                    const hal = document.getElementById('in-nilai-halaman').value;
-                    let separator = tingkat.includes('BAB') || tingkat.includes('SURAH') ? " " : " HAL ";
-                    materiVal = tingkat + separator + hal;
-                } else {
-                    materiVal = document.getElementById('in-nilai-materi-manual').value;
-                }
-
                 let skorVal = document.getElementById('in-nilai-skor').value;
                 if (skorVal === 'ANGKA') {
                     skorVal = document.getElementById('in-nilai-skor-angka').value;
@@ -1242,6 +1233,26 @@
                         showToast("Kolom nilai angka wajib diisi!", "fa-warning", "text-red-500");
                         btn.innerHTML = originalText; return;
                     }
+                }
+
+                let materiVal = "";
+                const autoDiv = document.getElementById('mode-materi-otomatis');
+                const quranDiv = document.getElementById('mode-materi-alquran');
+
+                if (skorVal === 'IJIN' || skorVal === 'ALFA') {
+                    materiVal = "Tidak Mengikuti Pelajaran";
+                } else if (mapelVal === "Al-Qur'an") {
+                    const juz = document.getElementById('in-nilai-juz').value;
+                    const ayat = document.getElementById('in-nilai-ayat').value;
+                    materiVal = juz + (ayat ? " Ayat " + ayat : "");
+                } else if (autoDiv && !autoDiv.classList.contains('hidden')) {
+                    const tingkat = document.getElementById('in-nilai-tingkat').value;
+                    const hal = document.getElementById('in-nilai-halaman').value;
+                    const bagian = document.getElementById('in-nilai-bagian') ? document.getElementById('in-nilai-bagian').value : "";
+                    let separator = tingkat.includes('BAB') || tingkat.includes('SURAH') ? " " : " HAL ";
+                    materiVal = tingkat + separator + hal + (bagian ? " " + bagian : "");
+                } else {
+                    materiVal = document.getElementById('in-nilai-materi-manual').value;
                 }
 
                 if(!selNama.value || !mapelVal || !materiVal.trim() || !tglNilai || !skorVal) {
@@ -1254,8 +1265,16 @@
 
                 const editId = document.getElementById('edit-nilai-id').value;
                 if(editId) {
-                    endpoint = '/update-data';
-                    payload = { tabel: 'nilai', id: editId, data: { nama: selNama.value, kelas: selectedKelas, mapel: mapelVal, materi: materiGabung, skor: skorVal } };
+                    try {
+                        await fetch(`${WORKER_URL}/delete-data`, { 
+                            method: 'POST', 
+                            headers: { 'Content-Type': 'application/json' }, 
+                            body: JSON.stringify({ tabel: 'nilai', id: editId }) 
+                        });
+                    } catch(e) { console.error("Hapus data lama gagal", e); }
+                    
+                    endpoint = '/add-nilai';
+                    payload = { nama: selNama.value, kelas: selectedKelas, mapel: mapelVal, materi: materiGabung, skor: skorVal };
                 } else {
                     payload = { nama: selNama.value, kelas: selectedKelas, mapel: mapelVal, materi: materiGabung, skor: skorVal };
                 }
@@ -1291,6 +1310,7 @@
                     
                     const currentKat = document.getElementById('admin-kategori').value;
                     const currentKelasFilter = document.getElementById('in-nilai-kelas-filter') ? document.getElementById('in-nilai-kelas-filter').value : "";
+                    const currentNamaSantri = document.getElementById('in-nilai-nama') ? document.getElementById('in-nilai-nama').value : "";
                     const currentTglNilai = document.getElementById('in-nilai-tgl') ? document.getElementById('in-nilai-tgl').value : "";
                     const currentMapel = document.getElementById('in-nilai-mapel') ? document.getElementById('in-nilai-mapel').value : "";
                     const currentMapelInput = document.getElementById('in-nilai-mapel-input') ? document.getElementById('in-nilai-mapel-input').value : "";
@@ -1302,11 +1322,18 @@
                     document.getElementById('admin-kategori').value = currentKat;
                     changeAdminForm(); 
                     
+                    await loadData(); 
+                    
                     if (currentKat === 'nilai') {
                         document.getElementById('in-nilai-kelas-filter').value = currentKelasFilter;
                         filterSantriByKelasForNilai(); 
                         
                         if(!isEditMode) {
+                            setTimeout(() => { 
+                                const elNama = document.getElementById('in-nilai-nama');
+                                if(elNama) elNama.value = currentNamaSantri; 
+                            }, 100);
+                            
                             document.getElementById('in-nilai-tgl').value = currentTglNilai;
                             document.getElementById('in-nilai-mapel').value = currentMapel;
                             if(document.getElementById('in-nilai-tingkat')) document.getElementById('in-nilai-tingkat').value = currentTingkat;
@@ -1325,7 +1352,6 @@
                             inputAngka.value = '';
                         }
                     }
-                    await loadData(); 
                 }
                 else { 
                     showToast("Gagal memproses", "fa-xmark", "text-red-500"); 
@@ -1928,6 +1954,10 @@
                         badgeClass = 'text-red-600 bg-red-50 border-red-200';
                     } else if (skorTeks === '0') {
                         badgeClass = 'text-gray-500 bg-gray-50 border-gray-200';
+                    } else if (skorTeks === 'ALFA') {
+                        badgeClass = 'text-red-700 bg-red-100 border-red-300';
+                    } else if (skorTeks === 'IJIN') {
+                        badgeClass = 'text-yellow-700 bg-yellow-100 border-yellow-300';
                     } else if (!isNaN(skorTeks)) {
                         let nilaiAngka = parseInt(skorTeks);
                         if (nilaiAngka < 70) {
@@ -2007,7 +2037,7 @@
             }
 
             const skorSelect = document.getElementById('in-nilai-skor');
-            if(data.skor === 'L+' || data.skor === 'L-' || data.skor === '0') {
+            if(data.skor === 'L+' || data.skor === 'L-' || data.skor === '0' || data.skor === 'IJIN' || data.skor === 'ALFA') {
                 skorSelect.value = data.skor;
                 cekSkorAngka(data.skor);
             } else {
@@ -2024,7 +2054,7 @@
                     document.getElementById('in-nilai-juz').value = parts[0];
                     document.getElementById('in-nilai-ayat').value = parts[1] || "";
                 }
-            } else {
+            } else if(data.skor !== 'IJIN' && data.skor !== 'ALFA') {
                 let diprosesOtomatis = false;
                 const optTingkat = document.getElementById('in-nilai-tingkat').options;
                 
@@ -2036,8 +2066,17 @@
                         let sisaMateri = materiTeks.replace(valTingkat, '').trim();
                         sisaMateri = sisaMateri.replace(/^HAL /i, '').trim();
                         
-                        if(!isNaN(sisaMateri) && sisaMateri !== "") {
-                            document.getElementById('in-nilai-halaman').value = sisaMateri;
+                        let arrSisa = sisaMateri.split(' ');
+                        let halVal = arrSisa[0];
+                        let bagianVal = arrSisa.length > 1 ? arrSisa.slice(1).join(' ') : "";
+                        
+                        if(!isNaN(halVal) && halVal !== "") {
+                            document.getElementById('in-nilai-halaman').value = halVal;
+                            if(document.getElementById('in-nilai-bagian') && bagianVal) {
+                                document.getElementById('in-nilai-bagian').value = bagianVal;
+                            } else if (document.getElementById('in-nilai-bagian')) {
+                                document.getElementById('in-nilai-bagian').value = "";
+                            }
                             diprosesOtomatis = true;
                         }
                         break;
@@ -2398,6 +2437,33 @@
             } else {
                 inputAngka.classList.add('hidden'); 
                 inputAngka.value = '';
+            }
+
+            const mapel = document.getElementById('in-nilai-mapel').value;
+            if(val === 'IJIN' || val === 'ALFA') {
+                const autoDiv = document.getElementById('mode-materi-otomatis');
+                const quranDiv = document.getElementById('mode-materi-alquran');
+                const btnToggle = document.getElementById('btn-toggle-materi');
+                const manualInp = document.getElementById('in-nilai-materi-manual');
+                
+                if(autoDiv) autoDiv.classList.add('hidden');
+                if(quranDiv) quranDiv.classList.add('hidden');
+                if(btnToggle) btnToggle.classList.add('hidden');
+                
+                if(manualInp) {
+                    manualInp.classList.remove('hidden');
+                    manualInp.value = 'Tidak Mengikuti Pelajaran';
+                    manualInp.setAttribute('readonly', 'true');
+                    manualInp.classList.add('bg-gray-100', 'text-gray-500');
+                }
+            } else {
+                const manualInp = document.getElementById('in-nilai-materi-manual');
+                if(manualInp) {
+                    manualInp.removeAttribute('readonly');
+                    manualInp.classList.remove('bg-gray-100', 'text-gray-500');
+                    if (manualInp.value === 'Tidak Mengikuti Pelajaran') manualInp.value = '';
+                }
+                cekMapelLainnya(mapel);
             }
         }
 
