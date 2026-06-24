@@ -214,6 +214,7 @@
         </div>
     </div>
 
+    <!-- PHASE PENDAFTARAN PUBLIC -->
     <div id="phase-pendaftaran" class="hidden min-h-screen flex flex-col items-center justify-center p-6 animate-fadeIn pb-24">
         <div class="mb-8 flex flex-col items-center text-center">
             <div class="w-20 h-20 border-[3px] border-white rounded-[25px] flex items-center justify-center p-3 mb-6 shadow-2xl bg-white/10">
@@ -279,6 +280,7 @@
                     </div>
                 </div>
 
+                <!-- DROPDOWN WILAYAH BERTINGKAT PUBLIC -->
                 <div>
                     <label class="text-[10px] font-black uppercase italic tracking-widest ml-4 opacity-80">Provinsi</label>
                     <div class="input-box flex items-center px-5 py-3 mt-1">
@@ -335,6 +337,7 @@
         </div>
     </div>
 
+    <!-- PHASE LANDING -->
     <div id="phase-landing" class="animate-fadeIn">
         <nav class="sticky top-4 z-50 mx-4">
             <div class="glass-card px-4 py-3 flex justify-between items-center bg-white/10 border-white/20">
@@ -404,6 +407,7 @@
         </main>
     </div>
 
+    <!-- PHASE LOGIN -->
     <div id="phase-login" class="hidden min-h-screen flex flex-col items-center justify-center p-6 animate-fadeIn">
         <div class="mb-8 flex flex-col items-center">
             <div class="w-20 h-20 border-[3px] border-white rounded-[25px] flex items-center justify-center p-3 mb-6 shadow-2xl bg-white/10">
@@ -440,6 +444,7 @@
         </div>
     </div>
 
+    <!-- PHASE DASHBOARD -->
     <div id="phase-dashboard" class="hidden min-h-screen animate-fadeIn pb-32">
         <div class="bg-white sticky top-0 z-40 px-6 py-4 flex items-center justify-between border-b border-gray-100 shadow-sm">
             <button onclick="toggleSidebar()" class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-700 text-lg shadow-sm active:scale-95 transition">
@@ -549,6 +554,7 @@
                 </div>
             </div>
 
+            <!-- KEBUTUHAN TPQ -->
             <div id="info-internal-box" class="bg-white p-5 rounded-3xl shadow-sm border border-gray-100">
                 <div class="flex justify-between items-center mb-4">
                     <div class="flex items-center gap-2">
@@ -620,6 +626,7 @@
             </div>
         </div>
 
+        <!-- FORM INTERNAL INPUT ADMIN -->
         <div id="tab-admin" class="hidden p-6 space-y-6">
             <div class="flex items-center gap-3 mb-2">
                 <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center">
@@ -641,6 +648,7 @@
                         </select>
                     </div>
 
+                    <!-- FORM SANTRI (ADMIN MODE) -->
                     <div id="form-santri" class="space-y-4 pt-2 border-t border-gray-100 hidden">
                         <input type="number" id="in-nik" class="input-box-light w-full p-3 text-sm font-bold" placeholder="NIK Santri (16 Digit)">
                         <input type="text" id="in-nama" class="input-box-light w-full p-3 text-sm font-bold" placeholder="Nama Lengkap Santri">
@@ -664,6 +672,7 @@
                             </div>
                         </div>
 
+                        <!-- CASCADING REGENCY FOR SANTRI -->
                         <select id="in-prov" class="input-box-light w-full p-3 text-sm font-bold"><option value="">Memuat Provinsi...</option></select>
                         <select id="in-kab" class="input-box-light w-full p-3 text-sm font-bold"><option value="">-- Pilih Provinsi Dahulu --</option></select>
                         <select id="in-kec" class="input-box-light w-full p-3 text-sm font-bold"><option value="">-- Pilih Kabupaten Dahulu --</option></select>
@@ -680,6 +689,7 @@
                         </div>
                     </div>
 
+                    <!-- FORM USTADZ / PENGURUS -->
                     <div id="form-pengurus" class="space-y-4 pt-2 border-t border-gray-100 hidden">
                         <input type="number" id="in-pengurus-nik" class="input-box-light w-full p-3 text-sm font-bold" placeholder="NIK Pengurus/Ustadz (16 Digit)">
                         <input type="text" id="in-pengurus-nama" class="input-box-light w-full p-3 text-sm font-bold" placeholder="Nama Lengkap">
@@ -712,6 +722,7 @@
                             </div>
                         </div>
 
+                        <!-- CASCADING REGENCY FOR PENGURUS -->
                         <select id="in-pengurus-prov" class="input-box-light w-full p-3 text-sm font-bold"><option value="">Memuat Provinsi...</option></select>
                         <select id="in-pengurus-kab" class="input-box-light w-full p-3 text-sm font-bold"><option value="">-- Pilih Provinsi Dahulu --</option></select>
                         <select id="in-pengurus-kec" class="input-box-light w-full p-3 text-sm font-bold"><option value="">-- Pilih Kabupaten Dahulu --</option></select>
@@ -735,11 +746,13 @@
                         <input type="text" id="in-pengurus-hp" class="input-box-light w-full p-3 text-sm font-bold" placeholder="Nomor HP Aktif WhatsApp">
                     </div>
 
+                    <!-- FORM KELAS -->
                     <div id="form-kelas" class="space-y-4 pt-2 border-t border-gray-100 hidden">
                         <input type="text" id="in-kelas-nama" class="input-box-light w-full p-3 text-sm font-bold" placeholder="Contoh: Kelas A1">
                         <input type="text" id="in-kelas-wali" class="input-box-light w-full p-3 text-sm font-bold" placeholder="Contoh: Ustadzah Fatimah (Ruang 1)">
                     </div>
 
+                    <!-- FORM PENGUMUMAN -->
                     <div id="form-pengumuman" class="space-y-4 pt-2 border-t border-gray-100 hidden">
                         <input type="text" id="in-judul" class="input-box-light w-full p-3 text-sm font-bold" placeholder="Judul Pengumuman">
                         <textarea id="in-isi" class="input-box-light w-full p-3 text-sm font-bold h-24" placeholder="Isi Pesan"></textarea>
@@ -750,6 +763,7 @@
                         </select>
                     </div>
 
+                    <!-- FORM KEBUTUHAN -->
                     <div id="form-kebutuhan" class="space-y-4 pt-2 border-t border-gray-100 hidden">
                         <input type="text" id="input-keb-nama" class="input-box-light w-full p-3 text-sm font-bold" placeholder="Nama Kebutuhan">
                         <select id="input-keb-skala" class="input-box-light w-full p-3 text-sm font-bold">
@@ -760,6 +774,7 @@
                         <textarea id="input-keb-ket" class="input-box-light w-full p-3 text-sm font-bold h-20" placeholder="Keterangan Rincian"></textarea>
                     </div>
 
+                    <!-- FORM SPP -->
                     <div id="form-spp" class="space-y-4 pt-2 border-t border-gray-100 hidden">
                         <select id="in-spp-nama" class="input-box-light w-full p-3 text-sm font-bold"></select>
                         <div class="grid grid-cols-2 gap-3">
@@ -774,6 +789,7 @@
                         <input type="number" id="in-spp-jumlah" class="input-box-light w-full p-3 text-sm font-bold" placeholder="Jumlah (Rp)">
                     </div>
 
+                    <!-- FORM JADWAL -->
                     <div id="form-jadwal" class="space-y-4 pt-2 border-t border-gray-100 hidden">
                         <select id="in-jadwal-kelas-select" class="input-box-light w-full p-3 text-sm font-bold"></select>
                         <select id="in-jadwal-tipe" class="input-box-light w-full p-3 text-sm font-bold">
@@ -783,6 +799,7 @@
                         <textarea id="in-jadwal-konten" class="input-box-light w-full p-3 text-sm font-bold h-32" placeholder="Contoh: Senin: Tajwid & Fiqh"></textarea>
                     </div>
 
+                    <!-- FORM EVALUASI NILAI -->
                     <div id="form-nilai" class="space-y-4 pt-2 border-t border-gray-100 hidden relative">
                         <div id="edit-nilai-indicator" class="hidden bg-blue-50 border border-blue-200 p-3 rounded-2xl mb-4 flex justify-between items-center">
                             <div class="flex items-center gap-2">
@@ -881,6 +898,7 @@
                         </div>
                     </div>
 
+                    <!-- FORM NOTIF TAGIHAN SPP -->
                     <div id="form-notif-spp" class="space-y-4 pt-2 border-t border-gray-100 hidden">
                         <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
                             <p class="text-xs font-bold text-blue-800 leading-relaxed mb-2">Tombol ini akan mengirimkan notifikasi PUSH ke seluruh HP Wali Santri untuk segera melunasi SPP.</p>
@@ -897,6 +915,7 @@
                         </div>
                     </div>
 
+                    <!-- FORM BUKU KAS -->
                     <div id="form-kas" class="space-y-4 pt-2 border-t border-gray-100 hidden">
                         <div class="bg-emerald-50 p-3 rounded-2xl border border-emerald-100 mb-2 flex items-center gap-2">
                             <i class="fa-solid fa-wallet text-emerald-600 text-lg"></i>
@@ -936,6 +955,7 @@
         </div>
     </div>
 
+    <!-- BOTTOM MOBILE NAVIGATION -->
     <div id="bottom-nav" class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 z-[100] px-6 py-2 pb-6 shadow-2xl hidden rounded-t-[30px]">
         <div class="flex justify-between items-end relative h-14 pt-2">
             <button onclick="switchTab('panel')" class="flex flex-col items-center gap-1 w-14 text-emerald-700" id="nav-panel">
@@ -962,6 +982,7 @@
         </div>
     </div>
 
+    <!-- SIDEBAR -->
     <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 z-[200] hidden transition-opacity" onclick="toggleSidebar()"></div>
     <div id="sidebar" class="fixed top-0 left-0 w-[280px] h-full bg-white z-[210] transform -translate-x-full transition-transform duration-300 shadow-2xl flex flex-col rounded-r-[30px]">
         <div class="bg-gradient-to-b from-emerald-600 to-emerald-800 p-8 text-white rounded-br-[50px]">
@@ -985,6 +1006,7 @@
         </div>
     </div>
 
+    <!-- MAIN DYNAMIC MODAL OVERLAY -->
     <div id="modal-master-overlay" class="fixed inset-0 bg-black/60 z-[300] hidden flex items-end sm:items-center justify-center sm:p-4 backdrop-blur-sm transition-opacity">
         <div class="w-full max-w-md bg-gray-50 rounded-t-[40px] sm:rounded-[40px] shadow-2xl relative flex flex-col max-h-[90vh] animate-fadeIn">
             <div class="bg-white px-6 py-5 rounded-t-[40px] sm:rounded-t-[40px] border-b border-gray-200 flex justify-between items-center sticky top-0 z-10">
@@ -1009,6 +1031,7 @@
         </div>
     </div>
 
+    <!-- CORE SYSTEM SCRIPTS -->
     <script>
         const WORKER_URL = 'https://web-tpq.simpartpqnurulfalah.workers.dev';
         let currentUserRole = 'guest';
@@ -1035,7 +1058,25 @@
             }
         });
 
-        // REUSABLE ASYNC REGION LOADER FROM EMSIFA API
+        // REUSABLE ASYNC REGION LOADER WITH MULTI-SERVER CDN FAILOVER (FIXED ERROR)
+        async function fetchWilayahData(path) {
+            const mirrors = [
+                `https://cdn.jsdelivr.net/gh/emsifa/api-wilayah-indonesia@master/api/${path}`,
+                `https://www.emsifa.com/api-wilayah-indonesia/api/${path}`,
+                `https://emsifa.github.io/api-wilayah-indonesia/api/${path}`
+            ];
+            
+            for (let url of mirrors) {
+                try {
+                    const res = await fetch(url);
+                    if (res.ok) return await res.json();
+                } catch (e) {
+                    console.warn("Mirror wilayah gagal, mencoba cadangan server: ", url);
+                }
+            }
+            throw new Error("Semua server wilayah sibuk");
+        }
+
         async function initRegionDropdowns(provId, kabId, kecId, desId) {
             const pSel = document.getElementById(provId);
             const kSel = document.getElementById(kabId);
@@ -1046,11 +1087,12 @@
             const resetSelect = (el, txt) => { if(el) el.innerHTML = `<option value="" class="text-gray-800">-- Pilih ${txt} --</option>`; };
 
             try {
-                const res = await fetch('https://emsifa.github.io/api-wilayah-indonesia/api/provinces.json');
-                const provinces = await res.json();
+                const provinces = await fetchWilayahData('provinces.json');
                 pSel.innerHTML = '<option value="" class="text-gray-800">-- Pilih Provinsi --</option>' + 
                     provinces.map(p => `<option class="text-gray-800" value="${p.name}" data-id="${p.id}">${p.name}</option>`).join('');
-            } catch(err) { pSel.innerHTML = '<option value="" class="text-gray-800">Gagal Memuat Provinsi</option>'; }
+            } catch(err) { 
+                pSel.innerHTML = '<option value="" class="text-gray-800">Gagal Memuat Provinsi</option>'; 
+            }
 
             pSel.onchange = async () => {
                 resetSelect(kSel, 'Kabupaten'); resetSelect(cSel, 'Kecamatan'); resetSelect(dSel, 'Desa');
@@ -1058,8 +1100,7 @@
                 const id = opt.getAttribute('data-id');
                 if(!id) return;
                 try {
-                    const res = await fetch(`https://emsifa.github.io/api-wilayah-indonesia/api/regencies/${id}.json`);
-                    const data = await res.json();
+                    const data = await fetchWilayahData(`regencies/${id}.json`);
                     kSel.innerHTML = '<option value="" class="text-gray-800">-- Pilih Kabupaten --</option>' + 
                         data.map(r => `<option class="text-gray-800" value="${r.name}" data-id="${r.id}">${r.name}</option>`).join('');
                 } catch(e) {}
@@ -1071,8 +1112,7 @@
                 const id = opt.getAttribute('data-id');
                 if(!id) return;
                 try {
-                    const res = await fetch(`https://emsifa.github.io/api-wilayah-indonesia/api/districts/${id}.json`);
-                    const data = await res.json();
+                    const data = await fetchWilayahData(`districts/${id}.json`);
                     cSel.innerHTML = '<option value="" class="text-gray-800">-- Pilih Kecamatan --</option>' + 
                         data.map(c => `<option class="text-gray-800" value="${c.name}" data-id="${c.id}">${c.name}</option>`).join('');
                 } catch(e) {}
@@ -1084,8 +1124,7 @@
                 const id = opt.getAttribute('data-id');
                 if(!id) return;
                 try {
-                    const res = await fetch(`https://emsifa.github.io/api-wilayah-indonesia/api/villages/${id}.json`);
-                    const data = await res.json();
+                    const data = await fetchWilayahData(`villages/${id}.json`);
                     dSel.innerHTML = '<option value="" class="text-gray-800">-- Pilih Desa --</option>' + 
                         data.map(d => `<option class="text-gray-800" value="${d.name}">${d.name}</option>`).join('');
                 } catch(e) {}
@@ -2020,7 +2059,6 @@
             document.getElementById('modal-master-content').innerHTML = html + '</div>';
         }
 
-        // COLS FINISHED SCREEN
         function renderNilaiAkhir(nama) {
             currentModalState = { type: 'nilai_akhir', namaSantri: nama };
             setupModalUI("Hasil Studi", nama, true, false, false);
@@ -2084,7 +2122,7 @@
             document.getElementById('admin-main-form').reset();
         }
 
-        // GENERATOR DATA EXCEL MODIFICATION
+        // DOWNLOAD REPORT
         function downloadExcelData() {
             if (!masterData.santri || masterData.santri.length === 0) { showToast("Data kosong", "fa-warning", "text-red-500"); return; }
             const dataToExport = masterData.santri.map((s, index) => ({ 
@@ -2270,6 +2308,128 @@
             } else {
                 autoDiv.classList.add('hidden'); manualInp.classList.remove('hidden'); manualInp.focus();
                 btn.innerHTML = '<i class="fa-solid fa-list"></i> Ganti ke Mode Pilihan (Otomatis)';
+            }
+        }
+
+        // RENDERING IN-MODAL SHEET FORM (FIXED FOR PROVINCE ERRORS)
+        function renderSantriDetail(id, parentTab) {
+            const s = masterData.santri.find(s => s.id === id); if(!s) return;
+            currentModalState = { type: 'santri_detail', parentTab: parentTab };
+            setupModalUI("Detail Informasi Santri", "10 Kolom Standar Lengkap", true, false, false);
+            const badgeColor = s.status === 'Aktif' ? 'bg-emerald-500' : 'bg-red-500';
+            
+            const mask = (val) => isAdminActive ? (val || '-') : '*** (Mode Privasi)';
+
+            let statusKelasHTML = '';
+            const kelasList = masterData.kelas && masterData.kelas.length > 0 
+                ? masterData.kelas.map(k => k.nama) 
+                : ['Kelas A', 'Kelas B', 'Kelas C', 'Kelas D', 'Al-Qur\'an'];
+            
+            if (isAdminActive) {
+                statusKelasHTML = `
+                    <div class="mt-2 flex flex-col items-center justify-center">
+                        <div class="relative inline-block">
+                            <select id="modal-edit-kelas-top" onchange="updateKelasOtomatis(${s.id}, this.value)" class="appearance-none bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold rounded-full py-1.5 pl-4 pr-8 outline-none cursor-pointer hover:bg-emerald-100 transition text-center uppercase tracking-widest shadow-sm">
+                                <option value="Belum Ditentukan" ${!s.kelas || s.kelas === 'Belum Ditentukan' ? 'selected' : ''}>PILIH KELAS...</option>
+                                ${kelasList.map(kls => `<option value="${kls}" ${s.kelas === kls ? 'selected' : ''}>${kls}</option>`).join('')}
+                            </select>
+                            <i class="fa-solid fa-pen text-[10px] text-emerald-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                        </div>
+                    </div>`;
+            } else {
+                statusKelasHTML = `<p class="text-xs font-bold text-emerald-600 uppercase mt-2 bg-emerald-50 px-3 py-1 rounded-full inline-block">${s.kelas || 'Belum Ditentukan'}</p>`;
+            }
+
+            let fieldsBodyHTML = '';
+            if (isAdminActive) {
+                fieldsBodyHTML = `
+                <div class="space-y-3.5 pt-2">
+                    <div>
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-1">1. NIK Santri</label>
+                        <input type="number" id="modal-edit-nik" value="${s.nik || ''}" class="input-box-light w-full p-2.5 text-xs font-bold text-gray-700 outline-none focus:border-emerald-500 shadow-sm">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-1">2. Nama Lengkap Santri</label>
+                        <input type="text" id="modal-edit-nama" value="${s.nama || ''}" class="input-box-light w-full p-2.5 text-xs font-bold text-gray-700 outline-none focus:border-emerald-500 shadow-sm">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-1">3. Jenis Kelamin</label>
+                        <select id="modal-edit-jk" class="input-box-light w-full p-2.5 text-xs font-bold text-gray-700 outline-none focus:border-emerald-500 shadow-sm">
+                            <option value="">-- Pilih --</option>
+                            <option value="Laki-laki" ${s.jk === 'Laki-laki' ? 'selected' : ''}>Laki-laki</option>
+                            <option value="Perempuan" ${s.jk === 'Perempuan' ? 'selected' : ''}>Perempuan</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-1">4. Tempat Lahir</label>
+                            <input type="text" id="modal-edit-tempat" value="${s.tempat_lahir || (s.ttl ? s.ttl.split(', ')[0] : '')}" class="input-box-light w-full p-2.5 text-xs font-bold text-gray-700 outline-none focus:border-emerald-500 shadow-sm">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-1">5. Tanggal Lahir</label>
+                            <input type="date" id="modal-edit-tgl" value="${s.tanggal_lahir || (s.ttl ? s.ttl.split(', ')[1] : '')}" class="input-box-light w-full p-2.5 text-xs font-bold text-gray-700 outline-none focus:border-emerald-500 shadow-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-0.5">6. Provinsi <span class="text-emerald-600 font-extrabold">(${s.provinsi || 'Kosong'})</span></label>
+                        <select id="modal-edit-prov" class="input-box-light w-full p-2.5 text-xs font-bold text-gray-700 outline-none focus:border-emerald-500 shadow-sm"><option value="">-- Ganti Provinsi --</option></select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-0.5">7. Kabupaten <span class="text-emerald-600 font-extrabold">(${s.kabupaten || 'Kosong'})</span></label>
+                        <select id="modal-edit-kab" class="input-box-light w-full p-2.5 text-xs font-bold text-gray-700 outline-none focus:border-emerald-500 shadow-sm"><option value="">-- Pilih Provinsi Dahulu --</option></select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-0.5">8. Kecamatan <span class="text-emerald-600 font-extrabold">(${s.kecamatan || 'Kosong'})</span></label>
+                        <select id="modal-edit-kec" class="input-box-light w-full p-2.5 text-xs font-bold text-gray-700 outline-none focus:border-emerald-500 shadow-sm"><option value="">-- Pilih Kabupaten Dahulu --</option></select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-0.5">9. Desa <span class="text-emerald-600 font-extrabold">(${s.desa || 'Kosong'})</span></label>
+                        <select id="modal-edit-des" class="input-box-light w-full p-2.5 text-xs font-bold text-gray-700 outline-none focus:border-emerald-500 shadow-sm"><option value="">-- Pilih Kecamatan Dahulu --</option></select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-1">10. Alamat Rumah Detail (RT/RW/Jalan)</label>
+                        <textarea id="modal-edit-alamat" class="input-box-light w-full p-2.5 text-xs font-bold text-gray-700 outline-none focus:border-emerald-500 h-16 shadow-sm">${s.alamat || ''}</textarea>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-1">Nama Orang Tua / Wali</label>
+                        <input type="text" id="modal-edit-ortu" value="${s.ortu || ''}" class="input-box-light w-full p-2.5 text-xs font-bold text-gray-700 outline-none focus:border-emerald-500 shadow-sm">
+                    </div>
+                    
+                    <button onclick="updateSantriLengkap(${s.id})" class="w-full mt-4 py-3.5 bg-emerald-600 text-white font-black uppercase text-xs rounded-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-save"></i> Simpan Semua Perubahan
+                    </button>
+                </div>`;
+            } else {
+                fieldsBodyHTML = `
+                <div class="space-y-3 font-medium text-gray-700 text-xs">
+                    <div class="flex border-b pb-1.5"><span class="w-28 font-bold text-gray-400">1. NIK:</span><span class="font-bold">${mask(s.nik)}</span></div>
+                    <div class="flex border-b pb-1.5"><span class="w-28 font-bold text-gray-400">2. NAMA:</span><span class="font-bold">${s.nama}</span></div>
+                    <div class="flex border-b pb-1.5"><span class="w-28 font-bold text-gray-400">3. JK:</span><span class="font-bold">${mask(s.jk)}</span></div>
+                    <div class="flex border-b pb-1.5"><span class="w-28 font-bold text-gray-400">4. TEMPAT LAHIR:</span><span class="font-bold">${mask(s.tempat_lahir || (s.ttl ? s.ttl.split(', ')[0] : ''))}</span></div>
+                    <div class="flex border-b pb-1.5"><span class="w-28 font-bold text-gray-400">5. TGL LAHIR:</span><span class="font-bold">${mask(s.tanggal_lahir || (s.ttl ? s.ttl.split(', ')[1] : ''))}</span></div>
+                    <div class="flex border-b pb-1.5"><span class="w-28 font-bold text-gray-400">6. PROVINSI:</span><span class="font-bold">${mask(s.provinsi)}</span></div>
+                    <div class="flex border-b pb-1.5"><span class="w-28 font-bold text-gray-400">7. KABUPATEN:</span><span class="font-bold">${mask(s.kabupaten)}</span></div>
+                    <div class="flex border-b pb-1.5"><span class="w-28 font-bold text-gray-400">8. KECAMATAN:</span><span class="font-bold">${mask(s.kecamatan)}</span></div>
+                    <div class="flex border-b pb-1.5"><span class="w-28 font-bold text-gray-400">9. DESA:</span><span class="font-bold">${mask(s.desa)}</span></div>
+                    <div class="flex border-b pb-1.5"><span class="w-28 font-bold text-gray-400">10. ALAMAT:</span><span class="font-bold leading-snug">${mask(s.alamat)}</span></div>
+                    <div class="flex pt-0.5"><span class="w-28 font-bold text-gray-400">WALI / ORTU:</span><span class="font-bold">${mask(s.ortu)}</span></div>
+                </div>`;
+            }
+
+            document.getElementById('modal-master-content').innerHTML = `
+                <div class="bg-white rounded-3xl p-6 border border-gray-200 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 right-0 px-4 py-1.5 ${badgeColor} text-white text-[9px] font-black uppercase rounded-bl-2xl shadow-sm">${s.status}</div>
+                    <div class="flex flex-col items-center text-center mb-6 pt-4 border-b border-gray-100 pb-4">
+                        <div class="w-20 h-20 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center text-2xl font-black mb-3 border-4 border-emerald-100 shadow-inner">${s.nama.substring(0,2).toUpperCase()}</div>
+                        <h4 class="text-xl font-black text-gray-800 leading-none">${s.nama}</h4>
+                        ${statusKelasHTML}
+                    </div>
+                    ${fieldsBodyHTML}
+                    ${isAdminActive ? `<button onclick="hapusData('santri', ${s.id})" class="w-full text-red-500 font-bold text-[10px] py-3 border-t border-gray-100 mt-6 uppercase hover:bg-red-50 transition rounded-xl">Hapus Data Santri</button>` : ''}
+                </div>`;
+
+            if (isAdminActive) {
+                initRegionDropdowns('modal-edit-prov', 'modal-edit-kab', 'modal-edit-kec', 'modal-edit-des');
             }
         }
     </script>
