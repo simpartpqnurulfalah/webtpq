@@ -402,22 +402,33 @@
     </div>
 
     <div id="phase-dashboard" class="hidden min-h-screen animate-fadeIn pb-32">
-       <div class="bg-white sticky top-0 z-40 px-4 py-3 sm:px-6 sm:py-4 flex items-center justify-between border-b border-gray-100 shadow-sm">
-    <button onclick="toggleSidebar()" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-700 text-lg shadow-sm active:scale-95 transition">
+<div class="bg-white sticky top-0 z-40 px-6 py-4 flex items-center justify-between border-b border-gray-100 shadow-sm relative">
+    
+    <!-- KIRI: Tombol Menu Sidebar (shrink-0 agar ukurannya konsisten) -->
+    <button onclick="toggleSidebar()" class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-700 text-lg shadow-sm active:scale-95 transition shrink-0 z-10">
         <i class="fa-solid fa-bars-staggered"></i>
     </button>
-    <div class="flex items-center gap-2 flex-1 justify-center sm:justify-start sm:pl-4">
-        <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-white p-0.5 border border-emerald-100 overflow-hidden">
+    
+    <!-- TENGAH: Logo & Judul MDT (Dikunci mati di posisi tengah absolut) -->
+    <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none sm:pointer-events-auto z-0">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-white p-0.5 border border-emerald-100 overflow-hidden shrink-0">
             <img src="https://i.ibb.co.com/JRx6VXCf/fix-logo-tpq-png.png" alt="Logo TPQ" class="w-full h-full object-contain">
         </div>
-        <h1 class="text-sm sm:text-lg font-black italic uppercase tracking-tighter text-gray-800">MDT Nurul Falah</h1>
+        <h1 class="text-sm sm:text-lg font-black italic uppercase tracking-tighter text-gray-800 whitespace-nowrap">
+            MDT Nurul Falah
+        </h1>
     </div>
-    <div id="admin-indicator" class="hidden w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-yellow-400 flex items-center justify-center text-emerald-900 shadow-sm">
-        <i class="fa-solid fa-crown text-sm"></i>
+    
+    <!-- KANAN: Indikator Login Admin / Guest (shrink-0 agar seimbang dengan tombol kiri) -->
+    <div class="flex items-center shrink-0 z-10">
+        <div id="admin-indicator" class="hidden w-10 h-10 rounded-full bg-yellow-400 flex items-center justify-center text-emerald-900 shadow-sm">
+            <i class="fa-solid fa-crown text-sm"></i>
+        </div>
+        <div id="guest-indicator" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 shadow-inner">
+            <i class="fa-solid fa-user text-sm"></i>
+        </div>
     </div>
-    <div id="guest-indicator" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 shadow-inner">
-        <i class="fa-solid fa-user text-sm"></i>
-    </div>
+
 </div>
 
         <div class="px-6 pt-6 pb-2 relative z-30">
