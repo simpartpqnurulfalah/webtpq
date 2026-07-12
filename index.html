@@ -917,42 +917,61 @@
         </div>
     </div>
 
-    <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 z-[200] hidden transition-opacity" onclick="toggleSidebar()"></div>
-    <div id="sidebar" class="fixed top-0 left-0 w-[280px] h-full bg-white z-[210] transform -translate-x-full transition-transform duration-300 shadow-2xl flex flex-col rounded-r-[30px]">
-        <div class="bg-gradient-to-b from-emerald-600 to-emerald-800 p-8 text-white rounded-br-[50px]">
-            <div class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mb-4 p-2 shadow-lg">
-                <img src="https://i.ibb.co.com/JRx6VXCf/fix-logo-tpq-png.png" alt="Logo" class="w-full h-full object-contain">
-            </div>
-            <p class="font-black text-xl leading-tight">Portal<br>Publik</p>
-            <p class="text-[10px] opacity-80 uppercase mt-2 bg-black/20 inline-block px-2 py-1 rounded" id="sidebar-role">Mode Tamu</p>
+<!-- =================================================== -->
+<!-- KODE SIDEBAR UPDATE (HISTATS + TOMBOL KELUAR LENGKAP) -->
+<!-- =================================================== -->
+<div id="sidebar-overlay" class="fixed inset-0 bg-black/60 z-[200] hidden transition-opacity" onclick="toggleSidebar()"></div>
+<div id="sidebar" class="fixed top-0 left-0 w-[280px] h-full bg-white z-[210] transform -translate-x-full transition-transform duration-300 shadow-2xl flex flex-col rounded-r-[30px]">
+    
+    <!-- 1. BAGIAN ATAS: Header Profile Tamu/Admin -->
+    <div class="bg-gradient-to-b from-emerald-600 to-emerald-800 p-8 text-white rounded-br-[50px]">
+        <div class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mb-4 p-2 shadow-lg">
+            <img src="https://i.ibb.co.com/JRx6VXCf/fix-logo-tpq-png.png" alt="Logo" class="w-full h-full object-contain">
         </div>
-        <div class="flex-1 overflow-y-auto py-6 px-4">
-            <ul class="space-y-1">
-                <li><a href="javascript:void(0)" onclick="switchTab('panel'); toggleSidebar()" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl text-gray-700 hover:bg-emerald-50"><i class="fa-solid fa-house text-emerald-600"></i> <span class="text-sm font-bold">Dashboard</span></a></li>
-                <li id="menu-download-file" class="hidden"><a href="javascript:void(0)" onclick="downloadExcelData(); toggleSidebar()" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl text-gray-700 hover:bg-emerald-50"><i class="fa-solid fa-file-excel text-green-600"></i> <span class="text-sm font-bold">Download Data Santri</span></a></li>
-                <li id="menu-install-app" class="hidden"><a href="javascript:void(0)" onclick="installPWA()" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl text-gray-700 hover:bg-emerald-50"><i class="fa-solid fa-download text-emerald-600"></i> <span class="text-sm font-bold">Install Aplikasi</span></a></li>
-                <li><a href="https://drive.google.com/drive/folders/116ZwrvFVoqzuww2_-Z6Nsgw3S2GJY8B7?usp=sharing" target="_blank" onclick="toggleSidebar()" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl text-gray-700 hover:bg-emerald-50"><i class="fa-solid fa-folder-tree text-amber-500"></i> <span class="text-sm font-bold">Pusat Berkas & Dokumen</span></a></li>
-              <li><a href="javascript:void(0)" onclick="window.open('https://wa.me/6282138346442', '_blank')" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl text-gray-700 hover:bg-emerald-50"><i class="fa-brands fa-whatsapp text-emerald-600"></i> <span class="text-sm font-bold">Hubungi Pengurus</span></a></li>
-            </ul>
-             <script type="text/javascript">
-    var _Hasync= _Hasync|| [];
-    _Hasync.push(['Histats.start', '1,5038948,4,204,260,30,00011000']);
-    _Hasync.push(['Histats.fasi', '1']);
-    _Hasync.push(['Histats.track_hits', '']);
-    (function() {
-    var hs = document.createElement('script'); hs.type = 'text/javascript'; hs.async = true;
-    hs.src = ('//s10.histats.com/js15_as.js');
-    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(hs);
-    })();
-    </script>
-    <noscript><a href="/" target="_blank"><img src="//sstatic1.histats.com/0.gif?5038948&101" alt="" border="0"></a></noscript>
-            <div class="mt-8 p-4 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col items-center justify-center gap-2 shadow-inner">
-        <span class="text-[9px] font-black uppercase text-gray-400 tracking-widest">Statistik Aplikasi</span>
-        <div id="histats_counter"></div>
+        <p class="font-black text-xl leading-tight">Portal<br>Publik</p>
+        <p class="text-[10px] opacity-80 uppercase mt-2 bg-black/20 inline-block px-2 py-1 rounded" id="sidebar-role">Mode Tamu</p>
+    </div>
+    
+    <!-- 2. BAGIAN TENGAH: Menu Navigasi & Kotak Statistik (Bisa di-scroll) -->
+    <div class="flex-1 overflow-y-auto py-6 px-4">
+        <!-- List Link Menu -->
+        <ul class="space-y-1">
+            <li><a href="javascript:void(0)" onclick="switchTab('panel'); toggleSidebar()" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl text-gray-700 hover:bg-emerald-50"><i class="fa-solid fa-house text-emerald-600"></i> <span class="text-sm font-bold">Dashboard</span></a></li>
+            <li id="menu-download-file" class="hidden"><a href="javascript:void(0)" onclick="downloadExcelData(); toggleSidebar()" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl text-gray-700 hover:bg-emerald-50"><i class="fa-solid fa-file-excel text-green-600"></i> <span class="text-sm font-bold">Download Data Santri</span></a></li>
+            <li id="menu-install-app" class="hidden"><a href="javascript:void(0)" onclick="installPWA()" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl text-gray-700 hover:bg-emerald-50"><i class="fa-solid fa-download text-emerald-600"></i> <span class="text-sm font-bold">Install Aplikasi</span></a></li>
+            <li><a href="https://drive.google.com/drive/folders/116ZwrvFVoqzuww2_-Z6Nsgw3S2GJY8B7?usp=sharing" target="_blank" onclick="toggleSidebar()" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl text-gray-700 hover:bg-emerald-50"><i class="fa-solid fa-folder-tree text-amber-500"></i> <span class="text-sm font-bold">Pusat Berkas & Dokumen</span></a></li>
+            <li><a href="javascript:void(0)" onclick="window.open('https://wa.me/6282138346442', '_blank')" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl text-gray-700 hover:bg-emerald-50"><i class="fa-brands fa-whatsapp text-emerald-600"></i> <span class="text-sm font-bold">Hubungi Pengurus</span></a></li>
+        </ul>
+        
+        <!-- Histats Script Tracker -->
+        <script type="text/javascript">
+            var _Hasync= _Hasync|| [];
+            _Hasync.push(['Histats.start', '1,5038948,4,204,260,30,00011000']);
+            _Hasync.push(['Histats.fasi', '1']);
+            _Hasync.push(['Histats.track_hits', '']);
+            (function() {
+            var hs = document.createElement('script'); hs.type = 'text/javascript'; hs.async = true;
+            hs.src = ('//s10.histats.com/js15_as.js');
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(hs);
+            })();
+        </script>
+        <noscript><a href="/" target="_blank"><img src="//sstatic1.histats.com/0.gif?5038948&101" alt="" border="0"></a></noscript>
+        
+        <!-- Tampilan Box Tampilan Grafik Histats -->
+        <div class="mt-8 p-4 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col items-center justify-center gap-2 shadow-inner">
+            <span class="text-[9px] font-black uppercase text-gray-400 tracking-widest">Statistik Aplikasi</span>
+            <div id="histats_counter"></div>
+        </div>
+    </div>
+    
+    <!-- 3. BAGIAN BAWAH: Tombol Keluar (Tetap Terkunci di Bawah Menu) -->
+    <div class="p-6 border-t border-gray-100 mt-auto">
+        <button onclick="goToLanding()" class="w-full py-4 bg-red-50 text-red-600 rounded-2xl font-black uppercase text-xs active:scale-95 transition">
+            Keluar Sistem
+        </button>
     </div>
 
 </div>
-        </div>
         <div class="p-6 border-t border-gray-100">
             <button onclick="goToLanding()" class="w-full py-4 bg-red-50 text-red-600 rounded-2xl font-black uppercase text-xs">Keluar Sistem</button>
         </div>
