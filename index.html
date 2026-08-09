@@ -3,7 +3,7 @@
 <head>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#059669">
-    <link rel="apple-touch-icon" href="https://i.ibb.co.com/JRx6VXCf/fix-logo-tpq-png.png">
+    <link rel="apple-touch-icon" href="https://i.ibb.co.com/gbdfpc0k/Whats-App-Image-2026-07-06-at-20-06-14-removebg-preview.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Madrasah Diniyah Takmiliyah | Management System</title>
@@ -291,7 +291,7 @@
             <div class="glass-card px-4 py-3 flex justify-between items-center bg-white/10 border-white/20">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center p-1 shadow-md">
-                        <img src="https://i.ibb.co.com/JRx6VXCf/fix-logo-tpq-png.png" alt="Logo TPQ" class="w-full h-full object-contain">
+                        <img src="https://i.ibb.co.com/gbdfpc0k/Whats-App-Image-2026-07-06-at-20-06-14-removebg-preview.png" alt="Logo TPQ" class="w-full h-full object-contain">
                     </div>
                     <div class="leading-none text-white">
                         <span class="block font-black italic text-sm uppercase tracking-tighter">Nurul Falah</span>
@@ -314,7 +314,7 @@
 
             <div class="flex justify-center mb-4 animate-float">
                 <div class="w-36 h-36 bg-white rounded-full p-3 border-4 border-emerald-400 shadow-[0_0_40px_rgba(255,255,255,0.4)] flex items-center justify-center">
-                    <img src="https://i.ibb.co.com/JRx6VXCf/fix-logo-tpq-png.png" alt="Logo Besar TPQ" class="w-full h-full object-contain drop-shadow-md">
+                    <img src="https://i.ibb.co.com/gbdfpc0k/Whats-App-Image-2026-07-06-at-20-06-14-removebg-preview.png" alt="Logo Besar TPQ" class="w-full h-full object-contain drop-shadow-md">
                 </div>
             </div>
 
@@ -412,7 +412,7 @@
     <!-- TENGAH: Logo & Judul MDT (Dikunci mati di posisi tengah absolut) -->
     <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none sm:pointer-events-auto z-0">
         <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-white p-0.5 border border-emerald-100 overflow-hidden shrink-0">
-            <img src="https://i.ibb.co.com/JRx6VXCf/fix-logo-tpq-png.png" alt="Logo TPQ" class="w-full h-full object-contain">
+            <img src="https://i.ibb.co.com/gbdfpc0k/Whats-App-Image-2026-07-06-at-20-06-14-removebg-preview.png" alt="Logo TPQ" class="w-full h-full object-contain">
         </div>
         <h1 class="text-sm sm:text-lg font-black italic uppercase tracking-tighter text-gray-800 whitespace-nowrap">
             MDT Nurul Falah
@@ -681,7 +681,7 @@
                     </div>
 
                     <div id="form-kelas" class="space-y-4 pt-2 border-t border-gray-100 hidden">
-                        <input type="text" id="in-kelas-nama" class="input-box-light w-full p-3 text-sm font-bold" placeholder="Contoh: Kelas A1">
+                        <input type="text" id="in-kelas-nama" class="input-box-light w-full p-3 text-sm font-bold" placeholder="Contoh: IBDA' A">
                         <input type="text" id="in-kelas-wali" class="input-box-light w-full p-3 text-sm font-bold" placeholder="Contoh: Ustadzah Fatimah (Ruang 1)">
                     </div>
 
@@ -926,7 +926,7 @@
     <!-- 1. BAGIAN ATAS: Header Profile Tamu/Admin -->
     <div class="bg-gradient-to-b from-emerald-600 to-emerald-800 p-8 text-white rounded-br-[50px]">
         <div class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mb-4 p-2 shadow-lg">
-            <img src="https://i.ibb.co.com/JRx6VXCf/fix-logo-tpq-png.png" alt="Logo" class="w-full h-full object-contain">
+            <img src="https://i.ibb.co.com/gbdfpc0k/Whats-App-Image-2026-07-06-at-20-06-14-removebg-preview.png" alt="Logo" class="w-full h-full object-contain">
         </div>
         <p class="font-black text-xl leading-tight">Portal<br>Publik</p>
         <p class="text-[10px] opacity-80 uppercase mt-2 bg-black/20 inline-block px-2 py-1 rounded" id="sidebar-role">Mode Tamu</p>
@@ -1007,17 +1007,28 @@
             try {
                 const response = await fetch(`${WORKER_URL}/get-data`);
                 const data = await response.json();
+
+                // Ini adalah kode baru untuk merubah nama kelas secara otomatis
+                const renameKelasDisplay = (kName) => {
+                    if (!kName) return kName;
+                    if (kName === 'Kelas A1' || kName === 'A1') return "IBDA' A";
+                    if (kName === 'Kelas A2' || kName === 'A2') return "IBDA' B";
+                    if (kName === 'Kelas B' || kName === 'B') return "ULA";
+                    if (kName === 'Kelas C' || kName === 'C') return "WUSTHO A";
+                    if (kName === 'Kelas D' || kName === 'D') return "WUSTHO B";
+                    if (kName === 'Kelas E' || kName === 'E') return "WUSTHO C";
+                    return kName;
+                };
                 
-                masterData.santri = Array.isArray(data.santri) ? data.santri : [];
+                masterData.santri = Array.isArray(data.santri) ? data.santri.map(s => ({...s, kelas: renameKelasDisplay(s.kelas)})) : [];
                 masterData.pengurus = Array.isArray(data.pengurus) ? data.pengurus : [];
                 masterData.pengumuman = Array.isArray(data.pengumuman) ? data.pengumuman : [];
                 masterData.kebutuhan = Array.isArray(data.kebutuhan) ? data.kebutuhan : [];
-                masterData.kelas = Array.isArray(data.kelas) ? data.kelas : [];
+                masterData.kelas = Array.isArray(data.kelas) ? data.kelas.map(k => ({...k, nama: renameKelasDisplay(k.nama)})) : [];
                 masterData.spp = Array.isArray(data.spp) ? data.spp : [];
-                masterData.jadwal = Array.isArray(data.jadwal) ? data.jadwal : [];
-                masterData.nilai = Array.isArray(data.nilai) ? data.nilai : [];
+                masterData.jadwal = Array.isArray(data.jadwal) ? data.jadwal.map(j => ({...j, kelas: renameKelasDisplay(j.kelas)})) : [];
+                masterData.nilai = Array.isArray(data.nilai) ? data.nilai.map(n => ({...n, kelas: renameKelasDisplay(n.kelas)})) : [];
                 masterData.kas = Array.isArray(data.kas) ? data.kas : [];
-
                 updateDashboardStats();
                 updateDropdownKelas();
                 updateDropdownSantri(); 
@@ -1757,7 +1768,27 @@
             let html = '<div class="space-y-3">';
             masterData.kelas.forEach(k => {
                 const count = (masterData.santri || []).filter(s => s.status === 'Aktif' && s.kelas === k.nama).length;
-                html += `<div onclick="renderKelasSantri('${k.nama}', '${k.wali}')" class="bg-white p-4 rounded-2xl border border-gray-200 flex items-center justify-between cursor-pointer hover:border-orange-400 group transition"><div class="flex items-center gap-4"><div class="w-12 h-12 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center text-xl font-black group-hover:bg-orange-500 group-hover:text-white transition">${k.nama.replace('Kelas ', '')}</div><div><p class="font-black text-sm text-gray-800 leading-tight">${k.nama}</p><p class="text-[10px] text-gray-500 font-bold uppercase mt-1">${k.wali} | ${count} Santri</p></div></div><i class="fa-solid fa-chevron-right text-gray-300 group-hover:text-orange-500"></i></div>`;
+                
+                // Logika Pembuat Singkatan Otomatis
+                let singkatan = k.nama.split(' ').map(kata => kata[0]).join('');
+                if (singkatan.length === 1) singkatan = k.nama.substring(0, 2).toUpperCase();
+
+                // PENGAMAN TANDA KUTIP UNTUK IBDA'
+                const namaAman = k.nama.replace(/'/g, "\\'");
+                const waliAman = k.wali ? k.wali.replace(/'/g, "\\'") : "";
+
+                html += `<div onclick="renderKelasSantri('${namaAman}', '${waliAman}')" class="bg-white p-4 rounded-2xl border border-gray-200 flex items-center justify-between cursor-pointer hover:border-orange-400 group transition">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center text-lg font-black group-hover:bg-orange-500 group-hover:text-white transition">
+                            ${singkatan}
+                        </div>
+                        <div>
+                            <p class="font-black text-sm text-gray-800 leading-tight">${k.nama}</p>
+                            <p class="text-[10px] text-gray-500 font-bold uppercase mt-1">${k.wali} | ${count} Santri</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-gray-300 group-hover:text-orange-500"></i>
+                </div>`;
             });
             document.getElementById('modal-master-content').innerHTML = html + '</div>';
         }
@@ -1871,7 +1902,10 @@
             if(!masterData.kelas || !masterData.kelas.length) { document.getElementById('modal-master-content').innerHTML = '<p class="text-center opacity-50 font-bold py-10">Data kelas kosong</p>'; return; }
             let html = '<div class="grid gap-3">';
             masterData.kelas.forEach(k => {
-                html += `<div onclick="renderJadwalDetail('${k.nama}')" class="bg-white p-5 rounded-2xl border flex justify-between items-center cursor-pointer shadow-sm active:scale-95 hover:border-blue-400 transition">
+                // PENGAMAN TANDA KUTIP UNTUK IBDA'
+                const namaAman = k.nama.replace(/'/g, "\\'");
+                
+                html += `<div onclick="renderJadwalDetail('${namaAman}')" class="bg-white p-5 rounded-2xl border flex justify-between items-center cursor-pointer shadow-sm active:scale-95 hover:border-blue-400 transition">
                     <span class="font-black text-blue-800">${k.nama}</span><i class="fa-solid fa-calendar text-blue-300"></i></div>`;
             });
             document.getElementById('modal-master-content').innerHTML = html + '</div>';
@@ -1925,7 +1959,10 @@
             setupModalUI("Nilai Santri", "Pilih Kelas", false, false, false);
             let html = '<div class="grid gap-3">';
             (masterData.kelas || []).forEach(k => {
-                html += `<div onclick="renderNilaiSantriList('${k.nama}')" class="bg-white p-5 rounded-2xl border flex justify-between items-center cursor-pointer shadow-sm hover:border-purple-400 transition active:scale-95"><span class="font-black text-purple-800">${k.nama}</span><i class="fa-solid fa-user-graduate text-purple-300"></i></div>`;
+                // PENGAMAN TANDA KUTIP UNTUK IBDA'
+                const namaAman = k.nama.replace(/'/g, "\\'");
+                
+                html += `<div onclick="renderNilaiSantriList('${namaAman}')" class="bg-white p-5 rounded-2xl border flex justify-between items-center cursor-pointer shadow-sm hover:border-purple-400 transition active:scale-95"><span class="font-black text-purple-800">${k.nama}</span><i class="fa-solid fa-user-graduate text-purple-300"></i></div>`;
             });
             document.getElementById('modal-master-content').innerHTML = html + '</div>';
         }
