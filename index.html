@@ -1369,13 +1369,27 @@
         }
 
         function updatePublicIzinDropdowns() {
-            const kelasOptions = (masterData.kelas || []).map(k => `<option value="${k.nama}">${k.nama}</option>`).join('');
-            const elKelas = document.getElementById('pub-izin-kelas');
-            if (elKelas) {
-                elKelas.innerHTML = '<option value="">-- Pilih Kelas --</option>' + kelasOptions;
-            }
-            filterPublicIzinSantri();
-        }
+    const kelasOptions = (masterData.kelas || []).map(k => `<option value="${k.nama}">${k.nama}</option>`).join('');
+    
+    // Update dropdown kelas di form publik (full screen)
+    const elKelasPub = document.getElementById('pub-izin-kelas');
+    if (elKelasPub) {
+        elKelasPub.innerHTML = '<option value="">-- Pilih Kelas --</option>' + kelasOptions;
+    }
+
+    // Update dropdown kelas di form dashboard (Layanan Wali)
+    const elKelasDash = document.getElementById('in-izin-kelas-filter');
+    if (elKelasDash) {
+        const currentValDash = elKelasDash.value;
+        elKelasDash.innerHTML = '<option value="">-- Semua Kelas --</option>' + kelasOptions;
+        if(currentValDash) elKelasDash.value = currentValDash;
+    }
+
+    filterPublicIzinSantri();
+    
+    // Panggil filter untuk dashboard jika fungsinya sudah ada
+    if (typeof filterSantriIzin === 'function') filterSantriIzin();
+}
 
         function filterPublicIzinSantri() {
             const selectedKelas = document.getElementById('pub-izin-kelas') ? document.getElementById('pub-izin-kelas').value : "";
@@ -1397,7 +1411,84 @@
             }
             elNama.innerHTML = options;
         }
+// Fungsi untuk memfilter & menampilkan nama santri di dashboard izin wali
+function filterSantriIzin() {
+    const selectedKelas = document.getElementById('in-izin-kelas-filter') ? document.getElementById('in-izin-kelas-filter').value : "";
+    const searchQuery = document.getElementById('in-izin-cari') ? document.getElementById('in-izin-cari').value.toLowerCase() : "";
+    const elNama = document.getElementById('in-izin-nama');
+    if (!elNama) return;
 
+    let activeSantri = (masterData.santri || []).filter(s => s.status === 'Aktif');
+
+    // Filter berdasarkan kelas jika dipilih
+    if (selectedKelas !== "") {
+        activeSantri = activeSantri.filter(s => s.kelas === selectedKelas);
+    }
+
+    // Filter berdasarkan pencarian nama (quick search)
+    if (searchQuery !== "") {
+        activeSantri = activeSantri.filter(s => s.nama.toLowerCase().includes(searchQuery));
+    }
+
+    let options = '<option value="">-- Pilih Nama Santri --</option>';
+    if (activeSantri.length > 0) {
+        activeSantri.sort((a,b) => (a.nama || "").localeCompare(b.nama || "")).forEach(s => {
+            const label = selectedKelas !== "" ? s.nama : `${s.nama} (Kelas ${s.kelas})`;
+            options += `<option value="${s.nama}" data-kelas="${s.kelas}">${label}</option>`;
+        });
+    } else {
+        options = `<option value="">Tidak ada santri ditemukan</option>`;
+    }
+    elNama.innerHTML = options;
+}
+
+// Fungsi untuk mengirim data dari form dashboard izin wali
+async function kirimIzinWali(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btn-submit-izin');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
+
+    const sel = document.getElementById('in-izin-nama');
+    const nama = sel.value;
+    const kelas = sel.options[sel.selectedIndex].getAttribute('data-kelas') || "Belum Ditentukan";
+    
+    const tgl = document.getElementById('in-izin-tgl').value;
+    const kategori = document.getElementById('in-izin-kategori').value;
+    const alasan = document.getElementById('in-izin-pesan').value.trim();
+
+    const formatTgl = tgl.split('-').reverse().join('/');
+    const materiGabung = `${kategori} - ${alasan} (${formatTgl})`;
+
+    const payload = { 
+        nama: nama, 
+        kelas: kelas,
+        mapel: "Absensi", 
+        materi: materiGabung,
+        skor: "IJIN" 
+    };
+
+    try {
+        const res = await fetch(`${WORKER_URL}/add-nilai`, { 
+            method: 'POST', 
+            headers: {'Content-Type': 'application/json'}, 
+            body: JSON.stringify(payload) 
+        });
+        
+        if(res.ok) { 
+            showToast("Surat Izin Berhasil Dikirim!", "fa-check-circle", "text-emerald-500"); 
+            e.target.reset(); 
+            // Render ulang data jika login sebagai admin agar badge notif update
+            if (isAdminActive && typeof loadData === 'function') loadData();
+        } else {
+            showToast("Gagal mengirim izin", "fa-xmark", "text-red-500");
+        }
+    } catch (err) { 
+        showToast("Koneksi Error!", "fa-wifi", "text-red-500"); 
+    } finally {
+        btn.innerHTML = originalText;
+    }
+}
         function updateDropdownSantri() {
             const activeSantri = (masterData.santri || []).filter(s => s.status === 'Aktif');
             let options = '<option value="">-- Pilih Nama Santri --</option>';
