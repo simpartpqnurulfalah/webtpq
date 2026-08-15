@@ -215,6 +215,77 @@
         </div>
     </div>
 
+    <!-- FORM IZIN PUBLIK (FULL SCREEN) -->
+    <div id="phase-izin" class="hidden min-h-screen flex flex-col items-center justify-center p-6 animate-fadeIn pb-24">
+        <div class="mb-8 flex flex-col items-center text-center">
+            <div class="w-20 h-20 border-[3px] border-white rounded-[25px] flex items-center justify-center p-3 mb-6 shadow-2xl bg-white/10">
+                <i class="fa-solid fa-user-clock text-4xl text-white"></i>
+            </div>
+            <h1 class="text-2xl font-black italic glow-text tracking-tighter uppercase mb-1 text-white">Form Surat Izin Santri</h1>
+            <p class="text-[10px] text-white/70 uppercase tracking-widest leading-relaxed">Sampaikan pemberitahuan ketidakhadiran putra/putri Anda agar tercatat resmi di absensi madrasah.</p>
+        </div>
+
+        <div class="login-card w-full max-w-md p-8 shadow-2xl">
+            <form class="space-y-4 text-white" id="form-public-izin" onsubmit="handlePublicIzinSubmit(event)">
+                
+                <!-- PILIH KELAS -->
+                <div>
+                    <label class="text-[10px] font-black uppercase italic tracking-widest ml-4 opacity-80">Pilih Kelas</label>
+                    <div class="input-box flex items-center px-5 py-3 mt-1">
+                        <select id="pub-izin-kelas" onchange="filterPublicIzinSantri()" class="bg-transparent w-full outline-none font-bold text-sm text-white cursor-pointer [&>option]:text-gray-800" required>
+                            <option value="">-- Pilih Kelas --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- PILIH NAMA SANTRI -->
+                <div>
+                    <label class="text-[10px] font-black uppercase italic tracking-widest ml-4 opacity-80">Nama Santri</label>
+                    <div class="input-box flex items-center px-5 py-3 mt-1">
+                        <select id="pub-izin-nama" class="bg-transparent w-full outline-none font-bold text-sm text-white cursor-pointer [&>option]:text-gray-800" required>
+                            <option value="">-- Pilih Nama Santri --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- TANGGAL & KATEGORI -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[10px] font-black uppercase italic tracking-widest ml-4 opacity-80">Tanggal Izin</label>
+                        <div class="input-box flex items-center px-4 py-3 mt-1">
+                            <input type="date" id="pub-izin-tgl" class="bg-transparent w-full outline-none font-bold text-xs text-white cursor-pointer" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black uppercase italic tracking-widest ml-4 opacity-80">Keterangan</label>
+                        <div class="input-box flex items-center px-4 py-3 mt-1">
+                            <select id="pub-izin-kategori" class="bg-transparent w-full outline-none font-bold text-xs text-white cursor-pointer [&>option]:text-gray-800" required>
+                                <option value="Sakit">Sakit</option>
+                                <option value="Izin Keluarga">Izin Keluarga</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ALASAN LENGKAP -->
+                <div>
+                    <label class="text-[10px] font-black uppercase italic tracking-widest ml-4 opacity-80">Alasan / Keterangan Lengkap</label>
+                    <div class="input-box flex items-center px-5 py-3 mt-1">
+                        <textarea id="pub-izin-pesan" placeholder="Tulis alasan lengkapnya di sini..." class="bg-transparent w-full outline-none font-bold text-sm text-white placeholder-white/50 h-20 resize-none" required></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" id="btn-pub-izin" class="bg-yellow-400 text-emerald-900 w-full py-4 mt-6 text-[11px] font-black uppercase rounded-full shadow-xl active:scale-95 transition-all hover:bg-yellow-300">
+                    <i class="fa-solid fa-paper-plane mr-1"></i> Kirim Surat Izin
+                </button>
+                <button type="button" onclick="window.location.href = window.location.pathname" class="w-full text-[10px] font-bold text-white/50 hover:text-white transition-colors uppercase mt-4">
+                    Batal & Kembali ke Beranda
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- FORM PENDAFTARAN PUBLIK -->
     <div id="phase-pendaftaran" class="hidden min-h-screen flex flex-col items-center justify-center p-6 animate-fadeIn pb-24">
         <div class="mb-8 flex flex-col items-center text-center">
@@ -281,10 +352,27 @@
                     <div class="input-box px-5 py-4 mt-1 space-y-3">
                         <input type="text" id="pub-alamat-jalan" class="bg-transparent w-full outline-none font-bold text-sm text-white placeholder-white/50 border-b border-white/20 pb-2" placeholder="Nama Jalan, RT/RW, Dusun" required>
                         <div class="grid grid-cols-2 gap-3">
-                            <input type="text" id="pub-kelurahan" class="bg-transparent w-full outline-none font-bold text-sm text-white placeholder-white/50 border-b border-white/20 pb-2" placeholder="Kelurahan/Desa" required>
-                            <input type="text" id="pub-kabupaten" class="bg-transparent w-full outline-none font-bold text-sm text-white placeholder-white/50 border-b border-white/20 pb-2" placeholder="Kabupaten/Kota" required>
+                            <select id="pub-kelurahan" class="bg-transparent w-full outline-none font-bold text-sm text-white border-b border-white/20 pb-2 cursor-pointer [&>option]:text-gray-800" required>
+                                <option value="" class="text-gray-800">-- Kelurahan / Desa --</option>
+                                <option value="Simpar" class="text-gray-800">Desa Simpar</option>
+                                <option value="Lainnya" class="text-gray-800">Desa Lainnya...</option>
+                            </select>
+                            <select id="pub-kabupaten" class="bg-transparent w-full outline-none font-bold text-sm text-white border-b border-white/20 pb-2 cursor-pointer [&>option]:text-gray-800" required>
+                                <option value="" class="text-gray-800">-- Kabupaten / Kota --</option>
+                                <option value="Banjarnegara" class="text-gray-800">Banjarnegara</option>
+                                <option value="Wonosobo" class="text-gray-800">Wonosobo</option>
+                                <option value="Banyumas" class="text-gray-800">Banyumas</option>
+                                <option value="Purbalingga" class="text-gray-800">Purbalingga</option>
+                                <option value="Lainnya" class="text-gray-800">Luar Daerah...</option>
+                            </select>
                         </div>
-                        <input type="text" id="pub-provinsi" class="bg-transparent w-full outline-none font-bold text-sm text-white placeholder-white/50" placeholder="Provinsi" required>
+                        <select id="pub-provinsi" class="bg-transparent w-full outline-none font-bold text-sm text-white cursor-pointer [&>option]:text-gray-800" required>
+                            <option value="" class="text-gray-800">-- Provinsi --</option>
+                            <option value="Jawa Tengah" class="text-gray-800">Jawa Tengah</option>
+                            <option value="Jawa Barat" class="text-gray-800">Jawa Barat</option>
+                            <option value="Jawa Timur" class="text-gray-800">Jawa Timur</option>
+                            <option value="Luar Jawa" class="text-gray-800">Luar Jawa / Lainnya...</option>
+                        </select>
                     </div>
                 </div>
 
@@ -1253,6 +1341,7 @@
                 updateDropdownSantri(); 
                 renderPublicAnnouncements();
                 updateIzinBadge();
+                updatePublicIzinDropdowns();
             } catch (e) { 
                 console.error("Gagal memuat data:", e);
                 updateDashboardStats(); 
@@ -1276,33 +1365,35 @@
                 if(currentFilterVal) filterNilai.value = currentFilterVal;
             }
             
-            const filterIzin = document.getElementById('in-izin-kelas-filter');
-            if (filterIzin) {
-                const currentIzinVal = filterIzin.value;
-                filterIzin.innerHTML = '<option value="">-- Semua Kelas --</option>' + (kelasOptions || '');
-                if(currentIzinVal) filterIzin.value = currentIzinVal;
-            }
+            updatePublicIzinDropdowns();
         }
 
-        function filterSantriIzin() {
-            const selectedKelas = document.getElementById('in-izin-kelas-filter') ? document.getElementById('in-izin-kelas-filter').value : "";
-            const searchQ = document.getElementById('in-izin-cari') ? document.getElementById('in-izin-cari').value.toLowerCase() : "";
-            const elNama = document.getElementById('in-izin-nama');
+        function updatePublicIzinDropdowns() {
+            const kelasOptions = (masterData.kelas || []).map(k => `<option value="${k.nama}">${k.nama}</option>`).join('');
+            const elKelas = document.getElementById('pub-izin-kelas');
+            if (elKelas) {
+                elKelas.innerHTML = '<option value="">-- Pilih Kelas --</option>' + kelasOptions;
+            }
+            filterPublicIzinSantri();
+        }
+
+        function filterPublicIzinSantri() {
+            const selectedKelas = document.getElementById('pub-izin-kelas') ? document.getElementById('pub-izin-kelas').value : "";
+            const elNama = document.getElementById('pub-izin-nama');
             if (!elNama) return;
 
             let activeSantri = (masterData.santri || []).filter(s => s.status === 'Aktif');
-            
-            if (selectedKelas !== "") activeSantri = activeSantri.filter(s => s.kelas === selectedKelas);
-            if (searchQ !== "") activeSantri = activeSantri.filter(s => s.nama.toLowerCase().includes(searchQ));
+            if (selectedKelas !== "") {
+                activeSantri = activeSantri.filter(s => s.kelas === selectedKelas);
+            }
 
             let options = '<option value="">-- Pilih Nama Santri --</option>';
             if (activeSantri.length > 0) {
                 activeSantri.sort((a,b) => (a.nama || "").localeCompare(b.nama || "")).forEach(s => {
-                    const label = selectedKelas !== "" ? s.nama : `${s.nama} (Kelas ${s.kelas})`;
-                    options += `<option value="${s.nama}" data-kelas="${s.kelas}">${label}</option>`;
+                    options += `<option value="${s.nama}" data-kelas="${s.kelas}">${s.nama}</option>`;
                 });
-            } else { 
-                options = `<option value="">Nama tidak ditemukan</option>`; 
+            } else {
+                options = `<option value="">Belum ada santri di kelas ini</option>`;
             }
             elNama.innerHTML = options;
         }
@@ -1318,12 +1409,8 @@
             
             const elSpp = document.getElementById('in-spp-nama');
             if(elSpp) elSpp.innerHTML = options;
-            
-            const elIzin = document.getElementById('in-izin-nama');
-            if(elIzin && elIzin.options.length <= 1) elIzin.innerHTML = options;
 
             if(typeof filterSantriByKelasForNilai === 'function') filterSantriByKelasForNilai();
-            if(typeof filterSantriIzin === 'function') filterSantriIzin();
         }
 
         function filterSantriByKelasForNilai() {
@@ -1349,15 +1436,16 @@
             initMatrix(); 
             cekEventMendatang(); 
             
-            const dateInput = document.getElementById('in-izin-tgl');
-            if (dateInput) {
-                const today = new Date().toISOString().split('T')[0];
-                dateInput.value = today;
+            const pubDateInput = document.getElementById('pub-izin-tgl');
+            if (pubDateInput) {
+                pubDateInput.value = new Date().toISOString().split('T')[0];
             }
 
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('daftar') === 'true') {
+            // DETEKSI HASH LINK (#daftar atau #izin)
+            if (window.location.hash === '#daftar') {
                 setTimeout(() => { showPhase('phase-pendaftaran'); }, 100);
+            } else if (window.location.hash === '#izin') {
+                setTimeout(() => { showPhase('phase-izin'); }, 100);
             } else {
                 checkLoginState(); 
             }
@@ -1465,7 +1553,7 @@
         function goToLanding() { localStorage.removeItem('tpq_isLoggedIn'); localStorage.removeItem('tpq_userRole'); location.reload(); }
 
         function showPhase(id) {
-            ['phase-landing', 'phase-login', 'phase-dashboard', 'phase-pendaftaran'].forEach(p => {
+            ['phase-landing', 'phase-login', 'phase-dashboard', 'phase-pendaftaran', 'phase-izin'].forEach(p => {
                 const el = document.getElementById(p);
                 if (el) el.classList.add('hidden');
             });
@@ -3045,19 +3133,19 @@
             }
         }
 
-        async function kirimIzinWali(e) {
+        async function handlePublicIzinSubmit(e) {
             e.preventDefault();
-            const btn = document.getElementById('btn-submit-izin');
+            const btn = document.getElementById('btn-pub-izin');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
 
-            const sel = document.getElementById('in-izin-nama');
+            const sel = document.getElementById('pub-izin-nama');
             const nama = sel.value;
             const kelas = sel.options[sel.selectedIndex].getAttribute('data-kelas') || "Belum Ditentukan";
             
-            const tgl = document.getElementById('in-izin-tgl').value;
-            const kategori = document.getElementById('in-izin-kategori').value;
-            const alasan = document.getElementById('in-izin-pesan').value.trim();
+            const tgl = document.getElementById('pub-izin-tgl').value;
+            const kategori = document.getElementById('pub-izin-kategori').value;
+            const alasan = document.getElementById('pub-izin-pesan').value.trim();
 
             const formatTgl = tgl.split('-').reverse().join('/');
             const materiGabung = `${kategori} - ${alasan} (${formatTgl})`;
@@ -3080,10 +3168,7 @@
                 if(res.ok) { 
                     showToast("Surat Izin Berhasil Dikirim!", "fa-check-circle", "text-emerald-500"); 
                     e.target.reset(); 
-                    const today = new Date().toISOString().split('T')[0];
-                    document.getElementById('in-izin-tgl').value = today;
-
-                    if(isAdminActive) loadData(); 
+                    setTimeout(() => { window.location.href = window.location.pathname; }, 2000);
                 } else {
                     showToast("Gagal mengirim izin", "fa-xmark", "text-red-500");
                 }
@@ -3155,31 +3240,7 @@
             }
             setInterval(gantiMutiaraOtomatis, 6000); 
         });        
-document.addEventListener('DOMContentLoaded', () => { 
-            loadData(); 
-            initMatrix(); 
-            cekEventMendatang(); 
-            
-            const dateInput = document.getElementById('in-izin-tgl');
-            if (dateInput) {
-                const today = new Date().toISOString().split('T')[0];
-                dateInput.value = today;
-            }
 
-            // DETEKSI HASH LINK (#daftar atau #izin)
-            if (window.location.hash === '#daftar') {
-                setTimeout(() => { showPhase('phase-pendaftaran'); }, 100);
-            } else if (window.location.hash === '#izin') {
-                setTimeout(() => { 
-                    showPhase('phase-dashboard'); 
-                    // Otomatis geser layar ke form izin
-                    const formIzin = document.getElementById('form-izin-wali');
-                    if(formIzin) formIzin.scrollIntoView({ behavior: 'smooth' });
-                }, 100);
-            } else {
-                checkLoginState(); 
-            }
-        });
         function exportKasExcel() {
             let kasData = masterData.kas || [];
             if (kasData.length === 0) { showToast("Data kas kosong!", "fa-warning", "text-red-500"); return; }
