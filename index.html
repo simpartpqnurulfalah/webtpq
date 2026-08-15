@@ -191,7 +191,7 @@
       });
     </script>
 </head>
-<body class="" oncontextmenu="return false" onselectstart="return false" ondragstart="return false">
+<body class="">
 
     <canvas id="matrix-canvas"></canvas>
     
@@ -3285,17 +3285,6 @@ async function kirimIzinWali(e) {
                 });
             }, 50);
         }
-        document.onselectstart = () => false;
-        document.addEventListener('keydown', e => {
-            if (e.ctrlKey && (e.keyCode == 67 || e.keyCode == 85 || e.keyCode == 83)) {
-                if (e.keyCode == 67) showToast("Aksi Salin/Copy Dilarang!", "fa-shield-halved", "text-red-500");
-                e.preventDefault(); return false;
-            }
-        });
-        document.addEventListener('dragstart', e => { if (e.target.nodeName === 'IMG') e.preventDefault(); }, false);
-        const styleSelect = document.createElement('style');
-        styleSelect.innerHTML = "* { -webkit-user-select: none; user-select: none; } input, textarea, select { user-select: text !important; }";
-        document.head.appendChild(styleSelect);
         
         const daftarMutiara = [
             '"Sebaik-baik kalian adalah orang yang belajar Al-Qur\'an dan mengajarkannya." (HR. Bukhari)',
