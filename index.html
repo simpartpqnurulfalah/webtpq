@@ -1369,24 +1369,27 @@
         }
 
         function updatePublicIzinDropdowns() {
-            const kelasOptions = (masterData.kelas || []).map(k => `<option value="${k.nama}">${k.nama}</option>`).join('');
-            
-            const elKelasPub = document.getElementById('pub-izin-kelas');
-            if (elKelasPub) {
-                elKelasPub.innerHTML = '<option value="">-- Pilih Kelas --</option>' + kelasOptions;
-            }
+    const kelasOptions = (masterData.kelas || []).map(k => `<option value="${k.nama}">${k.nama}</option>`).join('');
+    
+    // Update dropdown kelas di form publik (full screen)
+    const elKelasPub = document.getElementById('pub-izin-kelas');
+    if (elKelasPub) {
+        elKelasPub.innerHTML = '<option value="">-- Pilih Kelas --</option>' + kelasOptions;
+    }
 
-            const elKelasDash = document.getElementById('in-izin-kelas-filter');
-            if (elKelasDash) {
-                const currentValDash = elKelasDash.value;
-                elKelasDash.innerHTML = '<option value="">-- Semua Kelas --</option>' + kelasOptions;
-                if(currentValDash) elKelasDash.value = currentValDash;
-            }
+    // Update dropdown kelas di form dashboard (Layanan Wali)
+    const elKelasDash = document.getElementById('in-izin-kelas-filter');
+    if (elKelasDash) {
+        const currentValDash = elKelasDash.value;
+        elKelasDash.innerHTML = '<option value="">-- Semua Kelas --</option>' + kelasOptions;
+        if(currentValDash) elKelasDash.value = currentValDash;
+    }
 
-            filterPublicIzinSantri();
-            
-            if (typeof filterSantriIzin === 'function') filterSantriIzin();
-        }
+    filterPublicIzinSantri();
+    
+    // Panggil filter untuk dashboard jika fungsinya sudah ada
+    if (typeof filterSantriIzin === 'function') filterSantriIzin();
+}
 
         function filterPublicIzinSantri() {
             const selectedKelas = document.getElementById('pub-izin-kelas') ? document.getElementById('pub-izin-kelas').value : "";
@@ -1408,157 +1411,84 @@
             }
             elNama.innerHTML = options;
         }
+// Fungsi untuk memfilter & menampilkan nama santri di dashboard izin wali
+function filterSantriIzin() {
+    const selectedKelas = document.getElementById('in-izin-kelas-filter') ? document.getElementById('in-izin-kelas-filter').value : "";
+    const searchQuery = document.getElementById('in-izin-cari') ? document.getElementById('in-izin-cari').value.toLowerCase() : "";
+    const elNama = document.getElementById('in-izin-nama');
+    if (!elNama) return;
 
-        function filterSantriIzin() {
-            const selectedKelas = document.getElementById('in-izin-kelas-filter') ? document.getElementById('in-izin-kelas-filter').value : "";
-            const searchQuery = document.getElementById('in-izin-cari') ? document.getElementById('in-izin-cari').value.toLowerCase() : "";
-            const elNama = document.getElementById('in-izin-nama');
-            if (!elNama) return;
+    let activeSantri = (masterData.santri || []).filter(s => s.status === 'Aktif');
 
-            let activeSantri = (masterData.santri || []).filter(s => s.status === 'Aktif');
+    // Filter berdasarkan kelas jika dipilih
+    if (selectedKelas !== "") {
+        activeSantri = activeSantri.filter(s => s.kelas === selectedKelas);
+    }
 
-            if (selectedKelas !== "") {
-                activeSantri = activeSantri.filter(s => s.kelas === selectedKelas);
-            }
+    // Filter berdasarkan pencarian nama (quick search)
+    if (searchQuery !== "") {
+        activeSantri = activeSantri.filter(s => s.nama.toLowerCase().includes(searchQuery));
+    }
 
-            if (searchQuery !== "") {
-                activeSantri = activeSantri.filter(s => s.nama.toLowerCase().includes(searchQuery));
-            }
+    let options = '<option value="">-- Pilih Nama Santri --</option>';
+    if (activeSantri.length > 0) {
+        activeSantri.sort((a,b) => (a.nama || "").localeCompare(b.nama || "")).forEach(s => {
+            const label = selectedKelas !== "" ? s.nama : `${s.nama} (Kelas ${s.kelas})`;
+            options += `<option value="${s.nama}" data-kelas="${s.kelas}">${label}</option>`;
+        });
+    } else {
+        options = `<option value="">Tidak ada santri ditemukan</option>`;
+    }
+    elNama.innerHTML = options;
+}
 
-            let options = '<option value="">-- Pilih Nama Santri --</option>';
-            if (activeSantri.length > 0) {
-                activeSantri.sort((a,b) => (a.nama || "").localeCompare(b.nama || "")).forEach(s => {
-                    const label = selectedKelas !== "" ? s.nama : `${s.nama} (Kelas ${s.kelas})`;
-                    options += `<option value="${s.nama}" data-kelas="${s.kelas}">${label}</option>`;
-                });
-            } else {
-                options = `<option value="">Tidak ada santri ditemukan</option>`;
-            }
-            elNama.innerHTML = options;
+// Fungsi untuk mengirim data dari form dashboard izin wali
+async function kirimIzinWali(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btn-submit-izin');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
+
+    const sel = document.getElementById('in-izin-nama');
+    const nama = sel.value;
+    const kelas = sel.options[sel.selectedIndex].getAttribute('data-kelas') || "Belum Ditentukan";
+    
+    const tgl = document.getElementById('in-izin-tgl').value;
+    const kategori = document.getElementById('in-izin-kategori').value;
+    const alasan = document.getElementById('in-izin-pesan').value.trim();
+
+    const formatTgl = tgl.split('-').reverse().join('/');
+    const materiGabung = `${kategori} - ${alasan} (${formatTgl})`;
+
+    const payload = { 
+        nama: nama, 
+        kelas: kelas,
+        mapel: "Absensi", 
+        materi: materiGabung,
+        skor: "IJIN" 
+    };
+
+    try {
+        const res = await fetch(`${WORKER_URL}/add-nilai`, { 
+            method: 'POST', 
+            headers: {'Content-Type': 'application/json'}, 
+            body: JSON.stringify(payload) 
+        });
+        
+        if(res.ok) { 
+            showToast("Surat Izin Berhasil Dikirim!", "fa-check-circle", "text-emerald-500"); 
+            e.target.reset(); 
+            // Render ulang data jika login sebagai admin agar badge notif update
+            if (isAdminActive && typeof loadData === 'function') loadData();
+        } else {
+            showToast("Gagal mengirim izin", "fa-xmark", "text-red-500");
         }
-
-        // ==========================================
-        // MESIN PEMBACA JADWAL OTOMATIS
-        // ==========================================
-        function dapatkanMapelOtomatis(tanggal, kelas) {
-            if (!masterData.jadwal) return [];
-            
-            const d = new Date(tanggal);
-            const namaHari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][d.getDay()];
-            
-            const bulan = d.getMonth() + 1;
-            const semesterAktif = (bulan >= 7 && bulan <= 12) ? "Semester 1" : "Semester 2";
-
-            const jadwalKelas = masterData.jadwal.find(j => j.kelas === kelas && j.tipe === semesterAktif);
-            if (!jadwalKelas) return [];
-
-            let mapelHariIni = [];
-            const barisJadwal = jadwalKelas.konten.split('\n');
-
-            barisJadwal.forEach(baris => {
-                if (baris.toLowerCase().includes(namaHari.toLowerCase())) {
-                    const parts = baris.split(':');
-                    if (parts.length > 1) {
-                        const isiMapel = parts[1].trim();
-                        const pisahMapel = isiMapel.split(/&| dan /i);
-                        pisahMapel.forEach(m => {
-                            if(m.trim() !== "") mapelHariIni.push(m.trim());
-                        });
-                    }
-                }
-            });
-
-            return mapelHariIni;
-        }
-
-        async function kirimIzinWali(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btn-submit-izin');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses Otomatis...';
-
-            const sel = document.getElementById('in-izin-nama');
-            const nama = sel.value;
-            const kelas = sel.options[sel.selectedIndex].getAttribute('data-kelas') || "Belum Ditentukan";
-            
-            const tgl = document.getElementById('in-izin-tgl').value;
-            const kategori = document.getElementById('in-izin-kategori').value;
-            const alasan = document.getElementById('in-izin-pesan').value.trim();
-
-            const formatTgl = tgl.split('-').reverse().join('/');
-            
-            try {
-                const materiAbsen = `${kategori} - ${alasan} (${formatTgl})`;
-                await fetch(`${WORKER_URL}/add-nilai`, { 
-                    method: 'POST', 
-                    headers: {'Content-Type': 'application/json'}, 
-                    body: JSON.stringify({ nama: nama, kelas: kelas, mapel: "Absensi", materi: materiAbsen, skor: "IJIN" }) 
-                });
-
-                const daftarMapel = dapatkanMapelOtomatis(tgl, kelas);
-                for (let mapel of daftarMapel) {
-                    let materiPelajaran = `Tidak Mengikuti Pelajaran (${formatTgl})`;
-                    await fetch(`${WORKER_URL}/add-nilai`, { 
-                        method: 'POST', 
-                        headers: {'Content-Type': 'application/json'}, 
-                        body: JSON.stringify({ nama: nama, kelas: kelas, mapel: mapel, materi: materiPelajaran, skor: "IJIN" }) 
-                    });
-                }
-                
-                showToast("Surat Izin & Nilai Berhasil Diproses!", "fa-check-circle", "text-emerald-500"); 
-                e.target.reset(); 
-                if (isAdminActive && typeof loadData === 'function') loadData();
-            } catch (err) { 
-                showToast("Koneksi Error!", "fa-wifi", "text-red-500"); 
-            } finally {
-                btn.innerHTML = originalText;
-            }
-        }
-
-        async function handlePublicIzinSubmit(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btn-pub-izin');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses Otomatis...';
-
-            const sel = document.getElementById('pub-izin-nama');
-            const nama = sel.value;
-            const kelas = sel.options[sel.selectedIndex].getAttribute('data-kelas') || "Belum Ditentukan";
-            
-            const tgl = document.getElementById('pub-izin-tgl').value;
-            const kategori = document.getElementById('pub-izin-kategori').value;
-            const alasan = document.getElementById('pub-izin-pesan').value.trim();
-
-            const formatTgl = tgl.split('-').reverse().join('/');
-
-            try {
-                const materiAbsen = `${kategori} - ${alasan} (${formatTgl})`;
-                await fetch(`${WORKER_URL}/add-nilai`, { 
-                    method: 'POST', 
-                    headers: {'Content-Type': 'application/json'}, 
-                    body: JSON.stringify({ nama: nama, kelas: kelas, mapel: "Absensi", materi: materiAbsen, skor: "IJIN" }) 
-                });
-
-                const daftarMapel = dapatkanMapelOtomatis(tgl, kelas);
-                for (let mapel of daftarMapel) {
-                    let materiPelajaran = `Tidak Mengikuti Pelajaran (${formatTgl})`;
-                    await fetch(`${WORKER_URL}/add-nilai`, { 
-                        method: 'POST', 
-                        headers: {'Content-Type': 'application/json'}, 
-                        body: JSON.stringify({ nama: nama, kelas: kelas, mapel: mapel, materi: materiPelajaran, skor: "IJIN" }) 
-                    });
-                }
-                
-                showToast("Surat Izin Berhasil Dikirim!", "fa-check-circle", "text-emerald-500"); 
-                e.target.reset(); 
-                setTimeout(() => { window.location.href = window.location.pathname; }, 2000);
-            } catch (err) { 
-                showToast("Koneksi Error!", "fa-wifi", "text-red-500"); 
-            } finally {
-                btn.innerHTML = originalText;
-            }
-        }
-
+    } catch (err) { 
+        showToast("Koneksi Error!", "fa-wifi", "text-red-500"); 
+    } finally {
+        btn.innerHTML = originalText;
+    }
+}
         function updateDropdownSantri() {
             const activeSantri = (masterData.santri || []).filter(s => s.status === 'Aktif');
             let options = '<option value="">-- Pilih Nama Santri --</option>';
@@ -1752,7 +1682,7 @@
         }
 
         function togglePassword() { const p = document.getElementById('input-password'); const eye = document.getElementById('eye-icon'); if (p.type === 'password') { p.type = 'text'; eye.classList.replace('fa-eye', 'fa-eye-slash'); } else { p.type = 'password'; eye.classList.replace('fa-eye-slash', 'fa-eye'); } }
-        function showToast(m,i='fa-check',c='text-emerald-600'){ const t=document.createElement('div'); t.className='toast-card'; t.innerHTML=`<i class="fa-solid ${i} ${c} text-xl"></i><p class="font-bold text-sm uppercase">${m}</p>`; document.getElementById('toast-container').appendChild(t); setTimeout(()=>t.classList.add('hide'), 2600); setTimeout(()=>t.remove(), 3000); }
+        function showToast(m,i='fa-check',c='text-emerald-600'){ const t=document.createElement('div'); t.className='toast-card'; t.innerHTML=`<i class="solid ${i} ${c} text-xl"></i><p class="font-bold text-sm uppercase">${m}</p>`; document.getElementById('toast-container').appendChild(t); setTimeout(()=>t.classList.add('hide'), 2600); setTimeout(()=>t.remove(), 3000); }
         function triggerNotificationPrompt() { if (window.OneSignalDeferred) { window.OneSignalDeferred.push(function(OneSignal) { OneSignal.Slidedown.promptPush(); }); } }
 
         function changeAdminForm() {
@@ -3294,6 +3224,52 @@
             }
         }
 
+        async function handlePublicIzinSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-pub-izin');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
+
+            const sel = document.getElementById('pub-izin-nama');
+            const nama = sel.value;
+            const kelas = sel.options[sel.selectedIndex].getAttribute('data-kelas') || "Belum Ditentukan";
+            
+            const tgl = document.getElementById('pub-izin-tgl').value;
+            const kategori = document.getElementById('pub-izin-kategori').value;
+            const alasan = document.getElementById('pub-izin-pesan').value.trim();
+
+            const formatTgl = tgl.split('-').reverse().join('/');
+            const materiGabung = `${kategori} - ${alasan} (${formatTgl})`;
+
+            const payload = { 
+                nama: nama, 
+                kelas: kelas,
+                mapel: "Absensi", 
+                materi: materiGabung,
+                skor: "IJIN" 
+            };
+
+            try {
+                const res = await fetch(`${WORKER_URL}/add-nilai`, { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify(payload) 
+                });
+                
+                if(res.ok) { 
+                    showToast("Surat Izin Berhasil Dikirim!", "fa-check-circle", "text-emerald-500"); 
+                    e.target.reset(); 
+                    setTimeout(() => { window.location.href = window.location.pathname; }, 2000);
+                } else {
+                    showToast("Gagal mengirim izin", "fa-xmark", "text-red-500");
+                }
+            } catch (err) { 
+                showToast("Koneksi Error!", "fa-wifi", "text-red-500"); 
+            } finally {
+                btn.innerHTML = originalText;
+            }
+        }
+
         const ctx = document.getElementById('matrix-canvas').getContext('2d');
         function initMatrix() {
             const c = document.getElementById('matrix-canvas'); 
@@ -3304,4 +3280,187 @@
                 ctx.fillStyle = "#34d399"; ctx.font = "15px monospace";
                 drops.forEach((y, i) => {
                     ctx.fillText(String.fromCharCode(Math.random()*128), i*20, y*20);
-                    if(y*20 > c.height && Math.random() > 0.975) drops[i] = 0Saya tidak diprogram untuk melakukan hal itu.
+                    if(y*20 > c.height && Math.random() > 0.975) drops[i] = 0; 
+                    drops[i]++;
+                });
+            }, 50);
+        }
+        
+        const daftarMutiara = [
+            '"Sebaik-baik kalian adalah orang yang belajar Al-Qur\'an dan mengajarkannya." (HR. Bukhari)',
+            '"Tuntutlah ilmu dari ayunan hingga liang lahat."',
+            '"Barangsiapa menempuh jalan untuk mencari ilmu, Allah akan mudahkan baginya jalan menuju surga." (HR. Muslim)',
+            '"Ilmu itu lebih baik daripada harta. Ilmu menjagamu, sedangkan engkau yang harus menjaga harta." (Ali bin Abi Thalib)',
+            '"Didiklah anak-anakmu dengan agama, kelak mereka akan menjadi makhkota cahaya untukmu di akhirat."',
+            '"Senyummu di hadapan saudaramu adalah sedekah." (HR. Tirmidzi)',
+            '"Membaca Al-Qur\'an adalah obat bagi hati yang gelisah dan pikiran yang gundah."',
+            '"Doa orang tua untuk anaknya sama seperti doa nabi untuk umatnya."'
+        ];
+
+        let indeksMutiaraSaatIni = 0;
+
+        function gantiMutiaraOtomatis() {
+            const el = document.getElementById('teks-hadits-harian');
+            if (el) {
+                el.style.opacity = 0;
+                setTimeout(() => {
+                    indeksMutiaraSaatIni = (indeksMutiaraSaatIni + 1) % daftarMutiara.length;
+                    el.innerText = daftarMutiara[indeksMutiaraSaatIni];
+                    el.style.opacity = 1;
+                }, 400);
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => { 
+            const el = document.getElementById('teks-hadits-harian');
+            if(el) {
+                el.style.transition = "opacity 0.4s ease-in-out";
+                indeksMutiaraSaatIni = Math.floor(Math.random() * daftarMutiara.length);
+                el.innerText = daftarMutiara[indeksMutiaraSaatIni];
+            }
+            setInterval(gantiMutiaraOtomatis, 6000); 
+        });        
+
+        function exportKasExcel() {
+            let kasData = masterData.kas || [];
+            if (kasData.length === 0) { showToast("Data kas kosong!", "fa-warning", "text-red-500"); return; }
+            
+            let currentSaldo = 0;
+            const dataToExport = kasData.map((item, index) => {
+                const masuk = parseInt(item.masuk) || 0;
+                const keluar = parseInt(item.keluar) || 0;
+                currentSaldo += (masuk - keluar);
+                return {
+                    "No": index + 1,
+                    "Tanggal": item.tanggal, 
+                    "Keterangan": item.keterangan || "Transaksi",
+                    "Pemasukan": masuk,
+                    "Pengeluaran": keluar,
+                    "Saldo Akhir": currentSaldo
+                };
+            });
+
+            const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+            worksheet['!cols'] = [ {wch:5}, {wch:15}, {wch:30}, {wch:15}, {wch:15}, {wch:15} ];
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Buku Kas TPQ");
+            XLSX.writeFile(workbook, "Laporan_Buku_Kas_Nurul_Falah.xlsx");
+            showToast("Excel Berhasil Diunduh!", "fa-file-excel", "text-emerald-600");
+        }
+
+        function cekMapelLainnya(val) {
+            const inputLainnya = document.getElementById('in-nilai-mapel-input');
+            const modeOtomatis = document.getElementById('mode-materi-otomatis');
+            const modeAlquran = document.getElementById('mode-materi-alquran');
+            const modeManual = document.getElementById('in-nilai-materi-manual');
+            const btnToggle = document.getElementById('btn-toggle-materi');
+
+            if(val === 'LAINNYA') {
+                inputLainnya.classList.remove('hidden'); inputLainnya.focus();
+                if(modeAlquran) modeAlquran.classList.add('hidden');
+                if(btnToggle) btnToggle.classList.remove('hidden');
+                if(btnToggle && btnToggle.innerText.includes('Ketik Manual')) {
+                    if(modeOtomatis) modeOtomatis.classList.remove('hidden');
+                } else {
+                    if(modeManual) modeManual.classList.remove('hidden');
+                }
+            } else if(val === "Al-Qur'an") {
+                inputLainnya.classList.add('hidden'); inputLainnya.value = '';
+                if(modeOtomatis) modeOtomatis.classList.add('hidden');
+                if(modeManual) modeManual.classList.add('hidden');
+                if(modeAlquran) modeAlquran.classList.remove('hidden');
+                if(btnToggle) btnToggle.classList.add('hidden');
+            } else {
+                inputLainnya.classList.add('hidden'); inputLainnya.value = '';
+                if(modeAlquran) modeAlquran.classList.add('hidden');
+                if(btnToggle) btnToggle.classList.remove('hidden');
+                if(btnToggle && btnToggle.innerText.includes('Ketik Manual')) {
+                    if(modeOtomatis) modeOtomatis.classList.remove('hidden');
+                    if(modeManual) modeManual.classList.add('hidden');
+                } else {
+                    if(modeOtomatis) modeOtomatis.classList.add('hidden');
+                    if(modeManual) modeManual.classList.remove('hidden');
+                }
+            }
+        }
+        
+        function cekSkorAngka(val) {
+            const inputAngka = document.getElementById('in-nilai-skor-angka');
+            if(val === 'ANGKA') {
+                inputAngka.classList.remove('hidden'); 
+                inputAngka.focus();
+            } else {
+                inputAngka.classList.add('hidden'); 
+                inputAngka.value = '';
+            }
+
+            const mapel = document.getElementById('in-nilai-mapel').value;
+            if(val === 'IJIN' || val === 'ALFA') {
+                const autoDiv = document.getElementById('mode-materi-otomatis');
+                const quranDiv = document.getElementById('mode-materi-alquran');
+                const btnToggle = document.getElementById('btn-toggle-materi');
+                const manualInp = document.getElementById('in-nilai-materi-manual');
+                
+                if(autoDiv) autoDiv.classList.add('hidden');
+                if(quranDiv) quranDiv.classList.add('hidden');
+                if(btnToggle) btnToggle.classList.add('hidden');
+                
+                if(manualInp) {
+                    manualInp.classList.remove('hidden');
+                    manualInp.value = 'Tidak Mengikuti Pelajaran';
+                    manualInp.setAttribute('readonly', 'true');
+                    manualInp.classList.add('bg-gray-100', 'text-gray-500');
+                }
+            } else {
+                const manualInp = document.getElementById('in-nilai-materi-manual');
+                if(manualInp) {
+                    manualInp.removeAttribute('readonly');
+                    manualInp.classList.remove('bg-gray-100', 'text-gray-500');
+                    if (manualInp.value === 'Tidak Mengikuti Pelajaran') manualInp.value = '';
+                }
+                cekMapelLainnya(mapel);
+            }
+        }
+
+        function toggleMateriMode() {
+            const autoDiv = document.getElementById('mode-materi-otomatis');
+            const manualInp = document.getElementById('in-nilai-materi-manual');
+            const btn = document.getElementById('btn-toggle-materi');
+            if (autoDiv.classList.contains('hidden')) {
+                autoDiv.classList.remove('hidden');
+                manualInp.classList.add('hidden');
+                btn.innerHTML = '<i class="fa-solid fa-keyboard"></i> Ganti ke Mode Ketik Manual';
+                btn.className = "mt-3 w-full py-2 bg-white rounded-xl text-[9px] font-black text-blue-500 uppercase shadow-sm border border-blue-100 active:scale-95 transition";
+            } else {
+                autoDiv.classList.add('hidden');
+                manualInp.classList.remove('hidden');
+                manualInp.focus();
+                btn.innerHTML = '<i class="fa-solid fa-list"></i> Ganti ke Mode Pilihan (Otomatis)';
+                btn.className = "mt-3 w-full py-2 bg-white rounded-xl text-[9px] font-black text-emerald-600 uppercase shadow-sm border border-emerald-100 active:scale-95 transition";
+            }
+        }
+
+        function sapaPengguna(role) {
+            let linkAudio = "";
+
+            if (role === 'admin') {
+                linkAudio = "https://raw.githubusercontent.com/simpartpqnurulfalah/webtpq/main/pengasuh.mp3"; 
+            } 
+            else if (role === 'bendahara' || role === 'pengurus') {
+                linkAudio = "https://raw.githubusercontent.com/simpartpqnurulfalah/webtpq/main/pengurus.mp3";
+            } 
+            else { 
+                linkAudio = "https://raw.githubusercontent.com/simpartpqnurulfalah/webtpq/main/walisantri.mp3";
+            }
+
+            if (linkAudio !== "") {
+                let suara = new Audio(linkAudio);
+                suara.volume = 1.0;
+                suara.play().catch(function(error) {
+                    console.log("Browser menunda suara sampai user berinteraksi", error);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
