@@ -645,8 +645,21 @@
                     </div>
                     <i class="fa-solid fa-chevron-right text-gray-300 group-hover:text-amber-500"></i>
                 </div>
-            </div>
-
+          
+<!-- 5. Buku Saku / Hafalan -->
+<div onclick="openModal('buku_saku')" class="bg-white p-5 rounded-3xl border-l-4 border-pink-500 flex items-center justify-between shadow-sm active:scale-95 transition cursor-pointer group hover:border-pink-600 hover:shadow-md">
+    <div class="flex items-center gap-4">
+        <div class="w-12 h-12 flex items-center justify-center bg-pink-50 text-pink-500 rounded-full shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:bg-pink-500 group-hover:text-white">
+            <i class="fa-solid fa-book-quran text-xl"></i>
+        </div>
+        <div>
+            <p class="text-sm font-black text-gray-800">Buku Saku</p>
+            <p class="text-[9px] font-bold uppercase text-gray-500 mt-0.5">Nadhom & Doa Harian</p>
+        </div>
+    </div>
+    <i class="fa-solid fa-chevron-right text-gray-300 group-hover:text-pink-500"></i>
+</div>
+  </div>
             <!-- Kotak Kebutuhan TPQ -->
             <div id="info-internal-box" class="bg-white p-5 sm:p-6 rounded-3xl shadow-sm border border-gray-100">
                 <div class="flex justify-between items-center mb-4">
@@ -1179,6 +1192,7 @@
                 <li id="menu-install-app" class="hidden"><a href="javascript:void(0)" onclick="installPWA()" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl text-gray-700 hover:bg-emerald-50"><i class="fa-solid fa-download text-emerald-600"></i> <span class="text-sm font-bold">Install Aplikasi</span></a></li>
                 <li><a href="https://drive.google.com/drive/folders/116ZwrvFVoqzuww2_-Z6Nsgw3S2GJY8B7?usp=sharing" target="_blank" onclick="toggleSidebar()" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl text-gray-700 hover:bg-emerald-50"><i class="fa-solid fa-folder-tree text-amber-500"></i> <span class="text-sm font-bold">Pusat Berkas & Dokumen</span></a></li>
                 <li><a href="javascript:void(0)" onclick="window.open('#', '_blank')" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl text-gray-700 hover:bg-emerald-50"><i class="fa-brands fa-whatsapp text-emerald-600"></i> <span class="text-sm font-bold">Hubungi Pengurus</span></a></li>
+                <li><a href="javascript:void(0)" onclick="openModal('buku_saku'); toggleSidebar()" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl text-gray-700 hover:bg-pink-50"><i class="fa-solid fa-book-open text-pink-500"></i> <span class="text-sm font-bold">Buku Saku Santri</span></a></li>
             </ul>
             
             <script type="text/javascript">
@@ -2080,6 +2094,7 @@ async function kirimIzinWali(e) {
             else if(type === 'kelas') renderKelasList();
             else if(type === 'ustadz') renderPengurusList('Ustadz/Pengajar', true);
             else if(type === 'daftar_izin') renderDaftarIzin();
+            else if(type === 'buku_saku') renderBukuSaku();
         }
 
         function closeMasterModal() { 
@@ -3461,6 +3476,243 @@ async function kirimIzinWali(e) {
                 });
             }
         }
+        // Data bawaan awal (bisa ditambah/diedit bebas oleh Pengurus melalui website)
+let defaultCatatan = [
+    {
+        id: 1,
+        judul: "Nadhom Alala Tanalul 'Ilma",
+        kategori: "Akhlak & Adab",
+        isi: `اَلاَ لاَ تَنَالُ الْعِلْمَ اِلاَّ بِسِتَّةٍ ۞ سَأُنْبِيْكَ عَنْ مَجْمُوْعِهَا بِبَيَانٍ
+"Elingo dak hasil ilmu anging nem perkoro ۞ Bakal tak crita'ke kumpule kanti pertelo"
+Artinya: Ingatlah, engkau tidak akan mendapatkan ilmu kecuali dengan 6 perkara yang akan dijelaskan perinciannya.
+
+ذُكَاءٍ وَحِرْصٍ وَاصْطِبَارٍوَبُلْغَةٍ ۞ وَاِرْشَادِ اُسْتَاذٍ وَطُوْلِ زَمَانٍ
+"Rupane limpat loba sabar ono sangune ۞ Lan piwulange guru lan sing suwe mangsane"
+Artinya: 1. Cerdas, 2. Semangat/Haus ilmu, 3. Sabar, 4. Ada bekal materi, 5. Petunjuk Guru/Ustadz, 6. Waktu yang lama.
+
+اِذَا مَا صَحِبْتَ قَوْمًا فَاصْحَبْ خِيَارَهُمْ ۞ وَلاَ تَصْحَبِ اْلأَرْدَى فَتَرْدَى مَعَ الرَّدِى
+"Yen sira kekancan meluo wong kang bagus ۞ Aja kekancan wong ala mundhak melu cilaka"
+Artinya: Jika engkau berteman, pilihlah orang yang baik budi pekertinya, dan jangan berteman dengan orang yang buruk agar engkau tidak terjerumus.`
+    }
+];
+
+// Inisialisasi data dari penyimpanan lokal browser
+function getCatatanList() {
+    const saved = localStorage.getItem('tpq_buku_saku');
+    if (saved) {
+        try { return JSON.parse(saved); } catch (e) { return defaultCatatan; }
+    }
+    return defaultCatatan;
+}
+
+function saveCatatanList(data) {
+    localStorage.setItem('tpq_buku_saku', JSON.stringify(data));
+}
+
+// 1. TAMPILAN UTAMA BUKU SAKU
+function renderBukuSaku() {
+    currentModalState = { type: 'buku_saku' };
+    setupModalUI("Buku Saku Santri", "Kumpulan Nadhom & Pelajaran", false, false, false);
+
+    const list = getCatatanList();
+    let html = `<div class="space-y-4">`;
+
+    // Tombol Khusus Admin untuk Tambah Catatan Baru
+    if (isAdminActive) {
+        html += `
+            <button onclick="formInputCatatan()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase rounded-2xl shadow-md active:scale-95 transition flex items-center justify-center gap-2 mb-4">
+                <i class="fa-solid fa-plus-circle text-sm"></i> Tulis Materi / Nadhom Baru
+            </button>
+        `;
+    }
+
+    if (list.length === 0) {
+        html += `<div class="text-center py-10"><i class="fa-solid fa-book-open text-4xl text-gray-200 mb-2 block"></i><p class="text-xs font-bold text-gray-400 uppercase">Belum ada materi catatan</p></div>`;
+    } else {
+        list.forEach((item) => {
+            html += `
+                <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm transition hover:border-emerald-300">
+                    <div class="p-4 flex justify-between items-center bg-gray-50/80 cursor-pointer" onclick="toggleAccordion('content-catatan-${item.id}', this)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-book-bookmark text-sm"></i>
+                            </div>
+                            <div class="text-left">
+                                <h4 class="font-black text-sm text-gray-800 leading-tight">${item.judul}</h4>
+                                <span class="text-[9px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded uppercase mt-1 inline-block">${item.kategori || 'Materi TPQ'}</span>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-down text-gray-400 text-xs transition-transform duration-300"></i>
+                    </div>
+                    
+                   <div id="content-catatan-${item.id}" class="hidden p-5 bg-white border-t border-gray-100 space-y-4">
+    <!-- Teks Isi Materi dengan Scroll Mandiri -->
+    <div class="p-4 bg-gray-50/50 rounded-2xl border border-gray-100 text-gray-800 text-sm leading-relaxed whitespace-pre-wrap font-medium max-h-[40vh] overflow-y-auto modal-content-scroll">
+${item.isi}
+    </div>
+
+                        <!-- Baris Tombol Aksi: Cetak, Edit, Hapus -->
+                        <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                            <button onclick="cetakCatatan(${item.id})" class="px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl text-[10px] font-black uppercase hover:bg-blue-600 hover:text-white transition flex items-center gap-1.5 shadow-sm active:scale-95">
+                                <i class="fa-solid fa-print"></i> Cetak / Simpan PDF
+                            </button>
+
+                            ${isAdminActive ? `
+                                <div class="flex items-center gap-2">
+                                    <button onclick="formInputCatatan(${item.id})" class="px-3 py-2 bg-amber-50 text-amber-600 border border-amber-200 rounded-xl text-[10px] font-black uppercase hover:bg-amber-500 hover:text-white transition">
+                                        <i class="fa-solid fa-pen"></i> Edit
+                                    </button>
+                                    <button onclick="hapusCatatan(${item.id})" class="px-3 py-2 bg-red-50 text-red-500 border border-red-200 rounded-xl text-[10px] font-black uppercase hover:bg-red-500 hover:text-white transition">
+                                        <i class="fa-solid fa-trash"></i> Hapus
+                                    </button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    html += `</div>`;
+    document.getElementById('modal-master-content').innerHTML = html;
+}
+
+// Buka/Tutup Accordion
+function toggleAccordion(contentId, headerEl) {
+    const el = document.getElementById(contentId);
+    const icon = headerEl.querySelector('.fa-chevron-down');
+    if (el) {
+        el.classList.toggle('hidden');
+        if (icon) icon.classList.toggle('rotate-180');
+    }
+}
+
+// 2. FORM INPUT & EDIT CATATAN (KHUSUS ADMIN/PENGURUS)
+function formInputCatatan(id = null) {
+    currentModalState = { type: 'form_catatan' };
+    const list = getCatatanList();
+    const item = id ? list.find(x => x.id === id) : null;
+    
+    setupModalUI(item ? "Edit Materi" : "Tulis Materi Baru", "Buku Saku Santri", true, false, false);
+
+    const html = `
+        <form onsubmit="simpanCatatan(event, ${id})" class="space-y-4">
+            <div>
+                <label class="text-[10px] font-black uppercase text-gray-500 mb-1 ml-2 block">Judul Materi / Nadhom</label>
+                <input type="text" id="in-cat-judul" value="${item ? item.judul : ''}" placeholder="Contoh: Nadhom Alala / Doa Harian" class="input-box-light w-full p-3 text-sm font-bold text-gray-800 outline-none" required>
+            </div>
+            <div>
+                <label class="text-[10px] font-black uppercase text-gray-500 mb-1 ml-2 block">Kategori</label>
+                <input type="text" id="in-cat-kategori" value="${item ? item.kategori : ''}" placeholder="Contoh: Akhlak / Fiqih / Tajwid" class="input-box-light w-full p-3 text-sm font-bold text-gray-800 outline-none" required>
+            </div>
+            <div>
+                <label class="text-[10px] font-black uppercase text-gray-500 mb-1 ml-2 block">Isi Materi Lengkap (Arab / Latin / Terjemah)</label>
+                <textarea id="in-cat-isi" placeholder="Tuliskan bait nadhom atau catatan di sini secara bebas..." class="input-box-light w-full p-3.5 text-xs font-bold text-gray-800 h-64 leading-relaxed outline-none" required>${item ? item.isi : ''}</textarea>
+                <p class="text-[9px] text-gray-400 mt-1 italic ml-2">*Ketik sebanyak-banyaknya. Baris baru (Enter) akan otomatis tersusun rapi.</p>
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button type="submit" class="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase rounded-2xl shadow-lg active:scale-95 transition">
+                    <i class="fa-solid fa-save mr-1"></i> Simpan Catatan
+                </button>
+                <button type="button" onclick="renderBukuSaku()" class="px-5 py-3.5 bg-gray-100 text-gray-600 font-bold text-xs uppercase rounded-2xl active:scale-95 hover:bg-gray-200 transition">
+                    Batal
+                </button>
+            </div>
+        </form>
+    `;
+    document.getElementById('modal-master-content').innerHTML = html;
+}
+
+// Simpan Catatan ke Data
+function simpanCatatan(e, id) {
+    e.preventDefault();
+    const judul = document.getElementById('in-cat-judul').value.trim();
+    const kategori = document.getElementById('in-cat-kategori').value.trim();
+    const isi = document.getElementById('in-cat-isi').value.trim();
+
+    let list = getCatatanList();
+    if (id) {
+        const index = list.findIndex(x => x.id === id);
+        if (index !== -1) {
+            list[index] = { ...list[index], judul, kategori, isi };
+        }
+        showToast("Materi Berhasil Diperbarui!", "fa-check-circle");
+    } else {
+        const newItem = {
+            id: Date.now(),
+            judul,
+            kategori,
+            isi
+        };
+        list.unshift(newItem);
+        showToast("Materi Baru Berhasil Disimpan!", "fa-check-circle");
+    }
+
+    saveCatatanList(list);
+    renderBukuSaku();
+}
+
+// Hapus Catatan
+function hapusCatatan(id) {
+    if (!confirm("Hapus materi ini secara permanen?")) return;
+    let list = getCatatanList();
+    list = list.filter(x => x.id !== id);
+    saveCatatanList(list);
+    showToast("Materi Dihapus!", "fa-trash", "text-red-500");
+    renderBukuSaku();
+}
+
+// 3. FITUR CETAK / SIMPAN PDF UNTUK WALI SANTRI
+function cetakCatatan(id) {
+    const list = getCatatanList();
+    const item = list.find(x => x.id === id);
+    if (!item) return;
+
+    const printWindow = window.open('', '', 'width=800,height=900');
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html lang="id">
+        <head>
+            <title>${item.judul} - Madin Nurul Falah</title>
+            <style>
+                body { font-family: 'Times New Roman', serif; padding: 40px; color: #111; line-height: 1.8; }
+                .header { text-align: center; border-bottom: 3px double #000; padding-bottom: 12px; margin-bottom: 25px; }
+                .header h2 { margin: 0; font-size: 20px; text-transform: uppercase; }
+                .header p { margin: 3px 0 0 0; font-size: 13px; color: #555; }
+                .title-box { text-align: center; margin-bottom: 25px; }
+                .title-box h3 { margin: 0; font-size: 18px; text-decoration: underline; }
+                .title-box span { font-size: 12px; font-style: italic; color: #444; }
+                .content { white-space: pre-wrap; font-size: 14px; margin-top: 15px; }
+                .footer { margin-top: 40px; text-align: right; font-size: 11px; color: #777; border-top: 1px solid #ddd; padding-top: 10px; }
+                @media print {
+                    body { padding: 15mm; }
+                    @page { size: auto; margin: 10mm; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h2>MADRASAH DINIYAH TAKMILIYAH NURUL FALAH</h2>
+                <p>Buku Saku Pembelajaran & Catatan Hafalan Santri</p>
+            </div>
+            <div class="title-box">
+                <h3>${item.judul}</h3>
+                <span>Kategori: ${item.kategori}</span>
+            </div>
+            <div class="content">${item.isi}</div>
+            <div class="footer">
+                Dicetak dari Portal Santri Madin Nurul Falah • Tanggal: ${new Date().toLocaleDateString('id-ID')}
+            </div>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+        printWindow.print();
+    }, 400);
+}
     </script>
 </body>
 </html>
