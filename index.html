@@ -2971,16 +2971,71 @@ function renderNilaiSantriList(kelasName) {
         `;
     });
 
+    // Tambahan tombol download berdampingan dengan tombol kembali
     html += `
             </tbody>
         </table>
     </div>
-    <button onclick="renderNilaiSantriList('${kelasName.replace(/'/g, "\\'")}')" class="w-full bg-gray-100 text-gray-600 font-bold text-xs py-3.5 rounded-2xl uppercase active:scale-95 hover:bg-gray-200 transition">
-        <i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Daftar Nama
-    </button>
+    <div class="flex gap-2">
+        <button onclick="downloadRekapNilaiExcel('${kelasName.replace(/'/g, "\\'")}')" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-[10px] py-3.5 rounded-2xl uppercase active:scale-95 transition flex items-center justify-center gap-2 shadow-sm">
+            <i class="fa-solid fa-file-excel"></i> Download Excel
+        </button>
+        <button onclick="renderNilaiSantriList('${kelasName.replace(/'/g, "\\'")}')" class="flex-1 bg-gray-100 text-gray-600 font-bold text-[10px] py-3.5 rounded-2xl uppercase active:scale-95 hover:bg-gray-200 transition">
+            <i class="fa-solid fa-arrow-left"></i> Kembali
+        </button>
+    </div>
     `;
 
     document.getElementById('modal-master-content').innerHTML = html;
+}
+        function downloadRekapNilaiExcel(kelasName) {
+    const santriKelas = (masterData.santri || []).filter(s => s.kelas === kelasName && s.status === 'Aktif');
+    
+    if (santriKelas.length === 0) {
+        showToast("Tidak ada data untuk diunduh", "fa-warning", "text-red-500");
+        return;
+    }
+
+    const dataToExport = [];
+    const sortedSantri = [...santriKelas].sort((a,b) => (a.nama || "").localeCompare(b.nama || ""));
+    
+    sortedSantri.forEach((s, index) => {
+        const records = (masterData.nilai || []).filter(n => (n.nama || "").trim().toLowerCase() === s.nama.trim().toLowerCase());
+        
+        let countLPlus = 0, countLMin = 0, countIjin = 0, countAlfa = 0;
+        
+        records.forEach(r => {
+            if (r.skor === 'L+') countLPlus++;
+            else if (r.skor === 'L-') countLMin++;
+            else if (r.skor === 'IJIN') countIjin++;
+            else if (r.skor === 'ALFA' || r.skor === '0') countAlfa++;
+        });
+
+        // Menyusun baris dan kolom untuk Excel
+        dataToExport.push({
+            "No": index + 1,
+            "Nama Santri": s.nama,
+            "L+ (Lulus)": countLPlus,
+            "L- (Mengulang)": countLMin,
+            "Ijin": countIjin,
+            "Alfa (Tanpa Keterangan)": countAlfa
+        });
+    });
+
+    // Proses konversi ke Excel menggunakan SheetJS
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    
+    // Mengatur lebar kolom agar rapi saat dibuka di Excel
+    worksheet['!cols'] = [ {wch:5}, {wch:35}, {wch:15}, {wch:18}, {wch:10}, {wch:25} ];
+    
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, `Rekap Nilai ${kelasName}`);
+    
+    // Menghasilkan file dengan nama kelas yang bersih dari spasi
+    const fileName = `Rekap_Nilai_Ujian_${kelasName.replace(/\s+/g, '_')}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+    
+    showToast("Rekap Excel Berhasil Diunduh!", "fa-file-excel", "text-emerald-600");
 }
         function renderNilaiAkhir(nama) {
             currentModalState = { type: 'nilai_akhir', namaSantri: nama };
