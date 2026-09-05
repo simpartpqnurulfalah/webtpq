@@ -2919,7 +2919,7 @@ function renderNilaiSantriList(kelasName) {
     });
     document.getElementById('modal-master-content').innerHTML = html + '</div>';
 }
-        function renderRekapNilaiKelas(kelasName) {
+       function renderRekapNilaiKelas(kelasName) {
     currentModalState = { type: 'rekap_nilai_kelas', kelas: kelasName };
     setupModalUI("Rekapitulasi Ujian", "Kelas: " + kelasName, true, false, false);
 
@@ -2940,6 +2940,7 @@ function renderNilaiSantriList(kelasName) {
                     <th class="px-3 py-3 text-center text-red-600 bg-red-50/50">L-</th>
                     <th class="px-3 py-3 text-center text-yellow-600 bg-yellow-50/50">Ijin</th>
                     <th class="px-3 py-3 text-center text-gray-500 bg-gray-50">Alfa</th>
+                    <th class="px-3 py-3 text-center text-blue-600 bg-blue-50/50">Rata-rata</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 bg-white">
@@ -2948,17 +2949,23 @@ function renderNilaiSantriList(kelasName) {
     santriKelas.sort((a,b) => (a.nama || "").localeCompare(b.nama || "")).forEach(s => {
         const records = (masterData.nilai || []).filter(n => (n.nama || "").trim().toLowerCase() === s.nama.trim().toLowerCase());
 
-        let countLPlus = 0;
-        let countLMin = 0;
-        let countIjin = 0;
-        let countAlfa = 0;
+        let countLPlus = 0, countLMin = 0, countIjin = 0, countAlfa = 0;
+        let totalAngka = 0, countAngka = 0;
 
         records.forEach(r => {
             if (r.skor === 'L+') countLPlus++;
             else if (r.skor === 'L-') countLMin++;
             else if (r.skor === 'IJIN') countIjin++;
             else if (r.skor === 'ALFA' || r.skor === '0') countAlfa++;
+            else if (!isNaN(r.skor) && r.skor.trim() !== '') {
+                // Menangkap nilai yang berupa Angka murni
+                totalAngka += parseFloat(r.skor);
+                countAngka++;
+            }
         });
+
+        // Hitung Rata-rata, tampilkan '-' jika tidak ada nilai angka sama sekali
+        let rataRata = countAngka > 0 ? (totalAngka / countAngka).toFixed(1) : '-';
 
         html += `
             <tr class="hover:bg-gray-50 transition">
@@ -2967,11 +2974,11 @@ function renderNilaiSantriList(kelasName) {
                 <td class="px-3 py-3 text-center font-black text-red-600 bg-red-50/20">${countLMin}</td>
                 <td class="px-3 py-3 text-center font-black text-yellow-600 bg-yellow-50/20">${countIjin}</td>
                 <td class="px-3 py-3 text-center font-black text-gray-500 bg-gray-50/20">${countAlfa}</td>
+                <td class="px-3 py-3 text-center font-black text-blue-600 bg-blue-50/20">${rataRata}</td>
             </tr>
         `;
     });
 
-    // Tambahan tombol download berdampingan dengan tombol kembali
     html += `
             </tbody>
         </table>
@@ -2988,7 +2995,7 @@ function renderNilaiSantriList(kelasName) {
 
     document.getElementById('modal-master-content').innerHTML = html;
 }
-        function downloadRekapNilaiExcel(kelasName) {
+function downloadRekapNilaiExcel(kelasName) {
     const santriKelas = (masterData.santri || []).filter(s => s.kelas === kelasName && s.status === 'Aktif');
     
     if (santriKelas.length === 0) {
@@ -3003,35 +3010,38 @@ function renderNilaiSantriList(kelasName) {
         const records = (masterData.nilai || []).filter(n => (n.nama || "").trim().toLowerCase() === s.nama.trim().toLowerCase());
         
         let countLPlus = 0, countLMin = 0, countIjin = 0, countAlfa = 0;
+        let totalAngka = 0, countAngka = 0;
         
         records.forEach(r => {
             if (r.skor === 'L+') countLPlus++;
             else if (r.skor === 'L-') countLMin++;
             else if (r.skor === 'IJIN') countIjin++;
             else if (r.skor === 'ALFA' || r.skor === '0') countAlfa++;
+            else if (!isNaN(r.skor) && r.skor.trim() !== '') {
+                totalAngka += parseFloat(r.skor);
+                countAngka++;
+            }
         });
 
-        // Menyusun baris dan kolom untuk Excel
+        let rataRata = countAngka > 0 ? parseFloat((totalAngka / countAngka).toFixed(1)) : 0;
+
         dataToExport.push({
             "No": index + 1,
             "Nama Santri": s.nama,
             "L+ (Lulus)": countLPlus,
             "L- (Mengulang)": countLMin,
             "Ijin": countIjin,
-            "Alfa (Tanpa Keterangan)": countAlfa
+            "Alfa": countAlfa,
+            "Rata-rata Nilai Angka": rataRata
         });
     });
 
-    // Proses konversi ke Excel menggunakan SheetJS
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    
-    // Mengatur lebar kolom agar rapi saat dibuka di Excel
-    worksheet['!cols'] = [ {wch:5}, {wch:35}, {wch:15}, {wch:18}, {wch:10}, {wch:25} ];
+    worksheet['!cols'] = [ {wch:5}, {wch:35}, {wch:12}, {wch:15}, {wch:10}, {wch:10}, {wch:22} ];
     
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, `Rekap Nilai ${kelasName}`);
     
-    // Menghasilkan file dengan nama kelas yang bersih dari spasi
     const fileName = `Rekap_Nilai_Ujian_${kelasName.replace(/\s+/g, '_')}.xlsx`;
     XLSX.writeFile(workbook, fileName);
     
