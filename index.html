@@ -2118,15 +2118,18 @@ async function kirimIzinWali(e) {
         }
 
         function handleModalBack() {
-            const s = currentModalState;
-            if(s.type === 'santri_detail') renderSantriList(s.parentTab || 'Aktif');
-            else if(s.type === 'jadwal_detail') renderJadwalList();
-            else if(s.type === 'jadwal_form_inline') renderJadwalDetail(s.kelasName);
-            else if(s.type === 'nilai_santri_list') renderNilaiKelasList();
-            else if(s.type === 'nilai_akhir') renderNilaiSantriList(masterData.santri.find(x => x.nama === s.namaSantri).kelas);
-            else if(s.type === 'pengurus_list') renderPengurusKategori();
-            else if(s.type === 'kelas_santri') renderKelasList();
-        }
+    const s = currentModalState;
+    if(s.type === 'santri_detail') renderSantriList(s.parentTab || 'Aktif');
+    else if(s.type === 'jadwal_detail') renderJadwalList();
+    else if(s.type === 'jadwal_form_inline') renderJadwalDetail(s.kelasName);
+    else if(s.type === 'nilai_santri_list') renderNilaiKelasList();
+    else if(s.type === 'nilai_akhir') renderNilaiSantriList(masterData.santri.find(x => x.nama === s.namaSantri).kelas);
+    // --- TAMBAHKAN BARIS INI ---
+    else if(s.type === 'rekap_nilai_kelas') renderNilaiSantriList(s.kelas);
+    // ---------------------------
+    else if(s.type === 'pengurus_list') renderPengurusKategori();
+    else if(s.type === 'kelas_santri') renderKelasList();
+}
 
         function handleQuickSearch(query) {
             const container = document.getElementById('quick-search-results');
@@ -2888,26 +2891,97 @@ async function kirimIzinWali(e) {
             document.getElementById('modal-master-content').innerHTML = html + '</div>';
         }
 
-        function renderNilaiSantriList(kelasName) {
-            currentModalState = { type: 'nilai_santri_list', kelas: kelasName };
-            setupModalUI(kelasName, "Pilih Nama Santri", true, true, false);
-            const filtered = (masterData.santri || []).filter(s => s.kelas === kelasName && s.status === 'Aktif');
-            
-            let html = '';
-            if (!isAdminActive) {
-                html = `<div id="privacy-lock-nilai" class="text-center py-8"><i class="fa-solid fa-lock text-4xl text-gray-200 mb-3 block"></i><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Mode Privasi Aktif</p><p class="text-xs font-bold text-gray-500 mt-2">Ketik nama anak Anda di pencarian (atas) untuk melihat nilainya.</p></div>`;
-            }
-            
-            html += '<div class="space-y-2">';
-            filtered.forEach(s => {
-                const displayStyle = isAdminActive ? "flex" : "none";
-                const namaAman = s.nama.replace(/'/g, "\\'"); 
-                
-                html += `<div id="card-nilai-${s.id}" style="display: ${displayStyle};" onclick="renderNilaiAkhir('${namaAman}')" class="bg-white p-4 rounded-xl border items-center justify-between cursor-pointer hover:bg-purple-50 hover:border-purple-200 transition"><p class="font-black text-xs text-gray-800">${s.nama}</p><i class="fa-solid fa-chevron-right text-gray-300"></i></div>`;
-            });
-            document.getElementById('modal-master-content').innerHTML = html + '</div>';
-        }
+function renderNilaiSantriList(kelasName) {
+    currentModalState = { type: 'nilai_santri_list', kelas: kelasName };
+    setupModalUI(kelasName, "Pilih Nama Santri", true, true, false);
+    const filtered = (masterData.santri || []).filter(s => s.kelas === kelasName && s.status === 'Aktif');
+    
+    let html = '';
+    if (!isAdminActive) {
+        html = `<div id="privacy-lock-nilai" class="text-center py-8"><i class="fa-solid fa-lock text-4xl text-gray-200 mb-3 block"></i><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Mode Privasi Aktif</p><p class="text-xs font-bold text-gray-500 mt-2">Ketik nama anak Anda di pencarian (atas) untuk melihat nilainya.</p></div>`;
+    }
+    
+    // --- TAMBAHAN TOMBOL REKAP UNTUK ADMIN ---
+    if (isAdminActive) {
+        html += `
+        <button onclick="renderRekapNilaiKelas('${kelasName.replace(/'/g, "\\'")}')" class="w-full mb-4 bg-purple-600 hover:bg-purple-500 text-white font-black text-[11px] py-3.5 uppercase rounded-2xl shadow-md active:scale-95 transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-chart-simple"></i> Lihat Rekapitulasi Nilai Kelas
+        </button>`;
+    }
+    // -----------------------------------------
 
+    html += '<div class="space-y-2">';
+    filtered.forEach(s => {
+        const displayStyle = isAdminActive ? "flex" : "none";
+        const namaAman = s.nama.replace(/'/g, "\\'"); 
+        
+        html += `<div id="card-nilai-${s.id}" style="display: ${displayStyle};" onclick="renderNilaiAkhir('${namaAman}')" class="bg-white p-4 rounded-xl border items-center justify-between cursor-pointer hover:bg-purple-50 hover:border-purple-200 transition"><p class="font-black text-xs text-gray-800">${s.nama}</p><i class="fa-solid fa-chevron-right text-gray-300"></i></div>`;
+    });
+    document.getElementById('modal-master-content').innerHTML = html + '</div>';
+}
+        function renderRekapNilaiKelas(kelasName) {
+    currentModalState = { type: 'rekap_nilai_kelas', kelas: kelasName };
+    setupModalUI("Rekapitulasi Ujian", "Kelas: " + kelasName, true, false, false);
+
+    const santriKelas = (masterData.santri || []).filter(s => s.kelas === kelasName && s.status === 'Aktif');
+
+    if (santriKelas.length === 0) {
+        document.getElementById('modal-master-content').innerHTML = '<div class="text-center py-10 text-gray-400 font-bold text-xs uppercase">Belum ada santri di kelas ini.</div>';
+        return;
+    }
+
+    let html = `
+    <div class="overflow-x-auto rounded-2xl border border-gray-200 shadow-sm mb-4">
+        <table class="w-full text-[10px] text-left whitespace-nowrap">
+            <thead class="bg-purple-50 text-purple-800 uppercase font-black tracking-widest border-b border-gray-200">
+                <tr>
+                    <th class="px-4 py-3">Nama Santri</th>
+                    <th class="px-3 py-3 text-center text-emerald-600 bg-emerald-50/50">L+</th>
+                    <th class="px-3 py-3 text-center text-red-600 bg-red-50/50">L-</th>
+                    <th class="px-3 py-3 text-center text-yellow-600 bg-yellow-50/50">Ijin</th>
+                    <th class="px-3 py-3 text-center text-gray-500 bg-gray-50">Alfa</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 bg-white">
+    `;
+
+    santriKelas.sort((a,b) => (a.nama || "").localeCompare(b.nama || "")).forEach(s => {
+        const records = (masterData.nilai || []).filter(n => (n.nama || "").trim().toLowerCase() === s.nama.trim().toLowerCase());
+
+        let countLPlus = 0;
+        let countLMin = 0;
+        let countIjin = 0;
+        let countAlfa = 0;
+
+        records.forEach(r => {
+            if (r.skor === 'L+') countLPlus++;
+            else if (r.skor === 'L-') countLMin++;
+            else if (r.skor === 'IJIN') countIjin++;
+            else if (r.skor === 'ALFA' || r.skor === '0') countAlfa++;
+        });
+
+        html += `
+            <tr class="hover:bg-gray-50 transition">
+                <td class="px-4 py-3 font-bold text-gray-800">${s.nama}</td>
+                <td class="px-3 py-3 text-center font-black text-emerald-600 bg-emerald-50/20">${countLPlus}</td>
+                <td class="px-3 py-3 text-center font-black text-red-600 bg-red-50/20">${countLMin}</td>
+                <td class="px-3 py-3 text-center font-black text-yellow-600 bg-yellow-50/20">${countIjin}</td>
+                <td class="px-3 py-3 text-center font-black text-gray-500 bg-gray-50/20">${countAlfa}</td>
+            </tr>
+        `;
+    });
+
+    html += `
+            </tbody>
+        </table>
+    </div>
+    <button onclick="renderNilaiSantriList('${kelasName.replace(/'/g, "\\'")}')" class="w-full bg-gray-100 text-gray-600 font-bold text-xs py-3.5 rounded-2xl uppercase active:scale-95 hover:bg-gray-200 transition">
+        <i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Daftar Nama
+    </button>
+    `;
+
+    document.getElementById('modal-master-content').innerHTML = html;
+}
         function renderNilaiAkhir(nama) {
             currentModalState = { type: 'nilai_akhir', namaSantri: nama };
             setupModalUI("Hasil Studi", nama, true, false, false);
