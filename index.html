@@ -1365,7 +1365,7 @@
                 return;
             }
 
-            const izinRecords = (masterData.nilai || []).filter(n => n.mapel === 'Absensi');
+            const izinRecords = (masterData.nilai || []).filter(n => n.mapel === 'Antrean Izin');
             if(izinRecords.length > 0) {
                 if(btn) btn.classList.remove('hidden');
                 if(countEl) countEl.innerText = izinRecords.length;
@@ -1525,12 +1525,12 @@ async function kirimIzinWali(e) {
     const materiGabung = `${kategori} - ${alasan} (${formatTgl})`;
 
     const payload = { 
-        nama: nama, 
-        kelas: kelas,
-        mapel: "Absensi", 
-        materi: materiGabung,
-        skor: "IJIN" 
-    };
+    nama: nama, 
+    kelas: kelas,
+    mapel: "Antrean Izin", // <-- Ubah bagian ini
+    materi: materiGabung,
+    skor: "IJIN" 
+};
 
     try {
         const res = await fetch(`${WORKER_URL}/add-nilai`, { 
@@ -2026,7 +2026,7 @@ async function kirimIzinWali(e) {
             currentModalState = { type: 'daftar_izin' };
             setupModalUI("Daftar Izin Santri", "Rekap Ketidakhadiran Terbaru", false, false, false);
 
-            const izinRecords = (masterData.nilai || []).filter(n => n.mapel === 'Absensi').reverse();
+            const izinRecords = (masterData.nilai || []).filter(n => n.mapel === 'Antrean Izin').reverse();
 
             let html = '';
             if(izinRecords.length === 0) {
@@ -3449,12 +3449,12 @@ function downloadRekapNilaiExcel(kelasName) {
             const materiGabung = `${kategori} - ${alasan} (${formatTgl})`;
 
             const payload = { 
-                nama: nama, 
-                kelas: kelas,
-                mapel: "Absensi", 
-                materi: materiGabung,
-                skor: "IJIN" 
-            };
+    nama: nama, 
+    kelas: kelas,
+    mapel: "Antrean Izin", // <-- Ubah bagian ini
+    materi: materiGabung,
+    skor: "IJIN" 
+};
 
             try {
                 const res = await fetch(`${WORKER_URL}/add-nilai`, { 
