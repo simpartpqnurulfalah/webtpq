@@ -3555,40 +3555,46 @@ function downloadRekapNilaiExcel(kelasName) {
         }
 
         function cekMapelLainnya(val) {
-            const inputLainnya = document.getElementById('in-nilai-mapel-input');
-            const modeOtomatis = document.getElementById('mode-materi-otomatis');
-            const modeAlquran = document.getElementById('mode-materi-alquran');
-            const modeManual = document.getElementById('in-nilai-materi-manual');
-            const btnToggle = document.getElementById('btn-toggle-materi');
+    const inputLainnya = document.getElementById('in-nilai-mapel-input');
+    const modeOtomatis = document.getElementById('mode-materi-otomatis');
+    const modeAlquran = document.getElementById('mode-materi-alquran');
+    const modeManual = document.getElementById('in-nilai-materi-manual');
+    const btnToggle = document.getElementById('btn-toggle-materi');
 
-            if(val === 'LAINNYA') {
-                inputLainnya.classList.remove('hidden'); inputLainnya.focus();
-                if(modeAlquran) modeAlquran.classList.add('hidden');
-                if(btnToggle) btnToggle.classList.remove('hidden');
-                if(btnToggle && btnToggle.innerText.includes('Ketik Manual')) {
-                    if(modeOtomatis) modeOtomatis.classList.remove('hidden');
-                } else {
-                    if(modeManual) modeManual.classList.remove('hidden');
-                }
-            } else if(val === "Al-Qur'an") {
-                inputLainnya.classList.add('hidden'); inputLainnya.value = '';
-                if(modeOtomatis) modeOtomatis.classList.add('hidden');
-                if(modeManual) modeManual.classList.add('hidden');
-                if(modeAlquran) modeAlquran.classList.remove('hidden');
-                if(btnToggle) btnToggle.classList.add('hidden');
-            } else {
-                inputLainnya.classList.add('hidden'); inputLainnya.value = '';
-                if(modeAlquran) modeAlquran.classList.add('hidden');
-                if(btnToggle) btnToggle.classList.remove('hidden');
-                if(btnToggle && btnToggle.innerText.includes('Ketik Manual')) {
-                    if(modeOtomatis) modeOtomatis.classList.remove('hidden');
-                    if(modeManual) modeManual.classList.add('hidden');
-                } else {
-                    if(modeOtomatis) modeOtomatis.classList.add('hidden');
-                    if(modeManual) modeManual.classList.remove('hidden');
-                }
-            }
+    if(val === 'LAINNYA') {
+        inputLainnya.classList.remove('hidden'); inputLainnya.focus();
+        if(modeAlquran) modeAlquran.classList.add('hidden');
+        if(btnToggle) btnToggle.classList.remove('hidden');
+        
+        // Perbaikan: Gunakan innerHTML agar kebal terhadap CSS uppercase
+        if(btnToggle && btnToggle.innerHTML.includes('Ketik Manual')) {
+            if(modeOtomatis) modeOtomatis.classList.remove('hidden');
+            if(modeManual) modeManual.classList.add('hidden');
+        } else {
+            if(modeOtomatis) modeOtomatis.classList.add('hidden');
+            if(modeManual) modeManual.classList.remove('hidden');
         }
+    } else if(val === "Al-Qur'an") {
+        inputLainnya.classList.add('hidden'); inputLainnya.value = '';
+        if(modeOtomatis) modeOtomatis.classList.add('hidden');
+        if(modeManual) modeManual.classList.add('hidden');
+        if(modeAlquran) modeAlquran.classList.remove('hidden');
+        if(btnToggle) btnToggle.classList.add('hidden');
+    } else {
+        inputLainnya.classList.add('hidden'); inputLainnya.value = '';
+        if(modeAlquran) modeAlquran.classList.add('hidden');
+        if(btnToggle) btnToggle.classList.remove('hidden');
+        
+        // Perbaikan: Gunakan innerHTML agar kebal terhadap CSS uppercase
+        if(btnToggle && btnToggle.innerHTML.includes('Ketik Manual')) {
+            if(modeOtomatis) modeOtomatis.classList.remove('hidden');
+            if(modeManual) modeManual.classList.add('hidden');
+        } else {
+            if(modeOtomatis) modeOtomatis.classList.add('hidden');
+            if(modeManual) modeManual.classList.remove('hidden');
+        }
+    }
+}
         
         function cekSkorAngka(val) {
             const inputAngka = document.getElementById('in-nilai-skor-angka');
