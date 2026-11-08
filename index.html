@@ -195,6 +195,52 @@
             }
         });
       });
+      function prosesIzinKeNilai(id) {
+    const data = masterData.nilai.find(n => n.id === id);
+    if(!data) return;
+    
+    // Tutup popup daftar izin & arahkan ke tab admin form nilai
+    closeMasterModal();
+    switchTab('admin');
+    document.getElementById('admin-kategori').value = 'nilai';
+    changeAdminForm();
+    
+    // Aktifkan mode edit
+    document.getElementById('edit-nilai-id').value = data.id;
+    document.getElementById('edit-nilai-indicator').classList.remove('hidden');
+    
+    // Set Nama & Kelas
+    document.getElementById('in-nilai-kelas-filter').value = data.kelas || "";
+    filterSantriByKelasForNilai();
+    setTimeout(() => {
+        document.getElementById('in-nilai-nama').value = data.nama;
+    }, 100);
+    
+    // Ambil tanggal dari string materi
+    if(data.materi && data.materi.includes('(') && data.materi.includes(')')) {
+        const tglMatch = data.materi.match(/\((.*?)\)/);
+        if(tglMatch && tglMatch[1]) {
+            const parts = tglMatch[1].split('/');
+            if(parts.length === 3) {
+                document.getElementById('in-nilai-tgl').value = `${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
+        }
+    }
+
+    // Kosongkan mapel agar admin wajib memilih mapel hari itu
+    document.getElementById('in-nilai-mapel').value = "";
+    cekMapelLainnya("");
+
+    // Set Skor menjadi IJIN
+    document.getElementById('in-nilai-skor').value = "IJIN";
+    cekSkorAngka("IJIN");
+
+    // Masukkan alasan izin dari wali ke input teks manual
+    let materiTeks = data.materi ? data.materi.split(' (')[0] : "";
+    document.getElementById('in-nilai-materi-manual').value = materiTeks;
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
     </script>
 </head>
 <body class="">
@@ -1318,7 +1364,7 @@
                 return;
             }
 
-            const izinRecords = (masterData.nilai || []).filter(n => n.skor === 'IJIN' || n.mapel === 'Absensi');
+            const izinRecords = (masterData.nilai || []).filter(n => n.mapel === 'Absensi');
             if(izinRecords.length > 0) {
                 if(btn) btn.classList.remove('hidden');
                 if(countEl) countEl.innerText = izinRecords.length;
@@ -1830,8 +1876,10 @@ async function kirimIzinWali(e) {
                 const quranDiv = document.getElementById('mode-materi-alquran');
 
                 if (skorVal === 'IJIN' || skorVal === 'ALFA') {
-                    materiVal = "Tidak Mengikuti Pelajaran";
-                } else if (mapelVal === "Al-Qur'an") {
+    // Gunakan alasan dari wali santri jika ada, jika kosong pakai teks default
+    let manualVal = document.getElementById('in-nilai-materi-manual').value.trim();
+    materiVal = manualVal ? manualVal : "Tidak Mengikuti Pelajaran";
+} else if (mapelVal === "Al-Qur'an") {
                     const juz = document.getElementById('in-nilai-juz').value;
                     const ayat = document.getElementById('in-nilai-ayat').value;
                     materiVal = juz + (ayat ? " Ayat " + ayat : "");
@@ -1977,7 +2025,7 @@ async function kirimIzinWali(e) {
             currentModalState = { type: 'daftar_izin' };
             setupModalUI("Daftar Izin Santri", "Rekap Ketidakhadiran Terbaru", false, false, false);
 
-            const izinRecords = (masterData.nilai || []).filter(n => n.skor === 'IJIN' || n.mapel === 'Absensi').reverse();
+            const izinRecords = (masterData.nilai || []).filter(n => n.mapel === 'Absensi').reverse();
 
             let html = '';
             if(izinRecords.length === 0) {
@@ -2000,9 +2048,10 @@ async function kirimIzinWali(e) {
                         <div class="pt-1">
                             <p class="text-[10px] text-gray-600 font-medium italic"><i class="fa-solid fa-quote-left text-yellow-300 mr-1"></i> ${r.materi}</p>
                         </div>
-                        <div class="mt-2 flex justify-end">
-                            <button onclick="hapusData('nilai', ${r.id})" class="text-[9px] bg-red-50 text-red-500 font-black px-3 py-1.5 rounded-lg hover:bg-red-500 hover:text-white transition uppercase shadow-sm">Hapus / Selesai</button>
-                        </div>
+                        <div class="mt-2 flex justify-end gap-2">
+    <button onclick="prosesIzinKeNilai(${r.id})" class="text-[9px] bg-blue-50 text-blue-500 font-black px-3 py-1.5 rounded-lg hover:bg-blue-600 hover:text-white transition uppercase shadow-sm">Proses ke Nilai</button>
+    <button onclick="hapusData('nilai', ${r.id})" class="text-[9px] bg-red-50 text-red-500 font-black px-3 py-1.5 rounded-lg hover:bg-red-600 hover:text-white transition uppercase shadow-sm">Hapus</button>
+</div>
                     </div>`;
                 });
                 html += '</div>';
@@ -3553,22 +3602,24 @@ function downloadRekapNilaiExcel(kelasName) {
 
             const mapel = document.getElementById('in-nilai-mapel').value;
             if(val === 'IJIN' || val === 'ALFA') {
-                const autoDiv = document.getElementById('mode-materi-otomatis');
-                const quranDiv = document.getElementById('mode-materi-alquran');
-                const btnToggle = document.getElementById('btn-toggle-materi');
-                const manualInp = document.getElementById('in-nilai-materi-manual');
-                
-                if(autoDiv) autoDiv.classList.add('hidden');
-                if(quranDiv) quranDiv.classList.add('hidden');
-                if(btnToggle) btnToggle.classList.add('hidden');
-                
-                if(manualInp) {
-                    manualInp.classList.remove('hidden');
-                    manualInp.value = 'Tidak Mengikuti Pelajaran';
-                    manualInp.setAttribute('readonly', 'true');
-                    manualInp.classList.add('bg-gray-100', 'text-gray-500');
-                }
-            } else {
+        const autoDiv = document.getElementById('mode-materi-otomatis');
+        const quranDiv = document.getElementById('mode-materi-alquran');
+        const btnToggle = document.getElementById('btn-toggle-materi');
+        const manualInp = document.getElementById('in-nilai-materi-manual');
+        
+        if(autoDiv) autoDiv.classList.add('hidden');
+        if(quranDiv) quranDiv.classList.add('hidden');
+        if(btnToggle) btnToggle.classList.add('hidden');
+        
+        if(manualInp) {
+            manualInp.classList.remove('hidden');
+            if (!manualInp.value || manualInp.value === 'Tidak Mengikuti Pelajaran') {
+                manualInp.value = 'Tidak Mengikuti Pelajaran';
+            }
+            manualInp.removeAttribute('readonly'); // Biarkan bisa diedit/dibaca
+            manualInp.classList.remove('bg-gray-100', 'text-gray-500');
+        }
+    } else {
                 const manualInp = document.getElementById('in-nilai-materi-manual');
                 if(manualInp) {
                     manualInp.removeAttribute('readonly');
