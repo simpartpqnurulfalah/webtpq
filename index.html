@@ -227,9 +227,9 @@
         }
     }
 
-    // Kosongkan mapel agar admin wajib memilih mapel hari itu
-    document.getElementById('in-nilai-mapel').value = "";
-    cekMapelLainnya("");
+    // Biarkan mapel tetap "Absensi" agar kategorinya tidak hilang di Hasil Studi
+    document.getElementById('in-nilai-mapel').value = "Absensi";
+    cekMapelLainnya("Absensi");
 
     // Set Skor menjadi IJIN
     document.getElementById('in-nilai-skor').value = "IJIN";
@@ -1060,6 +1060,7 @@
                             <label class="text-[10px] font-black text-gray-500 uppercase mb-1 ml-2 block">4. Mata Pelajaran</label>
                             <select id="in-nilai-mapel" class="input-box-light w-full p-3 text-sm font-bold text-gray-800" onchange="cekMapelLainnya(this.value)">
                                 <option value="">-- Pilih Pelajaran --</option>
+                                <option value="Absensi">Absensi / Izin</option>
                                 <option value="Yanbu'a">Yanbu'a</option>
                                 <option value="Al-Qur'an">Al-Qur'an</option>
                                 <option value="Tajwid">Tajwid</option>
